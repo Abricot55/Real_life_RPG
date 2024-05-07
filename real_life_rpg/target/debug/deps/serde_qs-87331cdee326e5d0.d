@@ -1,0 +1,11 @@
+D:\CodingThing\Real_life_RPG\Real_life_RPG\real_life_rpg\target\debug\deps\libserde_qs-87331cdee326e5d0.rmeta: C:\Users\cotea\.cargo\registry\src\index.crates.io-6f17d22bba15001f\serde_qs-0.8.5\src\lib.rs C:\Users\cotea\.cargo\registry\src\index.crates.io-6f17d22bba15001f\serde_qs-0.8.5\src\de\mod.rs C:\Users\cotea\.cargo\registry\src\index.crates.io-6f17d22bba15001f\serde_qs-0.8.5\src\de\parse.rs C:\Users\cotea\.cargo\registry\src\index.crates.io-6f17d22bba15001f\serde_qs-0.8.5\src\error.rs C:\Users\cotea\.cargo\registry\src\index.crates.io-6f17d22bba15001f\serde_qs-0.8.5\src\ser.rs
+
+D:\CodingThing\Real_life_RPG\Real_life_RPG\real_life_rpg\target\debug\deps\libserde_qs-87331cdee326e5d0.rlib: C:\Users\cotea\.cargo\registry\src\index.crates.io-6f17d22bba15001f\serde_qs-0.8.5\src\lib.rs C:\Users\cotea\.cargo\registry\src\index.crates.io-6f17d22bba15001f\serde_qs-0.8.5\src\de\mod.rs C:\Users\cotea\.cargo\registry\src\index.crates.io-6f17d22bba15001f\serde_qs-0.8.5\src\de\parse.rs C:\Users\cotea\.cargo\registry\src\index.crates.io-6f17d22bba15001f\serde_qs-0.8.5\src\error.rs C:\Users\cotea\.cargo\registry\src\index.crates.io-6f17d22bba15001f\serde_qs-0.8.5\src\ser.rs
+
+D:\CodingThing\Real_life_RPG\Real_life_RPG\real_life_rpg\target\debug\deps\serde_qs-87331cdee326e5d0.d: C:\Users\cotea\.cargo\registry\src\index.crates.io-6f17d22bba15001f\serde_qs-0.8.5\src\lib.rs C:\Users\cotea\.cargo\registry\src\index.crates.io-6f17d22bba15001f\serde_qs-0.8.5\src\de\mod.rs C:\Users\cotea\.cargo\registry\src\index.crates.io-6f17d22bba15001f\serde_qs-0.8.5\src\de\parse.rs C:\Users\cotea\.cargo\registry\src\index.crates.io-6f17d22bba15001f\serde_qs-0.8.5\src\error.rs C:\Users\cotea\.cargo\registry\src\index.crates.io-6f17d22bba15001f\serde_qs-0.8.5\src\ser.rs
+
+C:\Users\cotea\.cargo\registry\src\index.crates.io-6f17d22bba15001f\serde_qs-0.8.5\src\lib.rs:
+C:\Users\cotea\.cargo\registry\src\index.crates.io-6f17d22bba15001f\serde_qs-0.8.5\src\de\mod.rs:
+C:\Users\cotea\.cargo\registry\src\index.crates.io-6f17d22bba15001f\serde_qs-0.8.5\src\de\parse.rs:
+C:\Users\cotea\.cargo\registry\src\index.crates.io-6f17d22bba15001f\serde_qs-0.8.5\src\error.rs:
+C:\Users\cotea\.cargo\registry\src\index.crates.io-6f17d22bba15001f\serde_qs-0.8.5\src\ser.rs:

@@ -1,0 +1,11 @@
+D:\CodingThing\Real_life_RPG\Real_life_RPG\real_life_rpg\target\debug\deps\libsocket2-e705fc453c38d582.rmeta: C:\Users\cotea\.cargo\registry\src\index.crates.io-6f17d22bba15001f\socket2-0.3.19\src\lib.rs C:\Users\cotea\.cargo\registry\src\index.crates.io-6f17d22bba15001f\socket2-0.3.19\src\sockaddr.rs C:\Users\cotea\.cargo\registry\src\index.crates.io-6f17d22bba15001f\socket2-0.3.19\src\socket.rs C:\Users\cotea\.cargo\registry\src\index.crates.io-6f17d22bba15001f\socket2-0.3.19\src\utils.rs C:\Users\cotea\.cargo\registry\src\index.crates.io-6f17d22bba15001f\socket2-0.3.19\src\sys\windows.rs
+
+D:\CodingThing\Real_life_RPG\Real_life_RPG\real_life_rpg\target\debug\deps\libsocket2-e705fc453c38d582.rlib: C:\Users\cotea\.cargo\registry\src\index.crates.io-6f17d22bba15001f\socket2-0.3.19\src\lib.rs C:\Users\cotea\.cargo\registry\src\index.crates.io-6f17d22bba15001f\socket2-0.3.19\src\sockaddr.rs C:\Users\cotea\.cargo\registry\src\index.crates.io-6f17d22bba15001f\socket2-0.3.19\src\socket.rs C:\Users\cotea\.cargo\registry\src\index.crates.io-6f17d22bba15001f\socket2-0.3.19\src\utils.rs C:\Users\cotea\.cargo\registry\src\index.crates.io-6f17d22bba15001f\socket2-0.3.19\src\sys\windows.rs
+
+D:\CodingThing\Real_life_RPG\Real_life_RPG\real_life_rpg\target\debug\deps\socket2-e705fc453c38d582.d: C:\Users\cotea\.cargo\registry\src\index.crates.io-6f17d22bba15001f\socket2-0.3.19\src\lib.rs C:\Users\cotea\.cargo\registry\src\index.crates.io-6f17d22bba15001f\socket2-0.3.19\src\sockaddr.rs C:\Users\cotea\.cargo\registry\src\index.crates.io-6f17d22bba15001f\socket2-0.3.19\src\socket.rs C:\Users\cotea\.cargo\registry\src\index.crates.io-6f17d22bba15001f\socket2-0.3.19\src\utils.rs C:\Users\cotea\.cargo\registry\src\index.crates.io-6f17d22bba15001f\socket2-0.3.19\src\sys\windows.rs
+
+C:\Users\cotea\.cargo\registry\src\index.crates.io-6f17d22bba15001f\socket2-0.3.19\src\lib.rs:
+C:\Users\cotea\.cargo\registry\src\index.crates.io-6f17d22bba15001f\socket2-0.3.19\src\sockaddr.rs:
+C:\Users\cotea\.cargo\registry\src\index.crates.io-6f17d22bba15001f\socket2-0.3.19\src\socket.rs:
+C:\Users\cotea\.cargo\registry\src\index.crates.io-6f17d22bba15001f\socket2-0.3.19\src\utils.rs:
+C:\Users\cotea\.cargo\registry\src\index.crates.io-6f17d22bba15001f\socket2-0.3.19\src\sys\windows.rs:

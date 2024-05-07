@@ -1,0 +1,12 @@
+D:\CodingThing\Real_life_RPG\Real_life_RPG\real_life_rpg\target\debug\deps\libmiow-a558a1f657f30a2a.rmeta: C:\Users\cotea\.cargo\registry\src\index.crates.io-6f17d22bba15001f\miow-0.2.2\src\lib.rs C:\Users\cotea\.cargo\registry\src\index.crates.io-6f17d22bba15001f\miow-0.2.2\src\handle.rs C:\Users\cotea\.cargo\registry\src\index.crates.io-6f17d22bba15001f\miow-0.2.2\src\overlapped.rs C:\Users\cotea\.cargo\registry\src\index.crates.io-6f17d22bba15001f\miow-0.2.2\src\iocp.rs C:\Users\cotea\.cargo\registry\src\index.crates.io-6f17d22bba15001f\miow-0.2.2\src\net.rs C:\Users\cotea\.cargo\registry\src\index.crates.io-6f17d22bba15001f\miow-0.2.2\src\pipe.rs
+
+D:\CodingThing\Real_life_RPG\Real_life_RPG\real_life_rpg\target\debug\deps\libmiow-a558a1f657f30a2a.rlib: C:\Users\cotea\.cargo\registry\src\index.crates.io-6f17d22bba15001f\miow-0.2.2\src\lib.rs C:\Users\cotea\.cargo\registry\src\index.crates.io-6f17d22bba15001f\miow-0.2.2\src\handle.rs C:\Users\cotea\.cargo\registry\src\index.crates.io-6f17d22bba15001f\miow-0.2.2\src\overlapped.rs C:\Users\cotea\.cargo\registry\src\index.crates.io-6f17d22bba15001f\miow-0.2.2\src\iocp.rs C:\Users\cotea\.cargo\registry\src\index.crates.io-6f17d22bba15001f\miow-0.2.2\src\net.rs C:\Users\cotea\.cargo\registry\src\index.crates.io-6f17d22bba15001f\miow-0.2.2\src\pipe.rs
+
+D:\CodingThing\Real_life_RPG\Real_life_RPG\real_life_rpg\target\debug\deps\miow-a558a1f657f30a2a.d: C:\Users\cotea\.cargo\registry\src\index.crates.io-6f17d22bba15001f\miow-0.2.2\src\lib.rs C:\Users\cotea\.cargo\registry\src\index.crates.io-6f17d22bba15001f\miow-0.2.2\src\handle.rs C:\Users\cotea\.cargo\registry\src\index.crates.io-6f17d22bba15001f\miow-0.2.2\src\overlapped.rs C:\Users\cotea\.cargo\registry\src\index.crates.io-6f17d22bba15001f\miow-0.2.2\src\iocp.rs C:\Users\cotea\.cargo\registry\src\index.crates.io-6f17d22bba15001f\miow-0.2.2\src\net.rs C:\Users\cotea\.cargo\registry\src\index.crates.io-6f17d22bba15001f\miow-0.2.2\src\pipe.rs
+
+C:\Users\cotea\.cargo\registry\src\index.crates.io-6f17d22bba15001f\miow-0.2.2\src\lib.rs:
+C:\Users\cotea\.cargo\registry\src\index.crates.io-6f17d22bba15001f\miow-0.2.2\src\handle.rs:
+C:\Users\cotea\.cargo\registry\src\index.crates.io-6f17d22bba15001f\miow-0.2.2\src\overlapped.rs:
+C:\Users\cotea\.cargo\registry\src\index.crates.io-6f17d22bba15001f\miow-0.2.2\src\iocp.rs:
+C:\Users\cotea\.cargo\registry\src\index.crates.io-6f17d22bba15001f\miow-0.2.2\src\net.rs:
+C:\Users\cotea\.cargo\registry\src\index.crates.io-6f17d22bba15001f\miow-0.2.2\src\pipe.rs:
