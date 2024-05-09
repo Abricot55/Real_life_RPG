@@ -26,7 +26,7 @@ fn ptit_truc_test(){
     let mut conn_object: Option<ConnectionEstablished> = None;
     match connect_to_connection(){
         Ok(connection) => conn_object = Some(ConnectionEstablished{conn : connection}),
-        Err(e) => print!("oups")
+        Err(e) => print!("oups!")
     }
     match conn_object {
         Some(value) => 
@@ -34,7 +34,7 @@ fn ptit_truc_test(){
                 Ok(db) => print!("succesfully created"),
                 Err(e) => print!("impossible")
             }
-        None => print!("oups")
+        None => print!("oups!")
     }
 }
 
