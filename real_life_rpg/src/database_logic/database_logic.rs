@@ -1,7 +1,17 @@
 use arangors::{uclient::reqwest::ReqwestClient, ArangoError, ClientError, Connection, Database};
 
-struct connection_established{
-    conn : Connection
+/**
+ * @brief struct used to simulate an object connection.
+ */
+pub struct ConnectionEstablished{
+    pub(crate) conn : Connection
+}
+
+/**
+ * @brief struct used to simulate an object database
+ */
+pub struct DatabaseConnected{
+    datab : Database<ReqwestClient>
 }
 
 /**
@@ -16,8 +26,10 @@ pub async fn connect_to_connection() -> Result<Connection, ClientError>{
     return Connection::establish_jwt(url, &username, &password).await;
 }
 
-
-impl connection_established{
+/**
+ * @brief the following functions can only be used if a struct ConnectionEstablished is created.
+ */
+impl ConnectionEstablished{
 
     /**
      * @brief This function create a new database on the connexion on port 8529.
@@ -25,7 +37,7 @@ impl connection_established{
      * @return A result wich is either a error or another result containing the value of the database if the creation worked.
      */
     #[tokio::main]
-    async fn create_new_db(&self, name : String) -> Result<Database<ReqwestClient>, ClientError>{
+    pub async fn create_new_db(&self, name : String) -> Result<Database<ReqwestClient>, ClientError>{
         self.conn.create_database(name.as_str()).await
     }
 
@@ -40,39 +52,51 @@ impl connection_established{
     }
 }
 
+/**
+ * @brief The following functions can only be used if a struct DatabaseConnected is created.
+ */
+impl DatabaseConnected{
 
-fn create_new_collection(name : String){
+    #[tokio::main]
+    async fn create_new_collection(&self, name : String){
 
+    }
+
+    #[tokio::main]
+    async fn get_collection(&self, name : String){
+
+    }
+
+    #[tokio::main]
+    async fn add_document_to_collection(&self){
+
+    }
+
+    #[tokio::main]
+    async fn get_document_in_collection(&self, id : i32){
+
+    }
+
+    #[tokio::main]
+    async fn delete_document_in_collection(&self, id : i32){
+
+    }
+
+    #[tokio::main]
+    async fn update_document_in_collection(&self, id : i32){
+
+    }
+
+    #[tokio::main]
+    async fn create_new_relation(&self){
+
+    }
+
+    #[tokio::main]
+    async fn add_content_to_realtion(&self, id : i32){
+
+    }
 }
-
-fn get_collection(){
-
-}
-
-fn add_document_to_collection(){
-
-}
-
-fn get_document_in_collection(){
-
-}
-
-fn delete_document_in_collection(){
-
-}
-
-fn update_document_in_collection(){
-
-}
-
-fn create_new_relation(){
-
-}
-
-fn add_content_to_realtion(){
-
-}
-
 /**
  * @brief module use to link tests to this librairy
  */
