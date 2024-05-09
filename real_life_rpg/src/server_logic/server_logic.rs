@@ -15,7 +15,6 @@ pub fn run() {
  */
 fn search_for_function(args: &Vec<String>) {
     if !args.is_empty() {
-        //ad
         match args[0].to_lowercase().as_str() {
             "add" => ptit_truc_test(),
             _other => print!("nothing"),
