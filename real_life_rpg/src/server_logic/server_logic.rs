@@ -15,29 +15,14 @@ pub fn run() {
  */
 fn search_for_function(args: &Vec<String>) {
     if !args.is_empty() {
-        // ceci est un commentaire
         match args[0].to_lowercase().as_str() {
-            "add" => ptit_truc_test(),
+            "add" => create_new_db("testDB".to_string()),
             _other => print!("nothing"),
         }
     }
 }
 
-fn ptit_truc_test(){
-    let mut conn_object: Option<ConnectionEstablished> = None;
-    match connect_to_connection(){
-        Ok(connection) => conn_object = Some(ConnectionEstablished{conn : connection}),
-        Err(e) => print!("oups!")
-    }
-    match conn_object {
-        Some(value) => 
-            match value.create_new_db("new_db".to_string()) {
-                Ok(db) => print!("succesfully created"),
-                Err(e) => print!("impossible")
-            }
-        None => print!("oups!")
-    }
-}
+
 
 /**
  * @brief module use to link tests to this librairy

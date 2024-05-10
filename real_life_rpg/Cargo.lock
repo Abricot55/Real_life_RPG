@@ -642,6 +642,9 @@ name = "real_life_rpg"
 version = "0.1.0"
 dependencies = [
  "arangors",
+ "serde",
+ "serde_derive",
+ "serde_json",
  "tokio",
 ]
 
