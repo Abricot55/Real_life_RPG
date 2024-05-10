@@ -20,7 +20,7 @@ fn search_for_function(args: &Vec<String>) {
                 match args[1].to_lowercase().as_str(){
                     "database" => create_new_db(args[2].clone()),
                     "collection" => if args.len() >= 4{
-                        print!("add collection {} {}", args[2].as_str(), args[3].as_str())
+                        create_new_collection(args[2].clone(), args[3].clone())
                     },
                     "document" =>  print!("add document {}", args[2].as_str()),
                     "relation" => print!("add relation {}", args[2].as_str()),
