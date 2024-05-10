@@ -11,6 +11,7 @@ enum DocumentType{
 }
 #[derive(Serialize, Deserialize)]
 pub struct UserType{
+    pub _key : String,
     pub name : String,
     pub pseudo : String,
     pub email : String,
@@ -19,6 +20,7 @@ pub struct UserType{
 }
 #[derive(Serialize, Deserialize)]
 pub struct SkillType{
+    pub _key : String,
     pub name : String
 }
 
@@ -143,7 +145,7 @@ pub async fn add_document_to_collection(document : DocumentType, collection_name
  * @return The document with the specified id.
  */
 #[tokio::main]
-async fn get_document_in_collection(key : String, collection_name : String, database_name : String) -> Result<arangors::Document<_>, ClientError>{
+async fn get_document_in_collection(key : String, collection_name : String, database_name : String) -> Result<arangors::Document<String>, ClientError>{
     match get_collection(collection_name, database_name){
         Ok(collec) => return collec.document::<String>(key.as_str()).await,
         Err(e) => return Err(e)
@@ -161,7 +163,7 @@ async fn delete_document_in_collection(key : String, collection_name : String, d
     let remove : RemoveOptions = RemoveOptions::default();
     match get_collection(collection_name, database_name){
         Ok(collec) => 
-            match collec.remove_document(key.as_str(), remove, None){
+            match collec.remove_document::<String>(key.as_str(), remove, None).await{
                 Ok(doc) => print!("Document succesfully deleted"),
                 Err(e) => print!("Unable to delete the document")
             },
@@ -169,22 +171,29 @@ async fn delete_document_in_collection(key : String, collection_name : String, d
     }
 }
 
-    #[tokio::main]
-    async fn update_document_in_collection(id : i32){
+/**
+ * @brief This function is used to update an already present document in a specified collection.
+ * @detail this function will search for a document with the same key and delete it and add the new_document in the collection.
+ * @param key -> the key of the document.
+ * @param new_document -> The updated version of the document.
+ * @param collection_name -> the name of the collection in which the document exist.
+ * @param database_name -> the name of the database in which the collection exist.
+ * 
+ */
+#[tokio::main]
+async fn update_document_in_collection(key : String, new_document : DocumentType, collection_name : String, database_name : String){
+    delete_document_in_collection(key, collection_name.clone(), database_name.clone()),
+    add_document_to_collection(new_document, collection_name, database_name)
+}
 
-    }
-
-    #[tokio::main]
-    async fn del_content_to_relation(id : i32){
-
-    }
-
-
+/**
+ * @brief This function convert a DocumentType to a String which is formatted like a jSon document.
+ * @param document -> The document that will be converted.
+ * return A result that contain either the String or an error.
+ */
 fn convert_doc_json(document : DocumentType) -> JResult<String>{
     return Ok(serde_json::to_string(&document)?);
 }
-
-
 
 
 /**
