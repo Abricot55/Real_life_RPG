@@ -1,5 +1,5 @@
 use std::env;
-use crate::database_logic::database_logic::{connect_to_connection,*};
+use crate::database_logic::database_logic::{*};
 /**
  * @brief This function collect information from the terminal and call serach_for_function with these information
 */

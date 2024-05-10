@@ -23,13 +23,6 @@ pub struct SkillType{
 }
 
 /**
- * @brief struct used to simulate an object Collection
- */
-pub struct CollectionSpecified{
-    collec : Collection<ReqwestClient>
-}
-
-/**
  * @brief This function etablish connection with the port 8529.
  * @return A result with the connection if it worked and a error if it didn't.
  */
@@ -82,7 +75,7 @@ pub async fn create_new_collection( name : String, database_name : String){
     match connect_to_db(database_name){
         Ok(db) => 
             match db.create_collection(name.as_str()).await{
-                Ok(collec) => print!("Collection {} succesfully created in database {}", name, database_name),
+                Ok(collec) => print!("Collection {} succesfully created in database", name),
                 Err(e) => print!("Impossible to create the collection")
             }
         Err(e) => print!("Impossible to connect to the database")
@@ -96,64 +89,68 @@ pub async fn create_new_collection( name : String, database_name : String){
  */
 #[tokio::main]
 async fn get_collection( name : String, database_name : String) -> Result<arangors::Collection<ReqwestClient>, ClientError>{
-    match connect_to_db(database_name.to_string()){
-        Ok(db) => return db.collection(name.as_string()).await,
+    match connect_to_db(database_name){
+        Ok(db) => return db.collection(name.as_str()).await,
         Err(e) => return Err(e)
     }
 }
 
-    /**
-     * @brief This function create a new relation collection in the database.
-     * @param name -> The name of the new relation.
-     * @return A result which is either an error or the new relation
-     */
-    #[tokio::main]
-    async fn create_new_relation(&self, name : String) -> Result<Collection<ReqwestClient>, ClientError>{
-        self.datab.create_edge_collection(name.as_str()).await
-    }
-
-}
-
-impl CollectionSpecified{
-
-    #[tokio::main]
-    pub async fn add_document_to_collection(&self, document : DocumentType)->Result<arangors::document::response::DocumentResponse<String>, &str>{
-        let insert : InsertOptions = InsertOptions::default();
-        match convert_doc_json(document){
-            Ok(json_doc) => 
-                match self.collec.create_document(json_doc,insert).await{
-                    Ok(doc) => return Ok(doc),
-                    Err(e) => return Err("Impossible to add the document")
-                },
-            Err(e) => return Err("The document is invalid")
-        }
-    }
-
-    #[tokio::main]
-    async fn get_document_in_collection(&self, id : i32){
-
-    }
-
-    #[tokio::main]
-    async fn delete_document_in_collection(&self, id : i32){
-
-    }
-
-    #[tokio::main]
-    async fn update_document_in_collection(&self, id : i32){
-
-    }
-
-    #[tokio::main]
-    async fn add_content_to_realtion(&self, id : i32){
-
-    }
-
-    #[tokio::main]
-    async fn del_content_to_relation(&self, id : i32){
-
+/**
+ * @brief This function create a new relation collection in the database.
+ * @param name -> The name of the new relation.
+ * @return A result which is either an error or the new relation
+ */
+#[tokio::main]
+async fn create_new_relation(name : String, database_name : String){
+    match connect_to_db(database_name){
+        Ok(db) => 
+            match db.create_edge_collection(name.as_str()).await{
+                Ok(collec) => print!("Collection {} succesfully created in database", name),
+                Err(e) => print!("Impossible to create the collection")
+            }
+        Err(e) => print!("Impossible to connect to the database")
     }
 }
+
+
+/*#[tokio::main]
+pub async fn add_document_to_collection(document : DocumentType){
+    let insert : InsertOptions = InsertOptions::default();
+    match convert_doc_json(document){
+        Ok(json_doc) => 
+            match self.collec.create_document(json_doc,insert).await{
+                Ok(doc) => return Ok(doc),
+                Err(e) => return Err("Impossible to add the document")
+            },
+        Err(e) => return Err("The document is invalid")
+    }
+}*/
+
+    #[tokio::main]
+    async fn get_document_in_collection(id : i32){
+
+    }
+
+    #[tokio::main]
+    async fn delete_document_in_collection(id : i32){
+
+    }
+
+    #[tokio::main]
+    async fn update_document_in_collection(id : i32){
+
+    }
+
+    #[tokio::main]
+    async fn add_content_to_realtion(id : i32){
+
+    }
+
+    #[tokio::main]
+    async fn del_content_to_relation(id : i32){
+
+    }
+
 
 fn convert_doc_json(document : DocumentType) -> JResult<String>{
     return Ok(serde_json::to_string(&document)?);
