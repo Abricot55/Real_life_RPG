@@ -16,8 +16,42 @@ pub fn run() {
 fn search_for_function(args: &Vec<String>) {
     if !args.is_empty() {
         match args[0].to_lowercase().as_str() {
-            "add" => create_new_db("testDB".to_string()),
-            _other => print!("nothing"),
+            "add" => if args.len() >= 3{
+                match args[1].to_lowercase().as_str(){
+                    "database" => create_new_db(args[2].clone()),
+                    "collection" => if args.len() >= 4{
+                        create_new_collection(args[2].clone(), args[3].clone())
+                    },
+                    "document" =>  print!("add document {}", args[2].as_str()),
+                    "relation" => print!("add relation {}", args[2].as_str()),
+                    other => print!("add other")
+                }
+            },
+            "get" => if args.len() >= 2{
+                match args[1].to_lowercase().as_str(){
+                    "database" => print!("get database"),
+                    "collection" => print!("get collection"),
+                    "document" => print!("get document"),
+                    "relation" => print!("get relation"),
+                    other => print!("get other")
+                }
+            },
+            "update" => if args.len() >= 2{
+                match args[1].to_lowercase().as_str(){
+                    "database" => print!("update database"),
+                    "collection" => print!("update collection"),
+                    "document" => print!("update document"),
+                    "relation" => print!("update relation"),
+                    other => print!("update other")
+                }
+            },
+            "delete" => if args.len() >= 2{
+                match args[1].to_lowercase().as_str(){
+                    "document" => print!("delete document"),
+                    other => print!("delete other")
+                }
+            },
+            _other => print!("nothing")
         }
     }
 }
