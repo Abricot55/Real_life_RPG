@@ -182,8 +182,8 @@ async fn delete_document_in_collection(key : String, collection_name : String, d
  */
 #[tokio::main]
 async fn update_document_in_collection(key : String, new_document : DocumentType, collection_name : String, database_name : String){
-    delete_document_in_collection(key, collection_name.clone(), database_name.clone())
-    add_document_to_collection(new_document, collection_name, database_name)
+    delete_document_in_collection(key, collection_name.clone(), database_name.clone());
+    add_document_to_collection(new_document, collection_name, database_name);
 }
 
 /**
@@ -194,7 +194,6 @@ async fn update_document_in_collection(key : String, new_document : DocumentType
 fn convert_doc_json(document : DocumentType) -> JResult<String>{
     return Ok(serde_json::to_string(&document)?);
 }
-
 
 /**
  * @brief module use to link tests to this librairy
