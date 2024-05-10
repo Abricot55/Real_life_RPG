@@ -43,10 +43,10 @@ pub async fn create_new_db( name : String){
     match connect_to_connection().await{
         Ok(connection) => 
             match connection.create_database(name.as_str()).await{
-                Ok(db) => print!("Database {} succesfully created", name),
-                Err(e) => print!("Impossible to create this database")
+                Ok(_) => print!("Database {} succesfully created", name),
+                Err(_) => print!("Impossible to create this database")
             },
-        Err(e) => print!("Impossible to connect")
+        Err(_) => print!("Impossible to connect")
     }
 }
 
@@ -73,10 +73,10 @@ pub async fn create_new_collection( name : String, database_name : String){
     match connect_to_db(database_name).await{
         Ok(db) => 
             match db.create_collection(name.as_str()).await{
-                Ok(collec) => print!("Collection {} succesfully created in database", name),
-                Err(e) => print!("Impossible to create the collection")
+                Ok(_) => print!("Collection {} succesfully created in database", name),
+                Err(_) => print!("Impossible to create the collection")
             }
-        Err(e) => print!("Impossible to connect to the database")
+        Err(_) => print!("Impossible to connect to the database")
     }
 }
 
@@ -102,10 +102,10 @@ pub async fn create_new_relation(name : String, database_name : String){
     match connect_to_db(database_name).await{
         Ok(db) => 
             match db.create_edge_collection(name.as_str()).await{
-                Ok(collec) => print!("Collection {} succesfully created in database", name),
-                Err(e) => print!("Impossible to create the collection")
+                Ok(_) => print!("Collection {} succesfully created in database", name),
+                Err(_) => print!("Impossible to create the collection")
             }
-        Err(e) => print!("Impossible to connect to the database")
+        Err(_) => print!("Impossible to connect to the database")
     }
 }
 
@@ -123,12 +123,12 @@ pub async fn add_document_to_collection(document : DocumentType, collection_name
             match convert_doc_json(document){
                 Ok(json_doc) => 
                     match collec.create_document(json_doc, insert).await{
-                        Ok(doc) => print!("Document succesfully created"),
-                        Err(e) => print!("Impossible to create the document")
+                        Ok(_) => print!("Document succesfully created"),
+                        Err(_) => print!("Impossible to create the document")
                     }
-                Err(e) => print!("The document is invalid")
+                Err(_) => print!("The document is invalid")
             }
-        Err(e) => print!("impossible to connect to the collection")
+        Err(_) => print!("impossible to connect to the collection")
     }
 }
 
@@ -159,10 +159,10 @@ pub async fn delete_document_in_collection(key : String, collection_name : Strin
     match get_collection(collection_name, database_name).await{
         Ok(collec) => 
             match collec.remove_document::<String>(key.as_str(), remove, None).await{
-                Ok(doc) => print!("Document succesfully deleted"),
-                Err(e) => print!("Unable to delete the document")
+                Ok(_) => print!("Document succesfully deleted"),
+                Err(_) => print!("Unable to delete the document")
             },
-        Err(e) => print!("unable to connect to the collection")
+        Err(_) => print!("unable to connect to the collection")
     }
 }
 
@@ -195,6 +195,5 @@ fn convert_doc_json(document : DocumentType) -> JResult<String>{
  */
 #[cfg(test)]
 mod tests {
-    use super::*;
     include!("tests_database_logic.rs");
 }

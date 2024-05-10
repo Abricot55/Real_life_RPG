@@ -24,7 +24,7 @@ fn search_for_function(args: &Vec<String>) {
                     },
                     "document" =>  print!("add document {}", args[2].as_str()),
                     "relation" => print!("add relation {}", args[2].as_str()),
-                    other => print!("add other")
+                    _other => print!("add other")
                 }
             },
             "get" => if args.len() >= 2{
@@ -33,7 +33,7 @@ fn search_for_function(args: &Vec<String>) {
                     "collection" => print!("get collection"),
                     "document" => print!("get document"),
                     "relation" => print!("get relation"),
-                    other => print!("get other")
+                    _other => print!("get other")
                 }
             },
             "update" => if args.len() >= 2{
@@ -42,13 +42,13 @@ fn search_for_function(args: &Vec<String>) {
                     "collection" => print!("update collection"),
                     "document" => print!("update document"),
                     "relation" => print!("update relation"),
-                    other => print!("update other")
+                    _other => print!("update other")
                 }
             },
             "delete" => if args.len() >= 2{
                 match args[1].to_lowercase().as_str(){
                     "document" => print!("delete document"),
-                    other => print!("delete other")
+                    _other => print!("delete other")
                 }
             },
             _other => print!("nothing")
