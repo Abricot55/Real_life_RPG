@@ -1,11 +1,9 @@
-use std::collections::{hash_map, HashMap};
-
-use arangors::{document::options::{InsertOptions, InsertOptionsBuilder, RemoveOptions}, uclient::reqwest::ReqwestClient, ArangoError, ClientError, Collection, Connection, Database};
+use arangors::{document::options::{InsertOptions, RemoveOptions}, uclient::reqwest::ReqwestClient, ClientError, Connection, Database};
 use serde::{ Deserialize, Serialize};
 use serde_json:: Result as JResult;
 
 #[derive(Serialize, Deserialize)]
-enum DocumentType{
+pub enum DocumentType{
     User(UserType),
     Skill(SkillType)
 }
@@ -28,8 +26,7 @@ pub struct SkillType{
  * @brief This function etablish connection with the port 8529.
  * @return A result with the connection if it worked and a error if it didn't.
  */
-#[tokio::main]
-async fn connect_to_connection() -> Result<Connection, ClientError>{
+pub async fn connect_to_connection() -> Result<Connection, ClientError>{
     let url = "http://localhost:8529";
     let username = "root";
     let password = "t53ee&&v9vt67";
@@ -43,7 +40,7 @@ async fn connect_to_connection() -> Result<Connection, ClientError>{
  */
 #[tokio::main]
 pub async fn create_new_db( name : String){
-    match connect_to_connection(){
+    match connect_to_connection().await{
         Ok(connection) => 
             match connection.create_database(name.as_str()).await{
                 Ok(db) => print!("Database {} succesfully created", name),
@@ -58,9 +55,8 @@ pub async fn create_new_db( name : String){
  * @param name -> The name of the database we want to access.
  * @return A result wich is either a error or another result containing the value if it worked.
  */
-#[tokio::main]
-async fn connect_to_db( name : String) -> Result<Database<ReqwestClient>, ClientError>{
-    match connect_to_connection(){
+pub async fn connect_to_db( name : String) -> Result<Database<ReqwestClient>, ClientError>{
+    match connect_to_connection().await{
         Ok(connection) => return connection.db(name.as_str()).await,
         Err(e) => return Err(e)
     }
@@ -74,7 +70,7 @@ async fn connect_to_db( name : String) -> Result<Database<ReqwestClient>, Client
  */
 #[tokio::main]
 pub async fn create_new_collection( name : String, database_name : String){
-    match connect_to_db(database_name){
+    match connect_to_db(database_name).await{
         Ok(db) => 
             match db.create_collection(name.as_str()).await{
                 Ok(collec) => print!("Collection {} succesfully created in database", name),
@@ -89,9 +85,8 @@ pub async fn create_new_collection( name : String, database_name : String){
  * @param name -> the name of the collection or relation we want to access.
  * @return A result which is either an error or the collection/relation.
  */
-#[tokio::main]
-async fn get_collection( name : String, database_name : String) -> Result<arangors::Collection<ReqwestClient>, ClientError>{
-    match connect_to_db(database_name){
+pub async fn get_collection( name : String, database_name : String) -> Result<arangors::Collection<ReqwestClient>, ClientError>{
+    match connect_to_db(database_name).await{
         Ok(db) => return db.collection(name.as_str()).await,
         Err(e) => return Err(e)
     }
@@ -103,8 +98,8 @@ async fn get_collection( name : String, database_name : String) -> Result<arango
  * @return A result which is either an error or the new relation
  */
 #[tokio::main]
-async fn create_new_relation(name : String, database_name : String){
-    match connect_to_db(database_name){
+pub async fn create_new_relation(name : String, database_name : String){
+    match connect_to_db(database_name).await{
         Ok(db) => 
             match db.create_edge_collection(name.as_str()).await{
                 Ok(collec) => print!("Collection {} succesfully created in database", name),
@@ -123,7 +118,7 @@ async fn create_new_relation(name : String, database_name : String){
 #[tokio::main]
 pub async fn add_document_to_collection(document : DocumentType, collection_name : String, database_name : String){
     let insert : InsertOptions = InsertOptions::default();
-    match get_collection(collection_name, database_name){
+    match get_collection(collection_name, database_name).await{
         Ok(collec) => 
             match convert_doc_json(document){
                 Ok(json_doc) => 
@@ -145,8 +140,8 @@ pub async fn add_document_to_collection(document : DocumentType, collection_name
  * @return The document with the specified id.
  */
 #[tokio::main]
-async fn get_document_in_collection(key : String, collection_name : String, database_name : String) -> Result<arangors::Document<String>, ClientError>{
-    match get_collection(collection_name, database_name){
+pub async fn get_document_in_collection(key : String, collection_name : String, database_name : String) -> Result<arangors::Document<String>, ClientError>{
+    match get_collection(collection_name, database_name).await{
         Ok(collec) => return collec.document::<String>(key.as_str()).await,
         Err(e) => return Err(e)
     }
@@ -159,9 +154,9 @@ async fn get_document_in_collection(key : String, collection_name : String, data
  * @param database_name -> The name of the database in which the collection exist.
  */
 #[tokio::main]
-async fn delete_document_in_collection(key : String, collection_name : String, database_name : String){
+pub async fn delete_document_in_collection(key : String, collection_name : String, database_name : String){
     let remove : RemoveOptions = RemoveOptions::default();
-    match get_collection(collection_name, database_name){
+    match get_collection(collection_name, database_name).await{
         Ok(collec) => 
             match collec.remove_document::<String>(key.as_str(), remove, None).await{
                 Ok(doc) => print!("Document succesfully deleted"),
@@ -181,7 +176,7 @@ async fn delete_document_in_collection(key : String, collection_name : String, d
  * 
  */
 #[tokio::main]
-async fn update_document_in_collection(key : String, new_document : DocumentType, collection_name : String, database_name : String){
+pub async fn update_document_in_collection(key : String, new_document : DocumentType, collection_name : String, database_name : String){
     delete_document_in_collection(key, collection_name.clone(), database_name.clone());
     add_document_to_collection(new_document, collection_name, database_name);
 }
