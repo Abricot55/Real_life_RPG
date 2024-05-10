@@ -1,6 +1,6 @@
 use std::collections::{hash_map, HashMap};
 
-use arangors::{document::options::{InsertOptions, InsertOptionsBuilder}, uclient::reqwest::ReqwestClient, ArangoError, ClientError, Collection, Connection, Database};
+use arangors::{document::options::{InsertOptions, InsertOptionsBuilder, RemoveOptions}, uclient::reqwest::ReqwestClient, ArangoError, ClientError, Collection, Connection, Database};
 use serde::{ Deserialize, Serialize};
 use serde_json:: Result as JResult;
 
@@ -11,15 +11,15 @@ enum DocumentType{
 }
 #[derive(Serialize, Deserialize)]
 pub struct UserType{
-    name : String,
-    pseudo : String,
-    email : String,
-    birth_date : String,
-    level : i32
+    pub name : String,
+    pub pseudo : String,
+    pub email : String,
+    pub birth_date : String,
+    pub level : i32
 }
 #[derive(Serialize, Deserialize)]
 pub struct SkillType{
-    name : String
+    pub name : String
 }
 
 /**
@@ -112,37 +112,65 @@ async fn create_new_relation(name : String, database_name : String){
     }
 }
 
-
-/*#[tokio::main]
-pub async fn add_document_to_collection(document : DocumentType){
+/**
+ * @brief This function add a new document to a specific collection.
+ * @param document -> The document that will be added to the collection.
+ * @param collection_name -> The name of the collection the document will be added to.
+ * @param database_name -> The name of the database the collection is a part of.
+ */
+#[tokio::main]
+pub async fn add_document_to_collection(document : DocumentType, collection_name : String, database_name : String){
     let insert : InsertOptions = InsertOptions::default();
-    match convert_doc_json(document){
-        Ok(json_doc) => 
-            match self.collec.create_document(json_doc,insert).await{
-                Ok(doc) => return Ok(doc),
-                Err(e) => return Err("Impossible to add the document")
+    match get_collection(collection_name, database_name){
+        Ok(collec) => 
+            match convert_doc_json(document){
+                Ok(json_doc) => 
+                    match collec.create_document(json_doc, insert).await{
+                        Ok(doc) => print!("Document succesfully created"),
+                        Err(e) => print!("Impossible to create the document")
+                    }
+                Err(e) => print!("The document is invalid")
+            }
+        Err(e) => print!("impossible to connect to the collection")
+    }
+}
+
+/**
+ * @brief This functionis used to retrieve a specific document in a collection.
+ * @param key -> The unique key of the document.
+ * @param collection_name -> The name of the collection in which the document exist.
+ * @param database_name -> The name of the database in which the collection exist.
+ * @return The document with the specified id.
+ */
+#[tokio::main]
+async fn get_document_in_collection(key : String, collection_name : String, database_name : String) -> Result<arangors::Document<_>, ClientError>{
+    match get_collection(collection_name, database_name){
+        Ok(collec) => return collec.document::<String>(key.as_str()).await,
+        Err(e) => return Err(e)
+    }
+}
+
+/**
+ * @brief This function is used to delete a document in a given collection.
+ * @param key -> The unique key of the document that need to be deleted.
+ * @param collection_name -> The name of the collection in which the document exist.
+ * @param database_name -> The name of the database in which the collection exist.
+ */
+#[tokio::main]
+async fn delete_document_in_collection(key : String, collection_name : String, database_name : String){
+    let remove : RemoveOptions = RemoveOptions::default();
+    match get_collection(collection_name, database_name){
+        Ok(collec) => 
+            match collec.remove_document(key.as_str(), remove, None){
+                Ok(doc) => print!("Document succesfully deleted"),
+                Err(e) => print!("Unable to delete the document")
             },
-        Err(e) => return Err("The document is invalid")
+        Err(e) => print!("unable to connect to the collection")
     }
-}*/
-
-    #[tokio::main]
-    async fn get_document_in_collection(id : i32){
-
-    }
-
-    #[tokio::main]
-    async fn delete_document_in_collection(id : i32){
-
-    }
+}
 
     #[tokio::main]
     async fn update_document_in_collection(id : i32){
-
-    }
-
-    #[tokio::main]
-    async fn add_content_to_realtion(id : i32){
 
     }
 
