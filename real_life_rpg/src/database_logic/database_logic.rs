@@ -38,7 +38,6 @@ pub async fn connect_to_connection() -> Result<Connection, ClientError>{
  * @param name -> The name of the database we are creating.
  * @return A result wich is either a error or another result containing the value of the database if the creation worked.
  */
-#[tokio::main]
 pub async fn create_new_db( name : String){
     match connect_to_connection().await{
         Ok(connection) => 
@@ -68,7 +67,7 @@ pub async fn connect_to_db( name : String) -> Result<Database<ReqwestClient>, Cl
  * @param name -> the name of the collection we want to create.
  * @return A result which is either an error or the new collection.
  */
-#[tokio::main]
+
 pub async fn create_new_collection( name : String, database_name : String){
     match connect_to_db(database_name).await{
         Ok(db) => 
@@ -97,7 +96,7 @@ pub async fn get_collection( name : String, database_name : String) -> Result<ar
  * @param name -> The name of the new relation.
  * @return A result which is either an error or the new relation
  */
-#[tokio::main]
+
 pub async fn create_new_relation(name : String, database_name : String){
     match connect_to_db(database_name).await{
         Ok(db) => 
@@ -115,7 +114,7 @@ pub async fn create_new_relation(name : String, database_name : String){
  * @param collection_name -> The name of the collection the document will be added to.
  * @param database_name -> The name of the database the collection is a part of.
  */
-#[tokio::main]
+
 pub async fn add_document_to_collection(document : DocumentType, collection_name : String, database_name : String){
     let insert : InsertOptions = InsertOptions::default();
     match get_collection(collection_name, database_name).await{
@@ -139,7 +138,7 @@ pub async fn add_document_to_collection(document : DocumentType, collection_name
  * @param database_name -> The name of the database in which the collection exist.
  * @return The document with the specified id.
  */
-#[tokio::main]
+
 pub async fn get_document_in_collection(key : String, collection_name : String, database_name : String) -> Result<arangors::Document<String>, ClientError>{
     match get_collection(collection_name, database_name).await{
         Ok(collec) => return collec.document::<String>(key.as_str()).await,
@@ -153,7 +152,7 @@ pub async fn get_document_in_collection(key : String, collection_name : String, 
  * @param collection_name -> The name of the collection in which the document exist.
  * @param database_name -> The name of the database in which the collection exist.
  */
-#[tokio::main]
+
 pub async fn delete_document_in_collection(key : String, collection_name : String, database_name : String){
     let remove : RemoveOptions = RemoveOptions::default();
     match get_collection(collection_name, database_name).await{
@@ -175,10 +174,10 @@ pub async fn delete_document_in_collection(key : String, collection_name : Strin
  * @param database_name -> the name of the database in which the collection exist.
  * 
  */
-#[tokio::main]
+
 pub async fn update_document_in_collection(key : String, new_document : DocumentType, collection_name : String, database_name : String){
-    delete_document_in_collection(key, collection_name.clone(), database_name.clone());
-    add_document_to_collection(new_document, collection_name, database_name);
+    delete_document_in_collection(key, collection_name.clone(), database_name.clone()).await;
+    add_document_to_collection(new_document, collection_name, database_name).await;
 }
 
 /**
