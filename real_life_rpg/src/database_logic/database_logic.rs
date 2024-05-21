@@ -1,6 +1,9 @@
-use arangors::{document::options::{InsertOptions, RemoveOptions}, uclient::reqwest::ReqwestClient, ClientError, Connection, Database};
+use std::collections::HashMap;
+
+use arangors::{document::options::{InsertOptions, RemoveOptions}, uclient::reqwest::ReqwestClient, ClientError, Connection, Database, Document};
 use serde::{ Deserialize, Serialize};
-use serde_json:: Result as JResult;
+use serde_json::{ map::Keys, to_string, Error, Result as JResult, Value};
+use arangors::{AqlQuery, Cursor};
 
 #[derive(Serialize, Deserialize)]
 pub enum DocumentType{
@@ -116,18 +119,19 @@ pub async fn create_new_relation(name : String, database_name : String){
  */
 
 pub async fn add_document_to_collection(document : DocumentType, collection_name : String, database_name : String){
-    let insert : InsertOptions = InsertOptions::default();
-    match get_collection(collection_name, database_name).await{
-        Ok(collec) => 
-            match convert_doc_json(document){
-                Ok(json_doc) => 
-                    match collec.create_document(json_doc, insert).await{
-                        Ok(_) => print!("Document succesfully created"),
-                        Err(_) => print!("Impossible to create the document")
-                    }
-                Err(_) => print!("The document is invalid")
+    match convert_doc_json(document){
+        Ok(json_doc) =>    { 
+            let aql = format!("INSERT {} INTO {}", json_doc.to_string(), collection_name);
+            let query: AqlQuery = AqlQuery::builder().query(&aql).build();
+                match connect_to_db(database_name).await{
+                Ok(db) => match db.aql_query::<Value>(query).await{
+                    Ok(_) => print!("Document successfully added to the collection"),
+                    Err(_) => print!("The document couldn't be added to the collection")
+                },
+                Err(_) => print!("Couldn't connect to the database")
+                }
             }
-        Err(_) => print!("impossible to connect to the collection")
+        Err(_) => print!("The document is invalid")
     }
 }
 
@@ -139,9 +143,9 @@ pub async fn add_document_to_collection(document : DocumentType, collection_name
  * @return The document with the specified id.
  */
 
-pub async fn get_document_in_collection(key : String, collection_name : String, database_name : String) -> Result<arangors::Document<String>, ClientError>{
+pub async fn get_document_in_collection(key : String, collection_name : String, database_name : String) -> Result<arangors::Document<Value>, ClientError>{
     match get_collection(collection_name, database_name).await{
-        Ok(collec) => return collec.document::<String>(key.as_str()).await,
+        Ok(collec) => return collec.document::<Value>(key.as_str()).await,
         Err(e) => return Err(e)
     }
 }
@@ -185,8 +189,15 @@ pub async fn update_document_in_collection(key : String, new_document : Document
  * @param document -> The document that will be converted.
  * return A result that contain either the String or an error.
  */
-fn convert_doc_json(document : DocumentType) -> JResult<String>{
-    return Ok(serde_json::to_string(&document)?);
+fn convert_doc_json(document : DocumentType) -> Result<String, String>{
+    match serde_json::to_value(&document){
+        Ok(document_value) => 
+            match  document_value.as_object().unwrap().iter().next() {
+                Some((key, value)) => return Ok(serde_json::to_string(&value).unwrap()),
+                None => return Err("The document is empty".to_string())
+            }
+        Err(_) => return Err("The document is invalid".to_string())
+    }
 }
 
 /**

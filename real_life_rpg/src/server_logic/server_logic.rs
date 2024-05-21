@@ -110,7 +110,7 @@ async fn search_for_function(args: &Vec<String>){
                     "document" => if args.len() >= 5{ //document key, collection name, database name
                         match get_document_in_collection(args[2].clone(), args[3].clone(), args[4].clone()).await{ //document key, collection name, database name
                             Ok(_document) => {
-                                print!("document trouvéé")
+                                print!("{}", _document.to_string())
                                 //if you do something with document, remove '_', return it
                             },
                             Err(_) => print!("document non trouvé")
