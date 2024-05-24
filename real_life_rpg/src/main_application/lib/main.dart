@@ -1,6 +1,7 @@
 import 'package:english_words/english_words.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:http/http.dart' as http;
 
 void main() {
   runApp(MyApp());
@@ -38,6 +39,8 @@ class MyHomePage extends StatelessWidget {
   Widget build(BuildContext context) {
     var appState = context.watch<MyAppState>();
     var pair = appState.current;
+    
+    var request = sendRequest("/document/a/allo/bonjour/");
 
     return Scaffold(
       body: Center(
@@ -86,5 +89,20 @@ class BigCard extends StatelessWidget {
         ),
       ),
     );
+  }
+}
+
+/**
+ * @brief Cette fonction envoie une requête http au serveur
+ * @param path -> le chemin envoyé dans la fonction, représente quelle requête est passée au serveur
+ * @return La réponse du serveur.
+ */
+Future<void> sendRequest(String path) async {
+  var url = Uri.http('127.0.0.1:3000', path);
+  var response = await http.get(url);
+  if (response.statusCode == 200) {
+    print('Response body: ${response.body}');
+  } else {
+    print('Request failed with status: ${response.statusCode}.');
   }
 }

@@ -1,4 +1,3 @@
-use std::env;
 use crate::database_logic::database_logic::{*};
 use std::fmt;
 
@@ -17,12 +16,16 @@ impl fmt::Display for MyError {
 }
 
 /**
- * @brief This function collect information from the terminal and call serach_for_function with these information
+ * @brief This function collect information concerning the request and call the good function accordingly.
 */
-pub async fn run() {
-    let command: Vec<String> = env::args().collect();
-    let args: Vec<String> = command[1..].to_vec();
-    search_for_function(&args).await;
+pub async fn run(method_name : &str, args : &Vec<String>) -> String{
+    match method_name.to_lowercase().as_str(){
+        "add" => return add_function(&args).await,
+        "delete" => return delete_function(&args).await,
+        "get" => return get_function(&args).await,
+        "update" => return update_function(&args).await,
+        _other => return "Echec".to_string()
+    }
 }
 
 fn get_document(args: &Vec<String>, index_value: i32) -> Result<DocumentType, MyError>{
@@ -60,108 +63,130 @@ fn get_document(args: &Vec<String>, index_value: i32) -> Result<DocumentType, My
     return Err(MyError {details: "document invalide".to_string()});
 }
 
+
 /**
- * @brief This function research what to do depending on the first element of the vector passed in argument.
- * @param args -> a vector of string
+ * @brief This function is called when a add request is made to the server.
+ * @param args -> A vector of string that contains the request to the server.
+ * @return A String which indicate the state of the request.
  */
-async fn search_for_function(args: &Vec<String>){
-    if !args.is_empty() {
-        match args[0].to_lowercase().as_str() {
-            "add" => if args.len() >= 3{
-                match args[1].to_lowercase().as_str(){
-                    "database" => create_new_db(args[2].clone()).await, //database name
-                    "collection" => if args.len() >= 4{
-                        create_new_collection(args[2].clone(), args[3].clone()).await//collection name, database name
-                    }else {
-                        print!("commande invalide")
-                    },
-                    "document" =>  if args.len() >= 5{ //collection name, database name, document type, value...
-                        match get_document(&args, 4){
-                            Ok(doc) => add_document_to_collection(doc, args[2].clone(), args[3].clone()).await,
-                            Err(e) => print!("{}", e)
-                        }
-                    }else {
-                        print!("commande invalide")
-                    },
-                    "relation" => if args.len() >= 4{
-                        create_new_relation(args[2].clone(),args[3].clone()).await // relation name, database name
-                    }else {
-                        print!("commande invalide")
-                    },
-                    _other => print!("add other")
-                }
+async fn add_function(args: &Vec<String>) -> String{
+    if args.len() >= 3{
+        match args[1].to_lowercase().as_str(){
+            "database" => {
+                create_new_db(args[2].clone()).await;
+                return "Database Créée".to_string()}, //database name
+            "collection" => {if args.len() >= 4{
+                create_new_collection(args[2].clone(), args[3].clone()).await;
+                return "Colledction Créée".to_string()}//collection name, database name
+            else {
+                return "commande invalide".to_string();
+            }},
+            "document" =>  { if args.len() >= 5{ //collection name, database name, document type, value...
+                match get_document(&args, 4){
+                    Ok(doc) => {
+                        add_document_to_collection(doc, args[2].clone(), args[3].clone()).await;
+                        return "Document Créé".to_string()},
+                    Err(e) => return e.to_string()}
             }else {
-                print!("commande invalide")
-            },
-            "get" => if args.len() >= 2{
-                match args[1].to_lowercase().as_str(){
-                    //"database" => print!("get database"),
-                    "collection" => if args.len() >= 4{
-                        match get_collection(args[2].clone(), args[3].clone()).await{ //collection name, database name
-                            Ok(_collection) => {
-                                print!("collection trouvée")
-                                //if you do something with collection, remove '_', return it
-                            },
-                            Err(_) => print!("collection non trouvée")
-                        }
-                    }else {
-                        print!("commande invalide")
-                    },
-                    "document" => if args.len() >= 5{ //document key, collection name, database name
-                        match get_document_in_collection(args[2].clone(), args[3].clone(), args[4].clone()).await{ //document key, collection name, database name
-                            Ok(_document) => {
-                                print!("{}", _document.to_string())
-                                //if you do something with document, remove '_', return it
-                            },
-                            Err(_) => print!("document non trouvé")
-                        }
-                    } else {
-                        print!("commande invalide")
-                    }, 
-                    //"relation" => print!("get relation"),
-                    _other => print!("get other")
-                }
+                return "commande invalide".to_string();
+            }},
+            "relation" => { if args.len() >= 4{
+                create_new_relation(args[2].clone(),args[3].clone()).await;
+                return "Relation Créée".to_string() // relation name, database name
             }else {
-                print!("commande invalide")
-            },
-            "update" => if args.len() >= 2{
-                match args[1].to_lowercase().as_str(){
-                    //"database" => print!("update database"),
-                    //"collection" => print!("update collection"),
-                    "document" => if args.len() >= 6{ //document key, collection name, database name, docutment type, value...
-                        match get_document(&args, 5){
-                            Ok(doc) => update_document_in_collection(args[2].clone(), doc, args[3].clone(), args[4].clone()).await,
-                            Err(e) => print!("{}", e)
-                        }
-                    } else{
-                        print!("commande invalie")
-                    },
-                    //"relation" => print!("update relation"),
-                    _other => print!("update other")
-                }
-            }else {
-                print!("commande invalide")
-            },
-            "delete" => if args.len() >= 2{
-                match args[1].to_lowercase().as_str(){
-                    "document" => if args.len() >= 5{ //document key, collection name, database name
-                        delete_document_in_collection(args[2].clone(), args[3].clone(), args[4].clone()).await
-                    } else {
-                        print!("commande invalide")
-                    },
-                    _other => print!("delete other")
-                }
-            }else {
-                print!("commande invalide")
-            },
-            _other => print!("nothing")
+                return "commande invalide".to_string();
+            }},
+            _other => return "add other".to_string()
         }
-    }else {
-        print!("commande invalide")
     }
+    return "commande invalide".to_string();
 }
 
+/**
+ * @brief Function called when the get request is sent to the server.
+ * @param args -> A vector of string that contains the request to the server
+ * @return A String which indicate the state of the request.
+ */
+async fn get_function(args: &Vec<String>) -> String{
+    if args.len() >= 2{
+        match args[1].to_lowercase().as_str(){
+            //"database" => print!("get database"),
+            "collection" => if args.len() >= 4{
+                match get_collection(args[2].clone(), args[3].clone()).await{ //collection name, database name
+                    Ok(_collection) => {
+                        return "collection trouvée".to_string()
+                        //if you do something with collection, remove '_', return it
+                    },
+                    Err(_) => return "collection non trouvée".to_string()
+                }
+            }else {
+                return "commande invalide".to_string();
+            },
+            "document" => if args.len() >= 5{ //document key, collection name, database name
+                match get_document_in_collection(args[2].clone(), args[3].clone(), args[4].clone()).await{ //document key, collection name, database name
+                    Ok(_document) => {
+                        return _document.to_string()
+                        //if you do something with document, remove '_', return it
+                    },
+                    Err(_) => return "document non trouvé".to_string()
+                }
+            } else {
+                return "commande invalide".to_string();
+            }, 
+            //"relation" => print!("get relation"),
+            _other => return "get other".to_string()
+        }
+    }
+    return "commande invalide".to_string();
+}
 
+/**
+ * @brief Function called when the update request is sent to the server.
+ * @param args -> A vector of string that contains the request to the server
+ * @return A String which indicate the state of the request.
+ */
+async fn update_function(args: &Vec<String>) -> String{
+    if args.len() >= 2{
+        match args[1].to_lowercase().as_str(){
+            //"database" => print!("update database"),
+            //"collection" => print!("update collection"),
+            "document" => if args.len() >= 6{ //document key, collection name, database name, docutment type, value...
+                match get_document(&args, 5){
+                    Ok(doc) => {
+                        update_document_in_collection(args[2].clone(), doc, args[3].clone(), args[4].clone()).await;
+                        return "Le document à été mis à jour!".to_string()},
+                    Err(e) => return e.to_string()
+                }
+            } else{
+                return "commande invalie".to_string();
+            },
+            //"relation" => print!("update relation"),
+            _other => return "update other".to_string()
+        }
+    }
+    return "commande invalide".to_string();
+
+}
+
+/**
+ * @brief Function called when the delete request is sent to the server.
+ * @param args -> A vector of string that contains the request to the server
+ * @return A String which indicate the state of the request.
+ */
+async fn delete_function(args: &Vec<String>) -> String{
+    if args.len() >= 2{
+        match args[1].to_lowercase().as_str(){
+            "document" => {if args.len() >= 5{ //document key, collection name, database name
+                delete_document_in_collection(args[2].clone(), args[3].clone(), args[4].clone()).await;
+                return "Document Supprimé".to_string()
+            } else {
+                return "commande invalide".to_string();
+            }},
+            _other => return "delete other".to_string()
+        }
+    }
+    return "commande invalide".to_string();
+}
 
 /**
  * @brief module use to link tests to this librairy

@@ -1,9 +1,7 @@
-use std::collections::HashMap;
-
-use arangors::{document::options::{InsertOptions, RemoveOptions}, uclient::reqwest::ReqwestClient, ClientError, Connection, Database, Document};
+use arangors::{document::options::{RemoveOptions}, uclient::reqwest::ReqwestClient, ClientError, Connection, Database};
 use serde::{ Deserialize, Serialize};
-use serde_json::{ map::Keys, to_string, Error, Result as JResult, Value};
-use arangors::{AqlQuery, Cursor};
+use serde_json::{Value};
+use arangors::{AqlQuery};
 
 #[derive(Serialize, Deserialize)]
 pub enum DocumentType{
@@ -193,7 +191,7 @@ fn convert_doc_json(document : DocumentType) -> Result<String, String>{
     match serde_json::to_value(&document){
         Ok(document_value) => 
             match  document_value.as_object().unwrap().iter().next() {
-                Some((key, value)) => return Ok(serde_json::to_string(&value).unwrap()),
+                Some((_key, value)) => return Ok(serde_json::to_string(&value).unwrap()),
                 None => return Err("The document is empty".to_string())
             }
         Err(_) => return Err("The document is invalid".to_string())
