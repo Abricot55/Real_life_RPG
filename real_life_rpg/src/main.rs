@@ -49,12 +49,12 @@ pub async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
 async fn handle(req: Request<Body>) -> Result<Response<Body>, Infallible> {
     let path_array : &Vec<String> = &path_to_array(req.uri().path());
     match req.method() {
-        &Method::GET => Ok(Response::new(Body::from(run("get",path_array).await))),
-        &Method::POST => Ok(Response::new(Body::from(run("add",path_array).await))),
-        &Method::DELETE => Ok(Response::new(Body::from(run("delete",path_array).await))),
-        &Method::PUT => Ok(Response::new(Body::from(run("update",path_array).await))),
+        &Method::GET => Ok(run("get",path_array).await),
+        &Method::POST => Ok(run("add",path_array).await),
+        &Method::DELETE => Ok(run("delete",path_array).await),
+        &Method::PUT => Ok(run("update",path_array).await),
         _ => {
-            let mut not_found = Response::default();
+            let mut not_found: Response<Body> = Response::default();
             *not_found.status_mut() = StatusCode::NOT_FOUND;
             Ok(not_found)
         }

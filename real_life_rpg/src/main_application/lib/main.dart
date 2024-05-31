@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:english_words/english_words.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -39,8 +41,6 @@ class MyHomePage extends StatelessWidget {
   Widget build(BuildContext context) {
     var appState = context.watch<MyAppState>();
     var pair = appState.current;
-    
-    var request = sendRequest("/document/a/allo/bonjour/");
 
     return Scaffold(
       body: Center(
@@ -54,6 +54,20 @@ class MyHomePage extends StatelessWidget {
               },
               child: Text('Next'),
             ),
+            Container(
+              width : MediaQuery.of(context).size.width * 0.3,
+              height: MediaQuery.of(context).size.height * 0.1,
+              decoration: BoxDecoration(border: Border.all(color : Colors.black)),
+              child:
+                TextField(
+                decoration: InputDecoration(border: InputBorder.none),
+                onSubmitted: (value){
+                  newRequest(value);
+                },
+              ),
+            )
+
+
           ],
         ),
       ),
@@ -97,12 +111,33 @@ class BigCard extends StatelessWidget {
  * @param path -> le chemin envoyé dans la fonction, représente quelle requête est passée au serveur
  * @return La réponse du serveur.
  */
-Future<void> sendRequest(String path) async {
+Future<void> sendRequest(String function ,String path) async {
   var url = Uri.http('127.0.0.1:3000', path);
-  var response = await http.get(url);
+  var response;
+  switch (function.toUpperCase()) {
+    case "GET" : response = await http.get(url); break;
+    case "ADD" : response = await http.post(url); break;
+    case "POST" : response = await http.post(url); break;
+    case "UPDATE" : response = await http.put(url); break;
+    case "PUT" : response = await http.put(url); break;
+    case "DELETE" : response = await http.delete(url); break;
+  }
   if (response.statusCode == 200) {
     print('Response body: ${response.body}');
   } else {
     print('Request failed with status: ${response.statusCode}.');
   }
+}
+
+void newRequest(String path){
+  var word = "";
+  for( int i = 0; i < path.length; i++){
+    if (path[i] != "/"){
+      word += path[i];
+    }
+    else{
+      path = path.substring(i-1);
+      break;}
+  }
+  sendRequest(word, path);
 }

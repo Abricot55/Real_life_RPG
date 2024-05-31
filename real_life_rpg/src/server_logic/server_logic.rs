@@ -1,6 +1,7 @@
 use crate::database_logic::database_logic::{*};
 use std::fmt;
-
+use hyper::{Body, Request, Response, Server};
+use hyper::{Method, StatusCode};
 /*
 *@brief Custom error
 */
@@ -18,13 +19,13 @@ impl fmt::Display for MyError {
 /**
  * @brief This function collect information concerning the request and call the good function accordingly.
 */
-pub async fn run(method_name : &str, args : &Vec<String>) -> String{
+pub async fn run(method_name : &str, args : &Vec<String>) -> Response<Body>{
     match method_name.to_lowercase().as_str(){
         "add" => return add_function(&args).await,
         "delete" => return delete_function(&args).await,
         "get" => return get_function(&args).await,
         "update" => return update_function(&args).await,
-        _other => return "Echec".to_string()
+        _other => return status(StatusCode::NOT_IMPLEMENTED)
     }
 }
 
@@ -69,37 +70,37 @@ fn get_document(args: &Vec<String>, index_value: i32) -> Result<DocumentType, My
  * @param args -> A vector of string that contains the request to the server.
  * @return A String which indicate the state of the request.
  */
-async fn add_function(args: &Vec<String>) -> String{
+async fn add_function(args: &Vec<String>) -> Response<Body>{
     if args.len() >= 3{
         match args[1].to_lowercase().as_str(){
             "database" => {
                 create_new_db(args[2].clone()).await;
-                return "Database Créée".to_string()}, //database name
+                return Response::new(Body::from("Database Créée".to_string()))}, //database name
             "collection" => {if args.len() >= 4{
                 create_new_collection(args[2].clone(), args[3].clone()).await;
-                return "Colledction Créée".to_string()}//collection name, database name
+                return Response::new(Body::from("Collection Créée".to_string()))}//collection name, database name
             else {
-                return "commande invalide".to_string();
+                return status(StatusCode::NOT_ACCEPTABLE);
             }},
             "document" =>  { if args.len() >= 5{ //collection name, database name, document type, value...
                 match get_document(&args, 4){
                     Ok(doc) => {
                         add_document_to_collection(doc, args[2].clone(), args[3].clone()).await;
-                        return "Document Créé".to_string()},
-                    Err(e) => return e.to_string()}
+                        return Response::new(Body::from("Document Créée".to_string()))},
+                    Err(e) => return status(StatusCode::NOT_ACCEPTABLE)}
             }else {
-                return "commande invalide".to_string();
+                return status(StatusCode::NOT_ACCEPTABLE);
             }},
             "relation" => { if args.len() >= 4{
                 create_new_relation(args[2].clone(),args[3].clone()).await;
-                return "Relation Créée".to_string() // relation name, database name
+                return Response::new(Body::from("Relation Créée".to_string())) // relation name, database name
             }else {
-                return "commande invalide".to_string();
+                return status(StatusCode::NOT_ACCEPTABLE);
             }},
-            _other => return "add other".to_string()
+            _other => return status(StatusCode::ACCEPTED)
         }
     }
-    return "commande invalide".to_string();
+    return status(StatusCode::NOT_ACCEPTABLE);
 }
 
 /**
@@ -107,37 +108,37 @@ async fn add_function(args: &Vec<String>) -> String{
  * @param args -> A vector of string that contains the request to the server
  * @return A String which indicate the state of the request.
  */
-async fn get_function(args: &Vec<String>) -> String{
+async fn get_function(args: &Vec<String>) -> Response<Body>{
     if args.len() >= 2{
         match args[1].to_lowercase().as_str(){
             //"database" => print!("get database"),
             "collection" => if args.len() >= 4{
                 match get_collection(args[2].clone(), args[3].clone()).await{ //collection name, database name
                     Ok(_collection) => {
-                        return "collection trouvée".to_string()
+                        return Response::new(Body::from(_collection.name().to_string()))
                         //if you do something with collection, remove '_', return it
                     },
-                    Err(_) => return "collection non trouvée".to_string()
+                    Err(_) => return status(StatusCode::NOT_FOUND)
                 }
             }else {
-                return "commande invalide".to_string();
+                return status(StatusCode::NOT_ACCEPTABLE);
             },
             "document" => if args.len() >= 5{ //document key, collection name, database name
                 match get_document_in_collection(args[2].clone(), args[3].clone(), args[4].clone()).await{ //document key, collection name, database name
                     Ok(_document) => {
-                        return _document.to_string()
+                        return Response::new(Body::from(_document.to_string()))
                         //if you do something with document, remove '_', return it
                     },
-                    Err(_) => return "document non trouvé".to_string()
+                    Err(_) => return status(StatusCode::NOT_FOUND)
                 }
             } else {
-                return "commande invalide".to_string();
+                return status(StatusCode::NOT_ACCEPTABLE);
             }, 
             //"relation" => print!("get relation"),
-            _other => return "get other".to_string()
+            _other => return status(StatusCode::ACCEPTED)
         }
     }
-    return "commande invalide".to_string();
+    return status(StatusCode::NOT_ACCEPTABLE);
 }
 
 /**
@@ -145,7 +146,7 @@ async fn get_function(args: &Vec<String>) -> String{
  * @param args -> A vector of string that contains the request to the server
  * @return A String which indicate the state of the request.
  */
-async fn update_function(args: &Vec<String>) -> String{
+async fn update_function(args: &Vec<String>) -> Response<Body>{
     if args.len() >= 2{
         match args[1].to_lowercase().as_str(){
             //"database" => print!("update database"),
@@ -154,17 +155,17 @@ async fn update_function(args: &Vec<String>) -> String{
                 match get_document(&args, 5){
                     Ok(doc) => {
                         update_document_in_collection(args[2].clone(), doc, args[3].clone(), args[4].clone()).await;
-                        return "Le document à été mis à jour!".to_string()},
-                    Err(e) => return e.to_string()
+                        return Response::new(Body::from("Le document à été mis à jour!".to_string()))},
+                    Err(e) => return status(StatusCode::NOT_ACCEPTABLE)
                 }
             } else{
-                return "commande invalie".to_string();
+                return status(StatusCode::NOT_ACCEPTABLE);
             },
             //"relation" => print!("update relation"),
-            _other => return "update other".to_string()
+            _other => return status(StatusCode::ACCEPTED)
         }
     }
-    return "commande invalide".to_string();
+    return status(StatusCode::NOT_ACCEPTABLE);
 
 }
 
@@ -173,19 +174,25 @@ async fn update_function(args: &Vec<String>) -> String{
  * @param args -> A vector of string that contains the request to the server
  * @return A String which indicate the state of the request.
  */
-async fn delete_function(args: &Vec<String>) -> String{
+async fn delete_function(args: &Vec<String>) -> Response<Body>{
     if args.len() >= 2{
         match args[1].to_lowercase().as_str(){
             "document" => {if args.len() >= 5{ //document key, collection name, database name
                 delete_document_in_collection(args[2].clone(), args[3].clone(), args[4].clone()).await;
-                return "Document Supprimé".to_string()
+                return Response::new(Body::from("Le document à été supprimé".to_string()))
             } else {
-                return "commande invalide".to_string();
+                return status(StatusCode::NOT_ACCEPTABLE);
             }},
-            _other => return "delete other".to_string()
+            _other => return status(StatusCode::ACCEPTED)
         }
     }
-    return "commande invalide".to_string();
+    return status(StatusCode::NOT_ACCEPTABLE);
+}
+
+fn status(code : StatusCode) -> Response<Body>{
+    let mut the_status: Response<Body> = Response::default();
+    *the_status.status_mut() = code;
+    return the_status;
 }
 
 /**

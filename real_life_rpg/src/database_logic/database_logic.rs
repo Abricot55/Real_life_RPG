@@ -8,6 +8,13 @@ pub enum DocumentType{
     User(UserType),
     Skill(SkillType)
 }
+
+#[derive(Serialize, Deserialize)]
+pub enum RelationType{
+    uu(RelationUserUserType),
+    us(RelationUserSkillType)
+}
+
 #[derive(Serialize, Deserialize)]
 pub struct UserType{
     pub _key : String,
@@ -21,6 +28,26 @@ pub struct UserType{
 pub struct SkillType{
     pub _key : String,
     pub name : String
+}
+
+#[derive(Serialize, Deserialize)]
+pub struct RelationUserUserType{
+    pub _key : String,
+    pub from : String,
+    pub to : String,
+    pub force : Option<i32>,
+    pub time : Option<i32>,
+    pub relation_type : String,
+}
+
+#[derive(Serialize, Deserialize)]
+pub struct RelationUserSkillType{
+    pub _key : String,
+    pub from : String,
+    pub to : String,
+    pub level : i32,
+    pub challenge_completed : i32,
+    pub title : String,
 }
 
 /**
@@ -141,10 +168,19 @@ pub async fn add_document_to_collection(document : DocumentType, collection_name
  * @return The document with the specified id.
  */
 
-pub async fn get_document_in_collection(key : String, collection_name : String, database_name : String) -> Result<arangors::Document<Value>, ClientError>{
+pub async fn get_document_in_collection(key : String, collection_name : String, database_name : String) -> Result<Value, String>{
     match get_collection(collection_name, database_name).await{
-        Ok(collec) => return collec.document::<Value>(key.as_str()).await,
-        Err(e) => return Err(e)
+        Ok(collec) => 
+        { match  collec.document::<Value>(key.as_str()).await {
+            Ok(doc) => {
+                match serde_json::to_value(doc.to_string().as_str()){
+                    Ok(json_doc) => return Ok(json_doc),
+                    Err(_) => return Err("Conversion en Json impossible".to_string())
+            }},
+            Err(e) => return Err("Immposssible de trouver le document".to_string())
+            
+        }},
+        Err(e) => return Err("Impossible de trouver la collection".to_string())
     }
 }
 
