@@ -4,6 +4,7 @@ import 'package:english_words/english_words.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:http/http.dart' as http;
+import 'signUpPage.dart';
 
 void main() {
   runApp(MyApp());
@@ -36,24 +37,26 @@ class MyAppState extends ChangeNotifier {
   }
 }
 
+/**
+ * @brief This class represent the home page of the application. It have a sign up button.
+ */
 class MyHomePage extends StatelessWidget {
+
+  /**
+   * @brief This function build all the user will see on the screen when the home page is loaded. This function is automatically called.
+   * @param context -> The context in which the home page is created.
+   * @return The widget which is all the stuff on screen.
+   */
   @override
   Widget build(BuildContext context) {
-    var appState = context.watch<MyAppState>();
-    var pair = appState.current;
-
     return Scaffold(
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            BigCard(pair: pair),
-            ElevatedButton(
-              onPressed: () {
-                appState.getNext();
-              },
-              child: Text('Next'),
-            ),
+            ElevatedButton(onPressed: (){navigateToNextScreen(context, 0);}, child: Text("Sign Up")),
+
+            /*This container is the TexField for the server request ***(FOR TEST PURPOSE)****/
             Container(
               width : MediaQuery.of(context).size.width * 0.3,
               height: MediaQuery.of(context).size.height * 0.1,
@@ -66,40 +69,7 @@ class MyHomePage extends StatelessWidget {
                 },
               ),
             )
-
-
           ],
-        ),
-      ),
-    );
-  }
-}
-
-class BigCard extends StatelessWidget {
-  const BigCard({
-    super.key,
-    required this.pair,
-  });
-
-  final WordPair pair;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final style = theme.textTheme.displayMedium!.copyWith(
-      color: theme.colorScheme.onPrimary,
-      //letterSpacing: 10.0,
-    );
-
-    return Card(
-      color: theme.colorScheme.primary,
-      //elevation: 10.0,
-      child: Padding(
-        padding: const EdgeInsets.all(20.0),
-        child: Text(
-          pair.asLowerCase,
-          style: style,
-          semanticsLabel: "${pair.first} ${pair.second}",
         ),
       ),
     );
@@ -112,6 +82,7 @@ class BigCard extends StatelessWidget {
  * @return La réponse du serveur.
  */
 Future<void> sendRequest(String function ,String path) async {
+  print(path);
   var url = Uri.http('127.0.0.1:3000', path);
   var response;
   switch (function.toUpperCase()) {
@@ -129,6 +100,10 @@ Future<void> sendRequest(String function ,String path) async {
   }
 }
 
+/**
+ * @brief This function take a basic String and transform it into a correct request for the server. Then it send the request to the sendRequest function.
+ * @param path -> The basic String.
+ */
 void newRequest(String path){
   var word = "";
   for( int i = 0; i < path.length; i++){
@@ -136,8 +111,20 @@ void newRequest(String path){
       word += path[i];
     }
     else{
-      path = path.substring(i-1);
+      path = path.substring(i+1);
       break;}
   }
   sendRequest(word, path);
+}
+
+/**
+ * @brief This function change the dispalyed screen according to the number passed as an argument.
+ * @param context -> The context in which this function is called.
+ * @param screenNumber -> The number representing the scene you want to display.
+ */
+void navigateToNextScreen(BuildContext context, int screenNumber) {
+  switch (screenNumber){
+    case 0 : Navigator.of(context).push(MaterialPageRoute(builder: (context) => SignUpPage()));break;
+    case 1 : Navigator.of(context).push(MaterialPageRoute(builder: (context) => MyHomePage()));break;
+  }
 }
