@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:ui';
 
 import 'package:english_words/english_words.dart';
@@ -124,12 +125,13 @@ bool connexionTest(BuildContext context, String pseudo) {
  * @param path -> le chemin envoyé dans la fonction, représente quelle requête est passée au serveur
  * @return La réponse du serveur.
  */
-Future<dynamic> sendRequest(String function, String path) async {
-  print(path);
-  var url = Uri.http('127.0.0.1:3000', path);
+Future<dynamic> sendRequest(String function, String path, ) async {
+  var url = Uri.http('127.0.0.1:3000','users', {"key": "aa"});
+  print(url);
   var response;
   switch (function.toUpperCase()) {
     case "GET":
+      print("s");
       response = await http.get(url);
       break;
     case "ADD":
@@ -147,6 +149,11 @@ Future<dynamic> sendRequest(String function, String path) async {
     case "DELETE":
       response = await http.delete(url);
       break;
+  }
+  if (response.statusCode == 200) {
+    // Si le serveur retourne une réponse OK, alors parsez le JSON.
+    var body = response.body;
+    print(body);
   }
   return response;
 }
