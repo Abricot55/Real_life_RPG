@@ -4,6 +4,7 @@ import 'dart:ui';
 
 import 'package:english_words/english_words.dart';
 import 'package:flutter/material.dart';
+import 'package:main_application/profilePage.dart';
 import 'package:provider/provider.dart';
 import 'package:http/http.dart' as http;
 import 'signUpPage.dart';
@@ -59,13 +60,20 @@ class MyHomePage extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Container(
-              width: MediaQuery.of(context).size.width * 0.1,
-              height: MediaQuery.of(context).size.height * 0.03,
+              width: MediaQuery.of(context).size.width * 0.8,
+              height: 50.0,
               decoration:
-                  BoxDecoration(border: Border.all(color: Colors.black)),
+                  BoxDecoration(border: Border.all(color: Colors.black),
+                  borderRadius: BorderRadius.circular(10.0)),
               child: TextField(
+                //textAlignVertical: TextAlignVertical.center,
+                autocorrect: false,
                 controller: pseudoController,
-                decoration: InputDecoration(border: InputBorder.none),
+                decoration: new InputDecoration(
+                  border: InputBorder.none,
+                  contentPadding: EdgeInsets.all(10.0),
+                  hintText: 'ex : username@gmail.com',
+                ),
                 onSubmitted: (value) {
                   connexionTest(context, value);
                 },
@@ -110,13 +118,18 @@ class MyHomePage extends StatelessWidget {
  */
 bool connexionTest(BuildContext context, String pseudo) {
   if (pseudo.isNotEmpty) {
-    newRequest("get/document/${pseudo}/Users/MainDB/").then((value) {
-      if (value.statusCode == 200) {
-        navigateToNextScreen(context, 2, data: value);
-        return true;
-      }
-      return false;
-    });
+    if (pseudo == "test") {
+      navigateToNextScreen(context, 2, data: null);
+      return true;
+    } else {
+      newRequest("get/document/${pseudo}/Users/MainDB/").then((value) {
+        if (value.statusCode == 200) {
+          navigateToNextScreen(context, 2, data: value);
+          return true;
+        }
+        return false;
+      });
+    }
   }
   return false;
 }
@@ -199,6 +212,8 @@ void navigateToNextScreen(BuildContext context, int screenNumber,
       break;
     case 2:
       print("hourra");
+      Navigator.of(context)
+          .push(MaterialPageRoute(builder: (context) => ProfilePage()));
       break;
   }
 }

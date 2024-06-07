@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'main.dart';
 
 /**
@@ -19,35 +20,61 @@ class SignUpPage extends StatelessWidget {
     var emailController = TextEditingController();
     var birthController = TextEditingController();
     return Scaffold(
+
       body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            createRow(context, "Name", nameController),
-            createRow(context, "Pseudo", pseudoController),
-            createRow(context, "Email adress", emailController),
-            createRow(context, "Birth Date", birthController),
-            ElevatedButton(
-                onPressed: () {
-                  if (nameController.text.isNotEmpty &&
-                      pseudoController.text.isNotEmpty &&
-                      emailController.text.isNotEmpty &&
-                      birthController.text.isNotEmpty) {
-                    var user = jsonEncode(<String, String>{
-                      'name': nameController.text,
-                      'pseudo': pseudoController.text,
-                      'email': emailController.text,
-                      'birthday': birthController.text,
-                      'level': "0"
-                    });
-                    sendRequest("ADD", path: "users", jsonBody: user);
-                    navigateToNextScreen(context, 1);
-                  }
-                },
-                child: Text("Sign Up"))
-          ],
-        ),
-      ),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+        Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Text("Name: "),
+              SizedBox(height: 35),
+              Text("Pseudo: "),
+              SizedBox(height: 35),
+              Text("Email adress: "),
+              SizedBox(height: 35),
+              Text("Birth date: ")
+            ],
+          ),
+          Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              createTextField("", nameController, context, TextInputType.text),
+              SizedBox(height: 5),
+              createTextField("", pseudoController, context, TextInputType.text),
+              SizedBox(height: 5),
+              createTextField("ex : username@gmail.com", emailController, context, TextInputType.emailAddress),
+              SizedBox(height: 5),
+              createTextField("DD/MM/YYYY", birthController, context, TextInputType.datetime)
+            ],
+          )
+        ]),
+        ElevatedButton(
+            onPressed: () {
+              if (nameController.text.isNotEmpty &&
+                  pseudoController.text.isNotEmpty &&
+                  emailController.text.isNotEmpty &&
+                  birthController.text.isNotEmpty) {
+                var user = jsonEncode(<String, String>{
+                  'name': nameController.text,
+                  'pseudo': pseudoController.text,
+                  'email': emailController.text,
+                  'birthday': birthController.text,
+                  'level': "0"
+                });
+                sendRequest("ADD", path: "users", jsonBody: user);
+                navigateToNextScreen(context, 1);
+              }
+            },
+            child: Text("Sign Up")),
+        ElevatedButton(
+            onPressed: () {
+              navigateToNextScreen(context, 1);
+            },
+            child: Text("Cancel"))
+      ])),
     );
   }
 
@@ -58,23 +85,23 @@ class SignUpPage extends StatelessWidget {
    * @param controller -> A controller so the textfield can be accessed later.
    * @return the resulting row widget.
    */
-  Row createRow(context, String text, TextEditingController controller) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Text(text + " :   "),
-        Container(
-          width: MediaQuery.of(context).size.width * 0.1,
-          height: MediaQuery.of(context).size.height * 0.03,
-          decoration: BoxDecoration(
-              borderRadius: BorderRadius.all(Radius.elliptical(1, 2)),
-              border: Border.all(color: Colors.black)),
-          child: TextField(
-            controller: controller,
-            decoration: InputDecoration(border: InputBorder.none),
-          ),
-        )
-      ],
+  Container createTextField(String text, TextEditingController controller, BuildContext context, TextInputType _keyboardType) {
+    return Container(
+      width: MediaQuery.of(context).size.width * 0.65,
+      height: 50.0,
+      decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(10.0),
+          border: Border.all(color: Colors.black)),
+      child: TextField(
+        keyboardType: _keyboardType,
+        autocorrect: false,
+        controller: controller,
+        decoration: new InputDecoration(
+          border: InputBorder.none,
+          contentPadding: EdgeInsets.all(10.0),
+          hintText: text,
+        ),
+      ),
     );
   }
 }
