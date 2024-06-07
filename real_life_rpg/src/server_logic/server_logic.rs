@@ -1,7 +1,8 @@
 use crate::database_logic::database_logic::*;
+use crate::util::is_valid_email;
 use hyper::body::to_bytes;
-use hyper::{Body, Request, Response, Server};
-use hyper::{Method, StatusCode};
+use hyper::{Body, Response};
+use hyper::{StatusCode};
 use serde_json::Value;
 use std::collections::HashMap;
 use std::fmt;
@@ -37,7 +38,7 @@ pub async fn get_body_map(body: Body) -> Option<HashMap<String, Value>> {
     }
 }
 
-fn get_document(args: &Vec<String>, index_value: i32) -> Result<DocumentType, MyError> {
+/*fn get_document(args: &Vec<String>, index_value: i32) -> Result<DocumentType, MyError> {
     //args[index_value] = document type, args[index_value]+ = value
     match args[index_value as usize].to_lowercase().as_str() {
         "skill" => {
@@ -89,57 +90,68 @@ fn get_document(args: &Vec<String>, index_value: i32) -> Result<DocumentType, My
     return Err(MyError {
         details: "document invalide".to_string(),
     });
-}
+}*/
 
+fn convert_hash_to_user(params: HashMap<String, String>) -> Result<UserType, String> {
+    let name: String = match params.get("name") {
+        Some(value) => value.clone(),
+        None => return Err("Aucun nom fourni!".to_string()),
+    };
+    let pseudo: String = match params.get("pseudo") {
+        Some(value) => value.clone(),
+        None => name.clone(),
+    };
+    let email: String = match params.get("email") {
+        Some(value) => {
+            if is_valid_email(value.clone().as_str()) {
+                value.clone()
+            } else {
+                return Err("Email invalide fourni".to_string());
+            }
+        }
+        None => return Err("Aucun email fourni!".to_string()),
+    };
+    let birth: String = match params.get("birthday") {
+        Some(value) => value.clone(),
+        None => return Err("Aucune date de naissance fournie!".to_string()),
+    };
+    let level = match params.get("level") {
+        Some(value) => value
+            .parse::<i32>()
+            .map_err(|_| "Le level doit être un nombre")?,
+        None => 0,
+    };
+    return Ok(UserType {
+        name,
+        pseudo,
+        email,
+        birth_date: birth,
+        level,
+    });
+}
 /**
  * @brief This function is called when a add request is made to the server.
  * @param args -> A vector of string that contains the request to the server.
  * @return A String which indicate the state of the request.
  */
-async fn add_function(args: &Vec<String>) -> Response<Body> {
-    if args.len() >= 3 {
-        match args[1].to_lowercase().as_str() {
-            "database" => {
-                create_new_db(args[2].clone()).await;
-                return Response::new(Body::from("Database Créée".to_string()));
-            } //database name
-            "collection" => {
-                if args.len() >= 4 {
-                    create_new_collection(args[2].clone(), args[3].clone()).await;
-                    return Response::new(Body::from("Collection Créée".to_string()));
-                }
-                //collection name, database name
-                else {
-                    return status(StatusCode::NOT_ACCEPTABLE);
-                }
+pub async fn add_user_function(
+    params: HashMap<String, String>,
+) -> Result<Response<Body>, warp::Rejection> {
+    match convert_hash_to_user(params) {
+        Ok(user) => {
+            match add_document_to_collection(
+                DocumentType::User(user),
+                "Users".to_string(),
+                "MainDB".to_string(),
+            )
+            .await
+            {
+                Ok(_) => Ok(Response::new(Body::from("Document Créée".to_string()))),
+                Err(_) => Ok(status(StatusCode::ACCEPTED)),
             }
-            "document" => {
-                if args.len() >= 5 {
-                    //collection name, database name, document type, value...
-                    match get_document(&args, 4) {
-                        Ok(doc) => {
-                            add_document_to_collection(doc, args[2].clone(), args[3].clone()).await;
-                            return Response::new(Body::from("Document Créée".to_string()));
-                        }
-                        Err(e) => return status(StatusCode::NOT_ACCEPTABLE),
-                    }
-                } else {
-                    return status(StatusCode::NOT_ACCEPTABLE);
-                }
-            }
-            "relation" => {
-                if args.len() >= 4 {
-                    create_new_relation(args[2].clone(), args[3].clone()).await;
-                    return Response::new(Body::from("Relation Créée".to_string()));
-                // relation name, database name
-                } else {
-                    return status(StatusCode::NOT_ACCEPTABLE);
-                }
-            }
-            _other => return status(StatusCode::ACCEPTED),
         }
+        Err(_) => Ok(status(StatusCode::NOT_ACCEPTABLE)),
     }
-    return status(StatusCode::NOT_ACCEPTABLE);
 }
 
 /**
@@ -161,6 +173,28 @@ pub async fn get_user_function(
     }
 }
 
+pub async fn search_user_function(
+    params: HashMap<String, String>,
+) -> Result<Response<Body>, warp::Rejection> {
+    match params.into_iter().next() {
+        Some((key, value)) => match search_one_field(
+            key,
+            Value::String(value),
+            "users_view".to_string(),
+            "MainDB".to_string(),
+        )
+        .await
+        {
+            Ok(document) => match serde_json::to_string(&document) {
+                Ok(json) => Ok(Response::new(Body::from(json))),
+                Err(_) => Ok(status(StatusCode::ACCEPTED)),
+            },
+            Err(_) => Ok(status(StatusCode::NOT_ACCEPTABLE)),
+        },
+        None => Ok(status(StatusCode::NOT_FOUND)),
+    }
+}
+/*
 /**
  * @brief Function called when the update request is sent to the server.
  * @param args -> A vector of string that contains the request to the server
@@ -199,7 +233,7 @@ async fn update_function(args: &Vec<String>) -> Response<Body> {
     }
     return status(StatusCode::NOT_ACCEPTABLE);
 }
-
+*/
 /**
  * @brief Function called when the delete request is sent to the server.
  * @param args -> A vector of string that contains the request to the server
@@ -228,6 +262,11 @@ async fn delete_function(args: &Vec<String>) -> Response<Body> {
     return status(StatusCode::NOT_ACCEPTABLE);
 }
 
+/**
+ * @brief This function convert a status code into a Repsponse<Body>.
+ * @param code -> The status code.
+ * @return The Response<Body>
+ */
 fn status(code: StatusCode) -> Response<Body> {
     let mut the_status: Response<Body> = Response::default();
     *the_status.status_mut() = code;

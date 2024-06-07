@@ -1,3 +1,4 @@
+import 'dart:collection';
 import 'dart:convert';
 import 'dart:ui';
 
@@ -122,20 +123,22 @@ bool connexionTest(BuildContext context, String pseudo) {
 
 /**
  * @brief Cette fonction envoie une requête http au serveur
- * @param path -> le chemin envoyé dans la fonction, représente quelle requête est passée au serveur
+ * @param path -> le chemin envoyé dans la fonction, représente quelle requête est pa?ssée au serveur
  * @return La réponse du serveur.
  */
-Future<dynamic> sendRequest(String function, String path, ) async {
-  var url = Uri.http('127.0.0.1:3000','users', {"key": "aa"});
-  print(url);
+Future<dynamic> sendRequest(String function,
+    {String path = "",
+    HashMap<String, String>? urlMap,
+    String jsonBody = ""}) async {
+  var url = Uri.http('127.0.0.1:3000', path, urlMap);
   var response;
   switch (function.toUpperCase()) {
     case "GET":
-      print("s");
       response = await http.get(url);
       break;
     case "ADD":
-      response = await http.post(url);
+      response = await http.post(url,
+          headers: {'Content-Type': 'application/json'}, body: jsonBody);
       break;
     case "POST":
       response = await http.post(url);
@@ -154,6 +157,8 @@ Future<dynamic> sendRequest(String function, String path, ) async {
     // Si le serveur retourne une réponse OK, alors parsez le JSON.
     var body = response.body;
     print(body);
+  } else {
+    print(response.statusCode);
   }
   return response;
 }
@@ -172,7 +177,7 @@ Future<dynamic> newRequest(String path) {
       break;
     }
   }
-  return sendRequest(word, path);
+  return sendRequest(word, path: path);
 }
 
 /**

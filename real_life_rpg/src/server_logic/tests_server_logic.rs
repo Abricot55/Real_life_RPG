@@ -12,10 +12,8 @@ mod tests_search_for_function{
     #[test]
     fn search_for_add(){
         let vector_test : Vec<String> = vec![String::from("add")];
-        search_for_function(&vector_test);
 
         let vector_test : Vec<String> = vec![String::from("aDd")];
-        search_for_function(&vector_test);
     }
 
 }

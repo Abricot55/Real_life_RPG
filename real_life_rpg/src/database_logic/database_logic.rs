@@ -1,60 +1,62 @@
-use arangors::{document::options::{RemoveOptions}, uclient::reqwest::ReqwestClient, ClientError, Connection, Database};
-use serde::{ Deserialize, Serialize};
-use serde_json::{Value};
-use arangors::{AqlQuery};
+use arangors::AqlQuery;
+use arangors::{
+    document::options::RemoveOptions, uclient::reqwest::ReqwestClient, ClientError, Connection,
+    Database,
+};
+use serde::{Deserialize, Serialize};
+use serde_json::Value;
 
 #[derive(Serialize, Deserialize)]
-pub enum DocumentType{
+pub enum DocumentType {
     User(UserType),
-    Skill(SkillType)
+    Skill(SkillType),
 }
 
 #[derive(Serialize, Deserialize)]
-pub enum RelationType{
-    uu(RelationUserUserType),
-    us(RelationUserSkillType)
+pub enum RelationType {
+    Uu(RelationUserUserType),
+    Us(RelationUserSkillType),
 }
 
 #[derive(Serialize, Deserialize)]
-pub struct UserType{
-    pub _key : String,
-    pub name : String,
-    pub pseudo : String,
-    pub email : String,
-    pub birth_date : String,
-    pub level : i32
+pub struct UserType {
+    pub name: String,
+    pub pseudo: String,
+    pub email: String,
+    pub birth_date: String,
+    pub level: i32,
 }
 #[derive(Serialize, Deserialize)]
-pub struct SkillType{
-    pub _key : String,
-    pub name : String
-}
-
-#[derive(Serialize, Deserialize)]
-pub struct RelationUserUserType{
-    pub _key : String,
-    pub from : String,
-    pub to : String,
-    pub force : Option<i32>,
-    pub time : Option<i32>,
-    pub relation_type : String,
+pub struct SkillType {
+    pub _key: String,
+    pub name: String,
 }
 
 #[derive(Serialize, Deserialize)]
-pub struct RelationUserSkillType{
-    pub _key : String,
-    pub from : String,
-    pub to : String,
-    pub level : i32,
-    pub challenge_completed : i32,
-    pub title : String,
+pub struct RelationUserUserType {
+    pub _key: String,
+    pub from: String,
+    pub to: String,
+    pub force: Option<i32>,
+    pub time: Option<i32>,
+    pub relation_type: String,
+}
+
+#[derive(Serialize, Deserialize)]
+pub struct RelationUserSkillType {
+    pub _key: String,
+    pub from: String,
+    pub to: String,
+    pub level: i32,
+    pub challenge_completed: i32,
+    pub title: String,
 }
 
 /**
  * @brief This function etablish connection with the port 8529.
  * @return A result with the connection if it worked and a error if it didn't.
  */
-pub async fn connect_to_connection() -> Result<Connection, ClientError>{
+pub async fn connect_to_connection() -> Result<Connection, ClientError> {
     let url = "http://localhost:8529";
     let username = "root";
     let password = "t53ee&&v9vt67";
@@ -66,14 +68,13 @@ pub async fn connect_to_connection() -> Result<Connection, ClientError>{
  * @param name -> The name of the database we are creating.
  * @return A result wich is either a error or another result containing the value of the database if the creation worked.
  */
-pub async fn create_new_db( name : String){
-    match connect_to_connection().await{
-        Ok(connection) => 
-            match connection.create_database(name.as_str()).await{
-                Ok(_) => print!("Database {} succesfully created", name),
-                Err(_) => print!("Impossible to create this database")
-            },
-        Err(_) => print!("Impossible to connect")
+pub async fn create_new_db(name: String) {
+    match connect_to_connection().await {
+        Ok(connection) => match connection.create_database(name.as_str()).await {
+            Ok(_) => print!("Database {} succesfully created", name),
+            Err(_) => print!("Impossible to create this database"),
+        },
+        Err(_) => print!("Impossible to connect"),
     }
 }
 
@@ -82,13 +83,12 @@ pub async fn create_new_db( name : String){
  * @param name -> The name of the database we want to access.
  * @return A result wich is either a error or another result containing the value if it worked.
  */
-pub async fn connect_to_db( name : String) -> Result<Database<ReqwestClient>, ClientError>{
-    match connect_to_connection().await{
+pub async fn connect_to_db(name: String) -> Result<Database<ReqwestClient>, ClientError> {
+    match connect_to_connection().await {
         Ok(connection) => return connection.db(name.as_str()).await,
-        Err(e) => return Err(e)
+        Err(e) => return Err(e),
     }
 }
-
 
 /**
  * @brief This function create a new collection in the current database.
@@ -96,14 +96,13 @@ pub async fn connect_to_db( name : String) -> Result<Database<ReqwestClient>, Cl
  * @return A result which is either an error or the new collection.
  */
 
-pub async fn create_new_collection( name : String, database_name : String){
-    match connect_to_db(database_name).await{
-        Ok(db) => 
-            match db.create_collection(name.as_str()).await{
-                Ok(_) => print!("Collection {} succesfully created in database", name),
-                Err(_) => print!("Impossible to create the collection")
-            }
-        Err(_) => print!("Impossible to connect to the database")
+pub async fn create_new_collection(name: String, database_name: String) {
+    match connect_to_db(database_name).await {
+        Ok(db) => match db.create_collection(name.as_str()).await {
+            Ok(_) => print!("Collection {} succesfully created in database", name),
+            Err(_) => print!("Impossible to create the collection"),
+        },
+        Err(_) => print!("Impossible to connect to the database"),
     }
 }
 
@@ -112,10 +111,13 @@ pub async fn create_new_collection( name : String, database_name : String){
  * @param name -> the name of the collection or relation we want to access.
  * @return A result which is either an error or the collection/relation.
  */
-pub async fn get_collection( name : String, database_name : String) -> Result<arangors::Collection<ReqwestClient>, ClientError>{
-    match connect_to_db(database_name).await{
+pub async fn get_collection(
+    name: String,
+    database_name: String,
+) -> Result<arangors::Collection<ReqwestClient>, ClientError> {
+    match connect_to_db(database_name).await {
         Ok(db) => return db.collection(name.as_str()).await,
-        Err(e) => return Err(e)
+        Err(e) => return Err(e),
     }
 }
 
@@ -125,14 +127,13 @@ pub async fn get_collection( name : String, database_name : String) -> Result<ar
  * @return A result which is either an error or the new relation
  */
 
-pub async fn create_new_relation(name : String, database_name : String){
-    match connect_to_db(database_name).await{
-        Ok(db) => 
-            match db.create_edge_collection(name.as_str()).await{
-                Ok(_) => print!("Collection {} succesfully created in database", name),
-                Err(_) => print!("Impossible to create the collection")
-            }
-        Err(_) => print!("Impossible to connect to the database")
+pub async fn create_new_relation(name: String, database_name: String) {
+    match connect_to_db(database_name).await {
+        Ok(db) => match db.create_edge_collection(name.as_str()).await {
+            Ok(_) => print!("Collection {} succesfully created in database", name),
+            Err(_) => print!("Impossible to create the collection"),
+        },
+        Err(_) => print!("Impossible to connect to the database"),
     }
 }
 
@@ -143,20 +144,24 @@ pub async fn create_new_relation(name : String, database_name : String){
  * @param database_name -> The name of the database the collection is a part of.
  */
 
-pub async fn add_document_to_collection(document : DocumentType, collection_name : String, database_name : String){
-    match convert_doc_json(document){
-        Ok(json_doc) =>    { 
+pub async fn add_document_to_collection(
+    document: DocumentType,
+    collection_name: String,
+    database_name: String,
+) -> Result<String, String> {
+    match convert_doc_json(document) {
+        Ok(json_doc) => {
             let aql = format!("INSERT {} INTO {}", json_doc.to_string(), collection_name);
             let query: AqlQuery = AqlQuery::builder().query(&aql).build();
-                match connect_to_db(database_name).await{
-                Ok(db) => match db.aql_query::<Value>(query).await{
-                    Ok(_) => print!("Document successfully added to the collection"),
-                    Err(_) => print!("The document couldn't be added to the collection")
+            match connect_to_db(database_name).await {
+                Ok(db) => match db.aql_query::<Value>(query).await {
+                    Ok(_) => Ok("Document successfully added to the collection".to_string()),
+                    Err(_) => Ok("The document couldn't be added to the collection".to_string()),
                 },
-                Err(_) => print!("Couldn't connect to the database")
-                }
+                Err(_) => Ok("Couldn't connect to the database".to_string()),
             }
-        Err(_) => print!("The document is invalid")
+        }
+        Err(_) => Ok("The document is invalid".to_string()),
     }
 }
 
@@ -168,19 +173,20 @@ pub async fn add_document_to_collection(document : DocumentType, collection_name
  * @return The document with the specified id.
  */
 
-pub async fn get_document_in_collection(key : String, collection_name : String, database_name : String) -> Result<Value, String>{
-    match get_collection(collection_name, database_name).await{
-        Ok(collec) => 
-        { match  collec.document::<Value>(key.as_str()).await {
-            Ok(doc) => {
-                match serde_json::to_value(doc.to_string().as_str()){
-                    Ok(json_doc) => return Ok(json_doc),
-                    Err(_) => return Err("Conversion en Json impossible".to_string())
-            }},
-            Err(e) => return Err("Immposssible de trouver le document".to_string())
-            
-        }},
-        Err(e) => return Err("Impossible de trouver la collection".to_string())
+pub async fn get_document_in_collection(
+    key: String,
+    collection_name: String,
+    database_name: String,
+) -> Result<Value, String> {
+    match get_collection(collection_name, database_name).await {
+        Ok(collec) => match collec.document::<Value>(key.as_str()).await {
+            Ok(doc) => match serde_json::to_value(doc.to_string().as_str()) {
+                Ok(json_doc) => return Ok(json_doc),
+                Err(_) => return Err("Conversion en Json impossible".to_string()),
+            },
+            Err(e) => return Err("Immposssible de trouver le document".to_string()),
+        },
+        Err(e) => return Err("Impossible de trouver la collection".to_string()),
     }
 }
 
@@ -191,15 +197,21 @@ pub async fn get_document_in_collection(key : String, collection_name : String, 
  * @param database_name -> The name of the database in which the collection exist.
  */
 
-pub async fn delete_document_in_collection(key : String, collection_name : String, database_name : String){
-    let remove : RemoveOptions = RemoveOptions::default();
-    match get_collection(collection_name, database_name).await{
-        Ok(collec) => 
-            match collec.remove_document::<String>(key.as_str(), remove, None).await{
-                Ok(_) => print!("Document succesfully deleted"),
-                Err(_) => print!("Unable to delete the document")
-            },
-        Err(_) => print!("unable to connect to the collection")
+pub async fn delete_document_in_collection(
+    key: String,
+    collection_name: String,
+    database_name: String,
+) {
+    let remove: RemoveOptions = RemoveOptions::default();
+    match get_collection(collection_name, database_name).await {
+        Ok(collec) => match collec
+            .remove_document::<String>(key.as_str(), remove, None)
+            .await
+        {
+            Ok(_) => print!("Document succesfully deleted"),
+            Err(_) => print!("Unable to delete the document"),
+        },
+        Err(_) => print!("unable to connect to the collection"),
     }
 }
 
@@ -210,10 +222,15 @@ pub async fn delete_document_in_collection(key : String, collection_name : Strin
  * @param new_document -> The updated version of the document.
  * @param collection_name -> the name of the collection in which the document exist.
  * @param database_name -> the name of the database in which the collection exist.
- * 
+ *
  */
 
-pub async fn update_document_in_collection(key : String, new_document : DocumentType, collection_name : String, database_name : String){
+pub async fn update_document_in_collection(
+    key: String,
+    new_document: DocumentType,
+    collection_name: String,
+    database_name: String,
+) {
     delete_document_in_collection(key, collection_name.clone(), database_name.clone()).await;
     add_document_to_collection(new_document, collection_name, database_name).await;
 }
@@ -223,17 +240,43 @@ pub async fn update_document_in_collection(key : String, new_document : Document
  * @param document -> The document that will be converted.
  * return A result that contain either the String or an error.
  */
-fn convert_doc_json(document : DocumentType) -> Result<String, String>{
-    match serde_json::to_value(&document){
-        Ok(document_value) => 
-            match  document_value.as_object().unwrap().iter().next() {
-                Some((_key, value)) => return Ok(serde_json::to_string(&value).unwrap()),
-                None => return Err("The document is empty".to_string())
-            }
-        Err(_) => return Err("The document is invalid".to_string())
+fn convert_doc_json(document: DocumentType) -> Result<String, String> {
+    match serde_json::to_value(&document) {
+        Ok(document_value) => match document_value.as_object().unwrap().iter().next() {
+            Some((_key, value)) => return Ok(serde_json::to_string(&value).unwrap()),
+            None => return Err("The document is empty".to_string()),
+        },
+        Err(_) => return Err("The document is invalid".to_string()),
     }
 }
 
+pub async fn search_one_field(
+    search_field: String,
+    field_value: Value,
+    view: String,
+    database_name: String,
+) -> Result<Vec<DocumentType>, String> {
+    let query = AqlQuery::builder()
+        .query(
+            r#"
+    FOR doc IN @view
+    SEARCH doc.@field == @value
+    RETURN doc
+"#,
+        )
+        .bind_var("field", search_field)
+        .bind_var("value", field_value)
+        .bind_var("view", view)
+        .build();
+
+    match connect_to_db(database_name).await {
+        Ok(db) => match db.aql_query::<DocumentType>(query).await {
+            Ok(documents) => Ok(documents),
+            Err(_) => Err("The quiery didn't Work".to_string()),
+        },
+        Err(_) => Err("Couldn't connect to db".to_string()),
+    }
+}
 /**
  * @brief module use to link tests to this librairy
  */

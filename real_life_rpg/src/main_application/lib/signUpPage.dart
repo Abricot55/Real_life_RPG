@@ -1,12 +1,12 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'main.dart';
-
 
 /**
  * @brief This class create represent the object which is the widget on screen when on signup page.
  */
 class SignUpPage extends StatelessWidget {
-
   /**
    * @brief This function build all the widgets the user will see on the screen when the home page is loaded. This function is automatically called.
    * @param context -> The context in which the home page is created.
@@ -33,8 +33,14 @@ class SignUpPage extends StatelessWidget {
                       pseudoController.text.isNotEmpty &&
                       emailController.text.isNotEmpty &&
                       birthController.text.isNotEmpty) {
-                    newRequest(
-                        "add/document/Users/MainDB/user/${nameController.text}${pseudoController.text}/${nameController.text}/${pseudoController.text}/${emailController.text}/${birthController.text}/0/");
+                    var user = jsonEncode(<String, String>{
+                      'name': nameController.text,
+                      'pseudo': pseudoController.text,
+                      'email': emailController.text,
+                      'birthday': birthController.text,
+                      'level': "0"
+                    });
+                    sendRequest("ADD", path: "users", jsonBody: user);
                     navigateToNextScreen(context, 1);
                   }
                 },
@@ -58,7 +64,7 @@ class SignUpPage extends StatelessWidget {
       children: [
         Text(text + " :   "),
         Container(
-          width: MediaQuery.of(context).size.width * 0.05,
+          width: MediaQuery.of(context).size.width * 0.1,
           height: MediaQuery.of(context).size.height * 0.03,
           decoration: BoxDecoration(
               borderRadius: BorderRadius.all(Radius.elliptical(1, 2)),
