@@ -130,7 +130,8 @@ Future<dynamic> sendRequest(String function,
     {String path = "",
     HashMap<String, String>? urlMap,
     String jsonBody = ""}) async {
-  var url = Uri.http('127.0.0.1:3000', path, urlMap);
+  var url = Uri.http('127.0.0.1:3000', path, {"name" : "a"});
+  print(url);
   var response;
   switch (function.toUpperCase()) {
     case "GET":

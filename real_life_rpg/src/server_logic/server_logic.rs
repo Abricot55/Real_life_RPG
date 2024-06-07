@@ -185,11 +185,12 @@ pub async fn search_user_function(
         )
         .await
         {
-            Ok(document) => match serde_json::to_string(&document) {
-                Ok(json) => Ok(Response::new(Body::from(json))),
+            Ok(document) => {
+                match serde_json::to_string(&document) {
+                Ok(json) => Ok(status(StatusCode::ACCEPTED)),
                 Err(_) => Ok(status(StatusCode::ACCEPTED)),
-            },
-            Err(_) => Ok(status(StatusCode::NOT_ACCEPTABLE)),
+            }},
+            Err(_) => Ok(status(StatusCode::BAD_REQUEST)),
         },
         None => Ok(status(StatusCode::NOT_FOUND)),
     }

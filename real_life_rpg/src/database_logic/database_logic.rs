@@ -256,25 +256,26 @@ pub async fn search_one_field(
     view: String,
     database_name: String,
 ) -> Result<Vec<DocumentType>, String> {
-    let query = AqlQuery::builder()
-        .query(
-            r#"
-    FOR doc IN @view
-    SEARCH doc.@field == @value
+    let query_str = format!(
+        r#"
+    FOR doc IN {}
+    SEARCH doc.{} == @value
     RETURN doc
 "#,
-        )
-        .bind_var("field", search_field)
+        view, search_field
+    );
+
+    let query = AqlQuery::builder()
+        .query(&query_str)
         .bind_var("value", field_value)
-        .bind_var("view", view)
         .build();
 
     match connect_to_db(database_name).await {
         Ok(db) => match db.aql_query::<DocumentType>(query).await {
             Ok(documents) => Ok(documents),
-            Err(_) => Err("The quiery didn't Work".to_string()),
+            Err(e) => Err(format!("The query didn't work: {:?}", e)),
         },
-        Err(_) => Err("Couldn't connect to db".to_string()),
+        Err(e) => Err(format!("Couldn't connect to db: {:?}", e)),
     }
 }
 /**
