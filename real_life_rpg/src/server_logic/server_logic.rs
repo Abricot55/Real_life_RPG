@@ -1,11 +1,12 @@
 use crate::database_logic::database_logic::*;
 use crate::util::is_valid_email;
 use hyper::body::to_bytes;
+use hyper::StatusCode;
 use hyper::{Body, Response};
-use hyper::{StatusCode};
 use serde_json::Value;
 use std::collections::HashMap;
 use std::fmt;
+use warp::reply::Reply;
 /*
 *@brief Custom error
 */
@@ -147,10 +148,10 @@ pub async fn add_user_function(
             .await
             {
                 Ok(_) => Ok(Response::new(Body::from("Document Créée".to_string()))),
-                Err(_) => Ok(status(StatusCode::ACCEPTED)),
+                Err(e) => Ok(warp::reply::with_status(e, StatusCode::NOT_FOUND).into_response()),
             }
         }
-        Err(_) => Ok(status(StatusCode::NOT_ACCEPTABLE)),
+        Err(e) => Ok(warp::reply::with_status(e, StatusCode::NOT_ACCEPTABLE).into_response()),
     }
 }
 
@@ -166,33 +167,31 @@ pub async fn get_user_function(
         Some(key) => {
             match get_document_in_collection(key, "Users".to_string(), "MainDB".to_string()).await {
                 Ok(document) => Ok(Response::new(Body::from(document.to_string()))),
-                Err(_) => Ok(status(StatusCode::NOT_FOUND)),
+                Err(e) => Ok(warp::reply::with_status(e, StatusCode::NOT_FOUND).into_response()),
             }
         }
-        None => Ok(status(StatusCode::NOT_ACCEPTABLE)),
+        None => Ok(warp::reply::with_status("No key given", StatusCode::NOT_FOUND).into_response()),
     }
 }
 
+/**
+ * @brief This function search a user based on the key of the hashmap passed as parameter. It return a Response which contains the list of users who correspond to the search fields.
+ * @param params -> the hashmap ofthe search fields.
+ * @return A Response<Body> containing the differents users.
+ */
 pub async fn search_user_function(
-    params: HashMap<String, String>,
+    params: HashMap<String, Value>,
 ) -> Result<Response<Body>, warp::Rejection> {
-    match params.into_iter().next() {
-        Some((key, value)) => match search_one_field(
-            key,
-            Value::String(value),
-            "users_view".to_string(),
-            "MainDB".to_string(),
-        )
-        .await
-        {
-            Ok(document) => {
-                match serde_json::to_string(&document) {
-                Ok(json) => Ok(status(StatusCode::ACCEPTED)),
-                Err(_) => Ok(status(StatusCode::ACCEPTED)),
-            }},
-            Err(_) => Ok(status(StatusCode::BAD_REQUEST)),
+    match relevant_search_field(params, "users_view".to_string(), "MainDB".to_string()).await {
+        Ok(document) => match serde_json::to_string(&document) {
+            Ok(json) => Ok(Response::new(Body::from(json))),
+            Err(_) => Ok(warp::reply::with_status(
+                "Serialization error",
+                StatusCode::NOT_ACCEPTABLE,
+            )
+            .into_response()),
         },
-        None => Ok(status(StatusCode::NOT_FOUND)),
+        Err(e) => Ok(warp::reply::with_status(e, StatusCode::NOT_ACCEPTABLE).into_response()),
     }
 }
 /*

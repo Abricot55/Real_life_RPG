@@ -1,8 +1,10 @@
-use arangors::AqlQuery;
+use std::collections::HashMap;
+
 use arangors::{
     document::options::RemoveOptions, uclient::reqwest::ReqwestClient, ClientError, Connection,
     Database,
 };
+use arangors::{AqlQuery, Document};
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 
@@ -250,34 +252,96 @@ fn convert_doc_json(document: DocumentType) -> Result<String, String> {
     }
 }
 
-pub async fn search_one_field(
-    search_field: String,
-    field_value: Value,
+/**
+ * @brief This function search in the database a document which correspond to the search criteria passed as parameter.
+ * @param fields -> A hashMap<String, Value> that contains the different fields that the search will be based on.
+ * @param view -> The view that contains the documents in the database.
+ * @param database_name -> The name of the database to which the aql request will be done.
+ * @return A Result that contain either the vector of found document or a String if something went wrong.
+ */
+pub async fn search_field(
+    fields: HashMap<String, Value>,
     view: String,
     database_name: String,
-) -> Result<Vec<DocumentType>, String> {
-    let query_str = format!(
-        r#"
-    FOR doc IN {}
-    SEARCH doc.{} == @value
-    RETURN doc
-"#,
-        view, search_field
-    );
+) -> Result<Vec<Document<Value>>, String> {
+    if !fields.is_empty() {
+        let mut base_query = format!(
+            r#"
+        FOR doc IN {}
+        SEARCH "#,
+            view
+        );
 
-    let query = AqlQuery::builder()
-        .query(&query_str)
-        .bind_var("value", field_value)
-        .build();
+        let mut first = true;
+        for (key, value) in fields {
+            if !first {
+                base_query.push_str(" AND ");
+            }
+            first = false;
+            match value {
+                Value::String(s) => base_query.push_str(&format!("doc.{} == '{}' ", key, s)),
+                _ => base_query.push_str(&format!("doc.{} == {} ", key, value)),
+            };
+        }
 
-    match connect_to_db(database_name).await {
-        Ok(db) => match db.aql_query::<DocumentType>(query).await {
-            Ok(documents) => Ok(documents),
-            Err(e) => Err(format!("The query didn't work: {:?}", e)),
-        },
-        Err(e) => Err(format!("Couldn't connect to db: {:?}", e)),
+        base_query.push_str(" RETURN doc");
+
+        let query = AqlQuery::builder().query(&base_query).build();
+
+        match connect_to_db(database_name).await {
+            Ok(db) => match db.aql_query::<Document<Value>>(query).await {
+                Ok(documents) => Ok(documents),
+                Err(e) => Err(format!("The query didn't work: {:?}", e)),
+            },
+            Err(e) => Err(format!("Couldn't connect to db: {:?}", e)),
+        }
+    } else {
+        Err("There is no search field!".to_string())
     }
 }
+
+
+pub async fn relevant_search_field(
+    fields: HashMap<String, Value>,
+    view: String,
+    database_name: String,
+) -> Result<Vec<Document<Value>>, String> {
+    if !fields.is_empty() {
+        let mut base_query = format!(
+            r#"
+        FOR doc IN {}
+        SEARCH "#,
+            view
+        );
+
+        let mut first = true;
+        for (key, value) in fields {
+            if !first {
+                base_query.push_str(" AND ");
+            }
+            first = false;
+            match value {
+                Value::String(s) => base_query.push_str(&format!("doc.{} == '{}' ", key, s)),
+                _ => base_query.push_str(&format!("ANALYZER(BOOST(doc.{} == {}, 2.5) ", key, value)),
+            };
+        }
+
+        base_query.push_str(" LET score = BM25(doc) SORT score DESC RETURN doc");
+
+        let query = AqlQuery::builder().query(&base_query).build();
+
+        match connect_to_db(database_name).await {
+            Ok(db) => match db.aql_query::<Document<Value>>(query).await {
+                Ok(documents) => Ok(documents),
+                Err(e) => Err(format!("The query didn't work: {:?}", e)),
+            },
+            Err(e) => Err(format!("Couldn't connect to db: {:?}", e)),
+        }
+    } else {
+        Err("There is no search field!".to_string())
+    }
+}
+
 /**
  * @brief module use to link tests to this librairy
  */
