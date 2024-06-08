@@ -92,7 +92,7 @@ class MyHomePage extends StatelessWidget {
               BoxDecoration(border: Border.all(color: Colors.black),
                   borderRadius: BorderRadius.circular(10.0)),
               child: TextField(
-                //textAlignVertical: TextAlignVertical.center,
+                obscureText: true,
                 autocorrect: false,
                 controller: motDePasseController,
                 decoration: new InputDecoration(
@@ -101,14 +101,13 @@ class MyHomePage extends StatelessWidget {
                   hintText: 'password',
                 ),
                 onSubmitted: (password) {
-                  connexionTest(context, pseudoController.text, password);
-                  motDePasseController.clear();
+                  setupConnect(context);
                 },
               ),
             ),
             ElevatedButton(
                 onPressed: () {
-                  connexionTest(context, pseudoController.text, motDePasseController.text);
+                  setupConnect(context);
                 },
                 child: Text("Connexion")),
             ElevatedButton(
@@ -136,6 +135,12 @@ class MyHomePage extends StatelessWidget {
     );
   }
 
+  void setupConnect(BuildContext context){
+    writeStorage("_userID", pseudoController.text);
+    connexionTest(context, pseudoController.text, motDePasseController.text);
+    motDePasseController.clear();
+  }
+
   Future<void> writeStorage(_key, _value) async {
     storage.write(key: _key, value: _value);
   }
@@ -153,7 +158,7 @@ class MyHomePage extends StatelessWidget {
  */
 bool connexionTest(BuildContext context, String pseudo, String password) {
   if (pseudo.isNotEmpty) {
-    if (pseudo == "test") {
+    if (pseudo == "test" && password == "test") {
       navigateToNextScreen(context, 2, data: null);
       return true;
     } else {
