@@ -8,6 +8,8 @@ import 'package:main_application/profilePage.dart';
 import 'package:provider/provider.dart';
 import 'package:http/http.dart' as http;
 import 'signUpPage.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+
 
 void main() {
   runApp(MyApp());
@@ -15,7 +17,6 @@ void main() {
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
-
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
@@ -35,13 +36,11 @@ class MyApp extends StatelessWidget {
 
 class MyAppState extends ChangeNotifier {
   var current = WordPair.random();
-
   void getNext() {
     current = WordPair.random();
     notifyListeners();
   }
 }
-
 /**
  * @brief This class represent the home page of the application. It have a sign up button.
  */
@@ -51,9 +50,15 @@ class MyHomePage extends StatelessWidget {
    * @param context -> The context in which the home page is created.
    * @return The widget which is all the stuff on screen.
    */
+  final storage = const FlutterSecureStorage();
+  var savedUsername = "";
+  var pseudoController = TextEditingController();
+  var motDePasseController = TextEditingController();
+
   @override
   Widget build(BuildContext context) {
-    var pseudoController = TextEditingController();
+    //savedUsername = "ouhlala";
+    readStorageValues();
     return Scaffold(
       body: Center(
         child: Column(
@@ -65,23 +70,44 @@ class MyHomePage extends StatelessWidget {
               decoration:
                   BoxDecoration(border: Border.all(color: Colors.black),
                   borderRadius: BorderRadius.circular(10.0)),
-              child: TextField(
-                //textAlignVertical: TextAlignVertical.center,
+              child: TextFormField(
+                onChanged: (text){
+                  savedUsername = text;
+                  writeStorage("_username", savedUsername);
+                },
                 autocorrect: false,
                 controller: pseudoController,
                 decoration: new InputDecoration(
                   border: InputBorder.none,
                   contentPadding: EdgeInsets.all(10.0),
-                  hintText: 'ex : username@gmail.com',
+                  hintText: 'username@gmail.com',
                 ),
-                onSubmitted: (value) {
-                  connexionTest(context, value);
+              ),
+            ),
+            SizedBox(height: 5.0),
+            Container(
+              width: MediaQuery.of(context).size.width * 0.8,
+              height: 50.0,
+              decoration:
+              BoxDecoration(border: Border.all(color: Colors.black),
+                  borderRadius: BorderRadius.circular(10.0)),
+              child: TextField(
+                obscureText: true,
+                autocorrect: false,
+                controller: motDePasseController,
+                decoration: new InputDecoration(
+                  border: InputBorder.none,
+                  contentPadding: EdgeInsets.all(10.0),
+                  hintText: 'password',
+                ),
+                onSubmitted: (password) {
+                  setupConnect(context);
                 },
               ),
             ),
             ElevatedButton(
                 onPressed: () {
-                  connexionTest(context, pseudoController.text);
+                  setupConnect(context);
                 },
                 child: Text("Connexion")),
             ElevatedButton(
@@ -108,17 +134,31 @@ class MyHomePage extends StatelessWidget {
       ),
     );
   }
-}
 
+  void setupConnect(BuildContext context){
+    writeStorage("_userID", pseudoController.text);
+    connexionTest(context, pseudoController.text, motDePasseController.text);
+    motDePasseController.clear();
+  }
+
+  Future<void> writeStorage(_key, _value) async {
+    storage.write(key: _key, value: _value);
+  }
+
+  Future<void> readStorageValues() async {
+    savedUsername = (await storage.read(key: "_username"))!;
+    pseudoController.text = savedUsername;
+  }
+}
 /**
  * @brief This function check if a user exist in the database by using it pseudo. If it finds the users, it goes to its profile page.
  * @param context -> The context in which this function is called.
  * @param pseudo -> The pseudo of the user.
  * @return A boolean which represent the existence of the user.
  */
-bool connexionTest(BuildContext context, String pseudo) {
+bool connexionTest(BuildContext context, String pseudo, String password) {
   if (pseudo.isNotEmpty) {
-    if (pseudo == "test") {
+    if (pseudo == "test" && password == "test") {
       navigateToNextScreen(context, 2, data: null);
       return true;
     } else {
