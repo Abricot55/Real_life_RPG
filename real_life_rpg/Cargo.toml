@@ -15,3 +15,4 @@ database = "0.5.0"
 hyper = { version = "0.14.28", features = ["full"] }
 warp = "0.3"
 regex = "1"
+bcrypt = "0.10"
