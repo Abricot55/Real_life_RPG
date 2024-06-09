@@ -71,10 +71,6 @@ class MyHomePage extends StatelessWidget {
                   BoxDecoration(border: Border.all(color: Colors.black),
                   borderRadius: BorderRadius.circular(10.0)),
               child: TextFormField(
-                onChanged: (text){
-                  savedUsername = text;
-                  writeStorage("_username", savedUsername);
-                },
                 autocorrect: false,
                 controller: pseudoController,
                 decoration: new InputDecoration(
@@ -137,7 +133,10 @@ class MyHomePage extends StatelessWidget {
 
   void setupConnect(BuildContext context){
     writeStorage("_userID", pseudoController.text);
-    connexionTest(context, pseudoController.text, motDePasseController.text);
+    if (connexionTest(context, pseudoController.text, motDePasseController.text)){
+      savedUsername = pseudoController.text;
+      writeStorage("_username", savedUsername);
+    }
     motDePasseController.clear();
   }
 
