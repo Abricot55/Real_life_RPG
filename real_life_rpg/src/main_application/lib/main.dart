@@ -158,7 +158,7 @@ class MyHomePage extends StatelessWidget {
  */
 bool connexionTest(BuildContext context, String pseudo, String password) {
   if (pseudo.isNotEmpty) {
-    if (pseudo == "test" && password == "test") {
+    if (pseudo == "testUser" && password == "test") {
       navigateToNextScreen(context, 2, data: null);
       return true;
     } else {
