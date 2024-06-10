@@ -1,9 +1,12 @@
 import 'dart:convert';
+import 'dart:ffi';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:percent_indicator/circular_percent_indicator.dart';
+import 'package:percent_indicator/linear_percent_indicator.dart';
 import 'main.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+//import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class ProfilePage extends StatefulWidget {
   @override
@@ -11,9 +14,17 @@ class ProfilePage extends StatefulWidget {
 }
 
 class _ProfilePageState extends State<ProfilePage> {
-  final storage = const FlutterSecureStorage();
+  //final storage = const FlutterSecureStorage();
+
+  //varaibles
   var savedUserID = "";
-  var labelUserIDController = Text("", style: TextStyle(fontSize: 20.0));
+  var nbFriends = 0;
+  var activeSkills = Map<String, double>();
+
+  //containers
+  var labelUserIDController = Text("", style: TextStyle(fontSize: 25.0));
+  var labelNbFriends = Text("Friends: ", style: TextStyle(fontSize: 20.0));
+  var columnSkills = Column();
 
   /**
    * @brief This function build all the widgets the user will see on the screen when the profile page is loaded. This function is automatically called.
@@ -27,8 +38,8 @@ class _ProfilePageState extends State<ProfilePage> {
         body: Center(
       child: Column(children: [
         Container(
-          padding: EdgeInsets.only(left: 5.0, right: 5.0),
-            color: Colors.grey,
+            padding: EdgeInsets.only(left: 5.0, right: 5.0),
+            color: Theme.of(context).primaryColor,
             child: Column(
               children: [
                 SizedBox(height: 30),
@@ -38,22 +49,80 @@ class _ProfilePageState extends State<ProfilePage> {
                       labelUserIDController,
                       ElevatedButton(
                           onPressed: () {
-                            navigateToNextScreen(context, 1);
+                            navigateToNextScreen(context, 3);
                           },
-                          child: Text("Disconnect", style: TextStyle(fontSize: 15.0),)),
+                          child: Text(
+                            "Settings",
+                            style: TextStyle(fontSize: 15.0),
+                          )),
                     ])
               ],
             )),
-        Text("COUCOU"),
+        Container(
+          child: Column(
+            children: [
+              Row(children: [labelNbFriends]),
+              Divider(),
+              Row(children: [
+                Text(
+                  "My skills",
+                  style: TextStyle(fontSize: 20.0),
+                )
+              ]),
+              columnSkills
+            ],
+          ),
+          padding: EdgeInsets.all(5.0),
+        ),
       ]),
     ));
   }
 
   Future<void> readUserID() async {
-    savedUserID = (await storage.read(key: "_userID"))!;
+    //trouver le user id
+    savedUserID = "testUser";//(await storage.read(key: "_userID"))!;
+    //faire les requêtes
+    //userTest
+    if (savedUserID == "testUser") {
+      nbFriends = 999;
+      activeSkills = {
+        "Cooking": 34.3,
+        "Skateboard": 12.1,
+        "Chapeau melon": 99.90
+      };
+    }
     setState(() {
-      labelUserIDController =
-          Text(savedUserID, style: TextStyle(fontSize: 20.0));
+      labelUserIDController = Text(
+        savedUserID,
+        style: TextStyle(fontSize: 25.0, color: Colors.white),
+      );
+      labelNbFriends =
+          Text("Friends: ${nbFriends}", style: TextStyle(fontSize: 20.0));
+      List<Widget> skills = [];
+      for (MapEntry<String, double> item in activeSkills.entries) {
+        skills.add(Row(
+          children: [
+            Text(
+              "${item.key}: ${item.value.toInt()}",
+              style: TextStyle(fontSize: 18.0),
+            )
+          ],
+        ));
+        skills.add(
+            Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+          Text("${item.value.toInt()}"),
+          LinearPercentIndicator(
+            width: MediaQuery.of(context).size.width - 60,
+            progressColor: Theme.of(context).primaryColor,
+            percent: item.value - item.value.toInt(),
+            barRadius: Radius.circular(10),
+            lineHeight: 18,
+            center: Text("${((item.value - item.value.toInt())*100).toInt()}%", style: TextStyle(color: Colors.white),),
+          ),
+          Text("${item.value.toInt()+1}")
+        ]));
+      }
+      columnSkills = Column(children: skills);
     });
   }
 }

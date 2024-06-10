@@ -5,10 +5,11 @@ import 'dart:ui';
 import 'package:english_words/english_words.dart';
 import 'package:flutter/material.dart';
 import 'package:main_application/profilePage.dart';
+import 'package:main_application/settingsPage.dart';
 import 'package:provider/provider.dart';
 import 'package:http/http.dart' as http;
 import 'signUpPage.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+//import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 
 void main() {
@@ -50,7 +51,7 @@ class MyHomePage extends StatelessWidget {
    * @param context -> The context in which the home page is created.
    * @return The widget which is all the stuff on screen.
    */
-  final storage = const FlutterSecureStorage();
+  //final storage = const FlutterSecureStorage();
   var savedUsername = "";
   var pseudoController = TextEditingController();
   var motDePasseController = TextEditingController();
@@ -141,12 +142,12 @@ class MyHomePage extends StatelessWidget {
   }
 
   Future<void> writeStorage(_key, _value) async {
-    storage.write(key: _key, value: _value);
+    //storage.write(key: _key, value: _value);
   }
 
   Future<void> readStorageValues() async {
-    savedUsername = (await storage.read(key: "_username"))!;
-    pseudoController.text = savedUsername;
+    //savedUsername = (await storage.read(key: "_username"))!;
+    pseudoController.text = "testUser";//savedUsername;
   }
 }
 /**
@@ -253,6 +254,10 @@ void navigateToNextScreen(BuildContext context, int screenNumber,
       print("hourra");
       Navigator.of(context)
           .push(MaterialPageRoute(builder: (context) => ProfilePage()));
+      break;
+    case 3:
+      Navigator.of(context)
+          .push(MaterialPageRoute(builder: (context) => Settingspage()));
       break;
   }
 }
