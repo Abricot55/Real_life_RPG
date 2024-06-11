@@ -301,6 +301,13 @@ pub async fn search_field(
 }
 
 
+/**
+ * @brief This function search the fields and check for the substring. It then shows the 3 most relevant documents.
+ * @param fields -> The fields on which the search is based.
+ * @param view -> The view that contains the documents in the database.
+ * @param database_name -> The name of the database to which the aql request will be sent.
+ * @return A Result that contain either the vector of found document or a String if something went wrong.
+ */
 pub async fn relevant_search_field(
     fields: HashMap<String, Value>,
     view: String,
@@ -320,13 +327,17 @@ pub async fn relevant_search_field(
                 base_query.push_str(" AND ");
             }
             first = false;
+
+            
             match value {
-                Value::String(s) => base_query.push_str(&format!("doc.{} == '{}' ", key, s)),
-                _ => base_query.push_str(&format!("ANALYZER(BOOST(doc.{} == {}, 2.5) ", key, value)),
+                Value::String(s) => base_query.push_str(&format!("LIKE(doc.{}, '%{}%') ", key, s)),
+                _ => base_query.push_str(&format!("LIKE(doc.{}, {}) ", key, value)),
             };
         }
 
-        base_query.push_str(" LET score = BM25(doc) SORT score DESC RETURN doc");
+        base_query.push_str(
+            "  SORT BM25(doc) DESC LIMIT 3 RETURN doc",
+        );
 
         let query = AqlQuery::builder().query(&base_query).build();
 

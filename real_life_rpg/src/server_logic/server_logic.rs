@@ -182,16 +182,36 @@ pub async fn get_user_function(
 pub async fn search_user_function(
     params: HashMap<String, Value>,
 ) -> Result<Response<Body>, warp::Rejection> {
-    match relevant_search_field(params, "users_view".to_string(), "MainDB".to_string()).await {
+    match search_field(params, "users_view".to_string(), "MainDB".to_string()).await {
         Ok(document) => match serde_json::to_string(&document) {
-            Ok(json) => Ok(Response::new(Body::from(json))),
+            Ok(json) => {Ok(Response::new(Body::from(json)))},
             Err(_) => Ok(warp::reply::with_status(
                 "Serialization error",
                 StatusCode::NOT_ACCEPTABLE,
             )
             .into_response()),
         },
-        Err(e) => Ok(warp::reply::with_status(e, StatusCode::NOT_ACCEPTABLE).into_response()),
+        Err(e) => {;Ok(warp::reply::with_status(e, StatusCode::NOT_ACCEPTABLE).into_response())},
+    }
+}
+/**
+ * @brief This function search the relevants user based on the key of the hashmap passed as parameter. It return a Response which contains the list of users who correspond to the search fields.
+ * @param params -> the hashmap ofthe search fields.
+ * @return A Response<Body> containing the differents users.
+ */
+pub async fn relevant_search_user_function(
+    params: HashMap<String, Value>,
+) -> Result<Response<Body>, warp::Rejection> {
+    match relevant_search_field(params, "users_view".to_string(), "MainDB".to_string()).await {
+        Ok(document) => match serde_json::to_string(&document) {
+            Ok(json) => {Ok(Response::new(Body::from(json)))},
+            Err(_) => Ok(warp::reply::with_status(
+                "Serialization error",
+                StatusCode::NOT_ACCEPTABLE,
+            )
+            .into_response()),
+        },
+        Err(e) => {;Ok(warp::reply::with_status(e, StatusCode::NOT_ACCEPTABLE).into_response())},
     }
 }
 /*
