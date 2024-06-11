@@ -21,8 +21,15 @@ class _ProfilePageState extends State<ProfilePage> {
   var nbFriends = 0;
   var activeSkills = Map<String, double>();
   var profileDescription = "";
+  var _selectedIndex = 0;
 
   //containers
+  var containerGeneral = Center();
+
+  //containers homePage
+  var containerHomePage = Column();
+  var _searchMode = false;
+  //containers profilepage
   var labelUserIDController = Text("", style: TextStyle(fontSize: 25.0));
   var labelNbFriends = Text("Friends: ", style: TextStyle(fontSize: 20.0));
   var columnSkills = Column();
@@ -36,65 +43,144 @@ class _ProfilePageState extends State<ProfilePage> {
   @override
   Widget build(BuildContext context) {
     readUserID();
+    containerGeneral = getMainScreen(_selectedIndex);
     return Scaffold(
-        body: Center(
-          child: Column(children: [
-            Container(
-                padding: EdgeInsets.only(left: 5.0, right: 5.0),
-                color: Theme
-                    .of(context)
-                    .primaryColor,
-                child: Column(
-                  children: [
-                    SizedBox(height: 30),
-                    Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          labelUserIDController,
-                          ElevatedButton(
-                              onPressed: () {
-                                navigateToNextScreen(context, 3);
-                              },
-                              child: Text(
-                                "Settings",
-                                style: TextStyle(fontSize: 15.0),
-                              )),
-                        ])
-                  ],
-                )),
-            Container(
-              padding: EdgeInsets.all(5.0),
-              child: Column(
-                children: [
-                  containerDescription,
-                  Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        bottomNavigationBar: BottomNavigationBar(
+            onTap: (int index) {
+              setState(() {
+                _selectedIndex = index;
+              });
+            },
+            selectedFontSize: 20,
+            currentIndex: _selectedIndex,
+            selectedItemColor: Theme.of(context).primaryColor,
+            items: [
+              BottomNavigationBarItem(icon: Container(), label: "Home"),
+              BottomNavigationBarItem(icon: Container(), label: "My profile"),
+              BottomNavigationBarItem(icon: Container(), label: "Picture")
+            ]),
+        body: containerGeneral);
+  }
+
+  Center getMainScreen(int index) {
+    if (index == 0) {
+      return Center(child: getHomePage(_searchMode));
+    } else if (index == 1) {
+      return Center(
+        child: Column(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Column(children: [
+                Container(
+                    padding: EdgeInsets.only(left: 5.0, right: 5.0),
+                    color: Theme.of(context).primaryColor,
+                    child: Column(
                       children: [
-                      labelNbFriends,
-                      GestureDetector(
-                          onTap: () {},
-                          child: Text("See all...",
-                              style: TextStyle(color: Theme
-                                  .of(context)
-                                  .primaryColor)))]),
-                  Divider(),
-                  Row(children: [
-                    Text(
-                      "My skills",
-                      style: TextStyle(fontSize: 20.0)
-                    )
-                  ]),
-                  columnSkills
-                ],
-              ),
-            ),
-          ]),
-        ));
+                        SizedBox(height: 30),
+                        Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              labelUserIDController,
+                              ElevatedButton(
+                                  onPressed: () {
+                                    navigateToNextScreen(context, 3);
+                                  },
+                                  child: Text(
+                                    "Settings",
+                                    style: TextStyle(fontSize: 15.0),
+                                  )),
+                            ])
+                      ],
+                    )),
+                Container(
+                  padding: EdgeInsets.all(5.0),
+                  child: Column(
+                    children: [
+                      containerDescription,
+                      Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            labelNbFriends,
+                            GestureDetector(
+                                onTap: () {},
+                                child: Text("See all...",
+                                    style: TextStyle(
+                                        color: Theme.of(context).primaryColor,
+                                        decoration: TextDecoration.underline)))
+                          ]),
+                      Divider(),
+                      Row(children: [
+                        Text("My skills", style: TextStyle(fontSize: 20.0))
+                      ]),
+                      columnSkills
+                    ],
+                  ),
+                )
+              ]),
+            ]),
+      );
+    } else if (index == 2) {
+      return Center(
+          child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [Text("Tu veux ma photo banane?")],
+      ));
+    } else
+      return Center(
+        child: Text("Coucou"),
+      );
+  }
+
+  Column getHomePage(bool _sM) {
+    if (_sM == false) {
+      return Column(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+        Column(children: [
+          Container(
+              padding: EdgeInsets.only(left: 5.0, right: 5.0),
+              //color: Theme.of(context).primaryColor,
+              child: Column(children: [
+                SizedBox(height: 30),
+                Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        "RealLifeRPG",
+                        style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 30,
+                            color: Theme.of(context).primaryColor),
+                      ),
+                      ElevatedButton(
+                          onPressed: () {
+                            setState(() {
+                              _searchMode = true;
+                            });
+                          },
+                          child: Text("Search"))
+                    ]),
+                Divider()
+              ]))
+        ])
+      ]);
+    } else {
+      return Column(
+        children: [
+          ElevatedButton(
+              onPressed: () {
+                setState(() {
+                  _searchMode = false;
+                });
+              },
+              child: Text("back to home"))
+        ],
+      );
+    }
   }
 
   Future<void> readUserID() async {
     //trouver le user id
     savedUserID = "testUser"; //(await storage.read(key: "_userID"))!;
+    //_selectedIndex = 0; //(await storage.read(key: "_indexMainApp"))!;
     //faire les requêtes
     //userTest
     if (savedUserID == "testUser") {
@@ -105,7 +191,7 @@ class _ProfilePageState extends State<ProfilePage> {
         "Chapeau melon": 99.90
       };
       profileDescription =
-      "This is a test account made to preview what an actual account could display on a phone when the connection with the server is successful!";
+          "This is a test account made to preview what an actual account could display on a phone when the connection with the server is successful!";
     }
     setState(() {
       labelUserIDController = Text(
@@ -126,25 +212,20 @@ class _ProfilePageState extends State<ProfilePage> {
         ));
         skills.add(
             Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-              Text("${item.value.toInt()}"),
-              LinearPercentIndicator(
-                width: MediaQuery
-                    .of(context)
-                    .size
-                    .width - 60,
-                progressColor: Theme
-                    .of(context)
-                    .primaryColor,
-                percent: item.value - item.value.toInt(),
-                barRadius: Radius.circular(10),
-                lineHeight: 18,
-                center: Text(
-                  "${((item.value - item.value.toInt()) * 100).toInt()}%",
-                  style: TextStyle(color: Colors.white),
-                ),
-              ),
-              Text("${item.value.toInt() + 1}")
-            ]));
+          Text("${item.value.toInt()}"),
+          LinearPercentIndicator(
+            width: MediaQuery.of(context).size.width - 60,
+            progressColor: Theme.of(context).primaryColor,
+            percent: item.value - item.value.toInt(),
+            barRadius: Radius.circular(10),
+            lineHeight: 18,
+            center: Text(
+              "${((item.value - item.value.toInt()) * 100).toInt()}%",
+              style: TextStyle(color: Colors.white),
+            ),
+          ),
+          Text("${item.value.toInt() + 1}")
+        ]));
       }
       columnSkills = Column(children: skills);
       if (profileDescription != "") {
