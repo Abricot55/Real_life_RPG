@@ -20,11 +20,13 @@ class _ProfilePageState extends State<ProfilePage> {
   var savedUserID = "";
   var nbFriends = 0;
   var activeSkills = Map<String, double>();
+  var profileDescription = "";
 
   //containers
   var labelUserIDController = Text("", style: TextStyle(fontSize: 25.0));
   var labelNbFriends = Text("Friends: ", style: TextStyle(fontSize: 20.0));
   var columnSkills = Column();
+  var containerDescription = Container();
 
   /**
    * @brief This function build all the widgets the user will see on the screen when the profile page is loaded. This function is automatically called.
@@ -36,51 +38,63 @@ class _ProfilePageState extends State<ProfilePage> {
     readUserID();
     return Scaffold(
         body: Center(
-      child: Column(children: [
-        Container(
-            padding: EdgeInsets.only(left: 5.0, right: 5.0),
-            color: Theme.of(context).primaryColor,
-            child: Column(
-              children: [
-                SizedBox(height: 30),
-                Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      labelUserIDController,
-                      ElevatedButton(
-                          onPressed: () {
-                            navigateToNextScreen(context, 3);
-                          },
-                          child: Text(
-                            "Settings",
-                            style: TextStyle(fontSize: 15.0),
-                          )),
-                    ])
-              ],
-            )),
-        Container(
-          child: Column(
-            children: [
-              Row(children: [labelNbFriends]),
-              Divider(),
-              Row(children: [
-                Text(
-                  "My skills",
-                  style: TextStyle(fontSize: 20.0),
-                )
-              ]),
-              columnSkills
-            ],
-          ),
-          padding: EdgeInsets.all(5.0),
-        ),
-      ]),
-    ));
+          child: Column(children: [
+            Container(
+                padding: EdgeInsets.only(left: 5.0, right: 5.0),
+                color: Theme
+                    .of(context)
+                    .primaryColor,
+                child: Column(
+                  children: [
+                    SizedBox(height: 30),
+                    Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          labelUserIDController,
+                          ElevatedButton(
+                              onPressed: () {
+                                navigateToNextScreen(context, 3);
+                              },
+                              child: Text(
+                                "Settings",
+                                style: TextStyle(fontSize: 15.0),
+                              )),
+                        ])
+                  ],
+                )),
+            Container(
+              padding: EdgeInsets.all(5.0),
+              child: Column(
+                children: [
+                  containerDescription,
+                  Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                      labelNbFriends,
+                      GestureDetector(
+                          onTap: () {},
+                          child: Text("See all...",
+                              style: TextStyle(color: Theme
+                                  .of(context)
+                                  .primaryColor)))]),
+                  Divider(),
+                  Row(children: [
+                    Text(
+                      "My skills",
+                      style: TextStyle(fontSize: 20.0)
+                    )
+                  ]),
+                  columnSkills
+                ],
+              ),
+            ),
+          ]),
+        ));
   }
 
   Future<void> readUserID() async {
     //trouver le user id
-    savedUserID = "testUser";//(await storage.read(key: "_userID"))!;
+    savedUserID = "testUser"; //(await storage.read(key: "_userID"))!;
     //faire les requêtes
     //userTest
     if (savedUserID == "testUser") {
@@ -90,6 +104,8 @@ class _ProfilePageState extends State<ProfilePage> {
         "Skateboard": 12.1,
         "Chapeau melon": 99.90
       };
+      profileDescription =
+      "This is a test account made to preview what an actual account could display on a phone when the connection with the server is successful!";
     }
     setState(() {
       labelUserIDController = Text(
@@ -110,19 +126,41 @@ class _ProfilePageState extends State<ProfilePage> {
         ));
         skills.add(
             Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-          Text("${item.value.toInt()}"),
-          LinearPercentIndicator(
-            width: MediaQuery.of(context).size.width - 60,
-            progressColor: Theme.of(context).primaryColor,
-            percent: item.value - item.value.toInt(),
-            barRadius: Radius.circular(10),
-            lineHeight: 18,
-            center: Text("${((item.value - item.value.toInt())*100).toInt()}%", style: TextStyle(color: Colors.white),),
-          ),
-          Text("${item.value.toInt()+1}")
-        ]));
+              Text("${item.value.toInt()}"),
+              LinearPercentIndicator(
+                width: MediaQuery
+                    .of(context)
+                    .size
+                    .width - 60,
+                progressColor: Theme
+                    .of(context)
+                    .primaryColor,
+                percent: item.value - item.value.toInt(),
+                barRadius: Radius.circular(10),
+                lineHeight: 18,
+                center: Text(
+                  "${((item.value - item.value.toInt()) * 100).toInt()}%",
+                  style: TextStyle(color: Colors.white),
+                ),
+              ),
+              Text("${item.value.toInt() + 1}")
+            ]));
       }
       columnSkills = Column(children: skills);
+      if (profileDescription != "") {
+        containerDescription = Container(
+          child: Column(
+            children: [
+              Text(
+                profileDescription,
+                style: TextStyle(fontSize: 18),
+                softWrap: true,
+              ),
+              Divider()
+            ],
+          ),
+        );
+      }
     });
   }
 }
