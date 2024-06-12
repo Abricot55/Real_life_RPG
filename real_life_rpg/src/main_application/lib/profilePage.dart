@@ -57,6 +57,7 @@ class _ProfilePageState extends State<ProfilePage> {
             onTap: (int index) {
               setState(() {
                 _searchMode = false;
+                _selectedIndex = index;
                 containerGeneral = getMainScreen(index);
               });
             },
@@ -110,16 +111,7 @@ class _ProfilePageState extends State<ProfilePage> {
                       GestureDetector(
                           onTap: () {
                             setState(() {
-                              containerGeneral = Center(
-                                child: ElevatedButton(
-                                  onPressed: () {
-                                    setState(() {
-                                      containerGeneral = getMainScreen(1);
-                                    });
-                                  },
-                                  child: Text("Back to profile"),
-                                ),
-                              );
+                              containerGeneral = getFriendsPage();
                             });
                           },
                           child: Text("See all...",
@@ -143,10 +135,11 @@ class _ProfilePageState extends State<ProfilePage> {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [Text("Tu veux ma photo banane?")],
       ));
-    } else
+    } else {
       return Center(
         child: Text("QU'EST-CE QUE TU FAIS LÀ MAN??"),
       );
+    }
   }
 
   Column getHomePage(bool _sM) {
@@ -252,6 +245,64 @@ class _ProfilePageState extends State<ProfilePage> {
           liste.add(Divider());
         }
       }
+    }
+    return liste;
+  }
+
+  Center getFriendsPage() {
+    return Center(
+        child: Column(children: [
+      Container(
+          padding: EdgeInsets.only(left: 5.0, right: 5.0),
+          color: Theme.of(context).primaryColor,
+          child: Column(
+            children: [
+              SizedBox(height: 30),
+              Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+                ElevatedButton(
+                    onPressed: () {
+                      setState(() {
+                        containerGeneral = getMainScreen(1);
+                      });
+                    },
+                    child: Text(
+                      "Back",
+                      style: TextStyle(fontSize: 15.0),
+                    )),
+                Text(
+                  "My Friends",
+                  style: TextStyle(color: Colors.white, fontSize: 25),
+                ),
+                SizedBox(
+                  width: 80,
+                )
+              ]),
+            ],
+          )),
+      Container(
+        padding: EdgeInsets.all(5.0),
+        child: Column(
+          children: [
+            Row(
+              children: [
+                Text(
+                  "All friends (${nbFriends})",
+                  style: TextStyle(fontSize: 20),
+                )
+              ],
+            ),
+            Divider(),
+            Column(children: getListAffichageFriends())
+          ],
+        ),
+      )
+    ]));
+  }
+
+  List<Widget> getListAffichageFriends() {
+    List<Widget> liste = [];
+    for(var i = 0; i < nbFriends; i++){
+      liste.add(Row(children: [Text(myFriends[i])],));
     }
     return liste;
   }
