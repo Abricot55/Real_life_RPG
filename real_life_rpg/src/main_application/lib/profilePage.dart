@@ -20,12 +20,13 @@ class _ProfilePageState extends State<ProfilePage> {
   //varaibles
   var savedUserID = "";
   var nbFriends = 0;
+  List<String> myFriends = [];
   var activeSkills = Map<String, double>();
   var profileDescription = "";
   var _selectedIndex = 0;
 
   //containers
-  var containerGeneral = Center();
+  var containerGeneral = null;
 
   //containers homePage
   var containerHomePage = Column();
@@ -47,13 +48,16 @@ class _ProfilePageState extends State<ProfilePage> {
    */
   @override
   Widget build(BuildContext context) {
-    readUserID();
-    containerGeneral = getMainScreen(_selectedIndex);
+    if (containerGeneral == null) {
+      readUserID();
+      containerGeneral = getMainScreen(_selectedIndex);
+    }
     return Scaffold(
         bottomNavigationBar: BottomNavigationBar(
             onTap: (int index) {
               setState(() {
-                _selectedIndex = index;
+                _searchMode = false;
+                containerGeneral = getMainScreen(index);
               });
             },
             selectedFontSize: 20,
@@ -72,57 +76,66 @@ class _ProfilePageState extends State<ProfilePage> {
       return Center(child: getHomePage(_searchMode));
     } else if (index == 1) {
       return Center(
-        child: Column(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Column(children: [
-                Container(
-                    padding: EdgeInsets.only(left: 5.0, right: 5.0),
-                    color: Theme.of(context).primaryColor,
-                    child: Column(
+        child: Column(children: [
+          Container(
+              padding: EdgeInsets.only(left: 5.0, right: 5.0),
+              color: Theme.of(context).primaryColor,
+              child: Column(
+                children: [
+                  SizedBox(height: 30),
+                  Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        SizedBox(height: 30),
-                        Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              labelUserIDController,
-                              ElevatedButton(
-                                  onPressed: () {
-                                    navigateToNextScreen(context, 3);
-                                  },
-                                  child: Text(
-                                    "Settings",
-                                    style: TextStyle(fontSize: 15.0),
-                                  )),
-                            ])
-                      ],
-                    )),
-                Container(
-                  padding: EdgeInsets.all(5.0),
-                  child: Column(
+                        labelUserIDController,
+                        ElevatedButton(
+                            onPressed: () {
+                              navigateToNextScreen(context, 3);
+                            },
+                            child: Text(
+                              "Settings",
+                              style: TextStyle(fontSize: 15.0),
+                            )),
+                      ])
+                ],
+              )),
+          Container(
+            padding: EdgeInsets.all(5.0),
+            child: Column(
+              children: [
+                containerDescription,
+                Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      containerDescription,
-                      Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            labelNbFriends,
-                            GestureDetector(
-                                onTap: () {},
-                                child: Text("See all...",
-                                    style: TextStyle(
-                                        color: Theme.of(context).primaryColor,
-                                        decoration: TextDecoration.underline)))
-                          ]),
-                      Divider(),
-                      Row(children: [
-                        Text("My skills", style: TextStyle(fontSize: 20.0))
-                      ]),
-                      columnSkills
-                    ],
-                  ),
-                )
-              ]),
-            ]),
+                      labelNbFriends,
+                      GestureDetector(
+                          onTap: () {
+                            setState(() {
+                              containerGeneral = Center(
+                                child: ElevatedButton(
+                                  onPressed: () {
+                                    setState(() {
+                                      containerGeneral = getMainScreen(1);
+                                    });
+                                  },
+                                  child: Text("Back to profile"),
+                                ),
+                              );
+                            });
+                          },
+                          child: Text("See all...",
+                              style: TextStyle(
+                                  color: Theme.of(context).primaryColor,
+                                  decoration: TextDecoration.underline)))
+                    ]),
+                Divider(),
+                Row(children: [
+                  Text("My skills", style: TextStyle(fontSize: 20.0))
+                ]),
+                columnSkills
+              ],
+            ),
+          )
+        ]),
       );
     } else if (index == 2) {
       return Center(
@@ -162,6 +175,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                 setState(() {
                                   _searchMode = true;
                                   _itemsRecherche = getListeItems("");
+                                  containerGeneral = getHomePage(_searchMode);
                                 });
                               },
                               child: Text("Search"))
@@ -187,6 +201,7 @@ class _ProfilePageState extends State<ProfilePage> {
                               onPressed: () {
                                 setState(() {
                                   _searchMode = false;
+                                  containerGeneral = getHomePage(_searchMode);
                                 });
                               },
                               child: Text("back")),
@@ -196,6 +211,7 @@ class _ProfilePageState extends State<ProfilePage> {
                               onChanged: (text) {
                                 setState(() {
                                   _itemsRecherche = getListeItems(text);
+                                  containerGeneral = getHomePage(_searchMode);
                                 });
                               },
                               decoration: new InputDecoration(
@@ -210,9 +226,7 @@ class _ProfilePageState extends State<ProfilePage> {
                           ),
                           ElevatedButton(
                               onPressed: () {
-                                setState(() {
-                                  //TODO
-                                });
+                                //rien
                               },
                               child: Text("Search"))
                         ]),
@@ -234,8 +248,8 @@ class _ProfilePageState extends State<ProfilePage> {
     if (text != "") {
       for (var i = 0; i < 5; i++) {
         liste.add(Row(children: [Text(text + i.toString())]));
-        if (i != 4){
-        liste.add(Divider());
+        if (i != 4) {
+          liste.add(Divider());
         }
       }
     }
@@ -249,7 +263,14 @@ class _ProfilePageState extends State<ProfilePage> {
     //faire les requêtes
     //userTest
     if (savedUserID == "testUser") {
-      nbFriends = 999;
+      myFriends = [
+        "Adamou",
+        "Sbasien",
+        "Jean-Jean",
+        "Mike Hawks",
+        "Marie-Ève Bolduc"
+      ];
+      nbFriends = myFriends.length;
       activeSkills = {
         "Cooking": 34.3,
         "Skateboard": 12.1,
