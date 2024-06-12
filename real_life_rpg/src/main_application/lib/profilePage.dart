@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:ffi';
+import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -28,7 +29,11 @@ class _ProfilePageState extends State<ProfilePage> {
 
   //containers homePage
   var containerHomePage = Column();
+  var containerRecherche = Column();
   var _searchMode = false;
+  var searchController;
+  List<Widget> _itemsRecherche = [];
+
   //containers profilepage
   var labelUserIDController = Text("", style: TextStyle(fontSize: 25.0));
   var labelNbFriends = Text("Friends: ", style: TextStyle(fontSize: 20.0));
@@ -127,54 +132,114 @@ class _ProfilePageState extends State<ProfilePage> {
       ));
     } else
       return Center(
-        child: Text("Coucou"),
+        child: Text("QU'EST-CE QUE TU FAIS LÀ MAN??"),
       );
   }
 
   Column getHomePage(bool _sM) {
     if (_sM == false) {
-      return Column(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-        Column(children: [
-          Container(
-              padding: EdgeInsets.only(left: 5.0, right: 5.0),
-              //color: Theme.of(context).primaryColor,
-              child: Column(children: [
-                SizedBox(height: 30),
-                Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        "RealLifeRPG",
-                        style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 30,
-                            color: Theme.of(context).primaryColor),
-                      ),
-                      ElevatedButton(
-                          onPressed: () {
-                            setState(() {
-                              _searchMode = true;
-                            });
-                          },
-                          child: Text("Search"))
-                    ]),
-                Divider()
-              ]))
-        ])
-      ]);
+      return Column(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Column(children: [
+              Container(
+                  padding: EdgeInsets.only(left: 5.0, right: 5.0),
+                  //color: Theme.of(context).primaryColor,
+                  child: Column(children: [
+                    SizedBox(height: 30),
+                    Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            "RealLifeRPG",
+                            style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 30,
+                                color: Theme.of(context).primaryColor),
+                          ),
+                          ElevatedButton(
+                              onPressed: () {
+                                setState(() {
+                                  _searchMode = true;
+                                  _itemsRecherche = getListeItems("");
+                                });
+                              },
+                              child: Text("Search"))
+                        ]),
+                    Divider()
+                  ]))
+            ])
+          ]);
     } else {
       return Column(
-        children: [
-          ElevatedButton(
-              onPressed: () {
-                setState(() {
-                  _searchMode = false;
-                });
-              },
-              child: Text("back to home"))
-        ],
-      );
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Column(children: [
+              Container(
+                  padding: EdgeInsets.only(left: 5.0, right: 5.0),
+                  //color: Theme.of(context).primaryColor,
+                  child: Column(children: [
+                    SizedBox(height: 30),
+                    Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          ElevatedButton(
+                              onPressed: () {
+                                setState(() {
+                                  _searchMode = false;
+                                });
+                              },
+                              child: Text("back")),
+                          Container(
+                            width: MediaQuery.of(context).size.width - 200,
+                            child: TextField(
+                              onChanged: (text) {
+                                setState(() {
+                                  _itemsRecherche = getListeItems(text);
+                                });
+                              },
+                              decoration: new InputDecoration(
+                                  hintText: "Search a user or a skill",
+                                  contentPadding:
+                                      EdgeInsets.only(left: 10, right: 10),
+                                  border: OutlineInputBorder(
+                                      gapPadding: 0,
+                                      borderRadius: BorderRadius.all(
+                                          Radius.circular(25.0)))),
+                            ),
+                          ),
+                          ElevatedButton(
+                              onPressed: () {
+                                setState(() {
+                                  //TODO
+                                });
+                              },
+                              child: Text("Search"))
+                        ]),
+                    Divider()
+                  ])),
+              Container(
+                  padding: EdgeInsets.only(left: 10.0, right: 10.0),
+                  child: Column(
+                    children: _itemsRecherche,
+                  ))
+            ])
+          ]);
     }
+  }
+
+  List<Widget> getListeItems(String text) {
+    List<Widget> liste = [];
+    //recherche de Adam
+    if (text != "") {
+      for (var i = 0; i < 5; i++) {
+        liste.add(Row(children: [Text(text + i.toString())]));
+        if (i != 4){
+        liste.add(Divider());
+        }
+      }
+    }
+    return liste;
   }
 
   Future<void> readUserID() async {
