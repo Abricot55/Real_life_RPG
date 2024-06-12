@@ -11,13 +11,13 @@ import 'package:http/http.dart' as http;
 import 'signUpPage.dart';
 //import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
-
 void main() {
   runApp(MyApp());
 }
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
+
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
@@ -37,11 +37,13 @@ class MyApp extends StatelessWidget {
 
 class MyAppState extends ChangeNotifier {
   var current = WordPair.random();
+
   void getNext() {
     current = WordPair.random();
     notifyListeners();
   }
 }
+
 /**
  * @brief This class represent the home page of the application. It have a sign up button.
  */
@@ -68,8 +70,8 @@ class MyHomePage extends StatelessWidget {
             Container(
               width: MediaQuery.of(context).size.width * 0.8,
               height: 50.0,
-              decoration:
-                  BoxDecoration(border: Border.all(color: Colors.black),
+              decoration: BoxDecoration(
+                  border: Border.all(color: Colors.black),
                   borderRadius: BorderRadius.circular(10.0)),
               child: TextFormField(
                 autocorrect: false,
@@ -85,8 +87,8 @@ class MyHomePage extends StatelessWidget {
             Container(
               width: MediaQuery.of(context).size.width * 0.8,
               height: 50.0,
-              decoration:
-              BoxDecoration(border: Border.all(color: Colors.black),
+              decoration: BoxDecoration(
+                  border: Border.all(color: Colors.black),
                   borderRadius: BorderRadius.circular(10.0)),
               child: TextField(
                 obscureText: true,
@@ -132,9 +134,10 @@ class MyHomePage extends StatelessWidget {
     );
   }
 
-  void setupConnect(BuildContext context){
+  void setupConnect(BuildContext context) {
     writeStorage("_userID", pseudoController.text);
-    if (connexionTest(context, pseudoController.text, motDePasseController.text)){
+    if (connexionTest(
+        context, pseudoController.text, motDePasseController.text)) {
       savedUsername = pseudoController.text;
       writeStorage("_username", savedUsername);
     }
@@ -147,9 +150,10 @@ class MyHomePage extends StatelessWidget {
 
   Future<void> readStorageValues() async {
     //savedUsername = (await storage.read(key: "_username"))!;
-    pseudoController.text = "testUser";//savedUsername;
+    pseudoController.text = "testUser"; //savedUsername;
   }
 }
+
 /**
  * @brief This function check if a user exist in the database by using it pseudo. If it finds the users, it goes to its profile page.
  * @param context -> The context in which this function is called.
@@ -162,7 +166,8 @@ bool connexionTest(BuildContext context, String pseudo, String password) {
       navigateToNextScreen(context, 2, data: null);
       return true;
     } else {
-      newRequest("get/document/${pseudo}/Users/MainDB/").then((value) {
+      sendRequest("get", path: "/users/search", urlMap: {"pseudo": pseudo})
+          .then((value) {
         if (value.statusCode == 200) {
           navigateToNextScreen(context, 2, data: value);
           return true;
@@ -181,9 +186,9 @@ bool connexionTest(BuildContext context, String pseudo, String password) {
  */
 Future<dynamic> sendRequest(String function,
     {String path = "",
-    HashMap<String, String>? urlMap,
+    Map<String, String>? urlMap,
     String jsonBody = ""}) async {
-  var url = Uri.http('127.0.0.1:3000', path, {"pseudo" : "s"});
+  var url = Uri.http('127.0.0.1:3000', path, urlMap);
   print(url);
   var response;
   switch (function.toUpperCase()) {
@@ -251,7 +256,6 @@ void navigateToNextScreen(BuildContext context, int screenNumber,
           .push(MaterialPageRoute(builder: (context) => MyHomePage()));
       break;
     case 2:
-      print("hourra");
       Navigator.of(context)
           .push(MaterialPageRoute(builder: (context) => ProfilePage()));
       break;

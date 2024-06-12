@@ -7,7 +7,63 @@ import 'main.dart';
 /**
  * @brief This class create represent the object which is the widget on screen when on signup page.
  */
-class SignUpPage extends StatelessWidget {
+class SignUpPage extends StatefulWidget {
+  @override
+  SignUpPageState createState() => SignUpPageState();
+}
+
+class SignUpPageState extends State<SignUpPage> {
+  var nameController = TextEditingController();
+  var pseudoController = TextEditingController();
+  var emailController = TextEditingController();
+  var birthController = TextEditingController();
+  var password1Controller = TextEditingController();
+  var password2Controller = TextEditingController();
+  List<Widget> rowList = [];
+
+  @override
+  void initState() {
+    super.initState();
+    rowList = [
+      Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+        SizedBox(height: 5),
+      ]),
+      Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+        SizedBox(height: 5),
+      ]),
+      Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+        SizedBox(height: 5),
+      ]),
+      Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+        SizedBox(height: 5),
+      ]),
+      Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+        SizedBox(height: 5),
+      ]),
+      Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+        SizedBox(height: 5),
+      ]),
+      Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+        SizedBox(height: 5),
+      ]),
+      Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+        SizedBox(height: 5),
+      ]),
+      Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+        SizedBox(height: 5),
+      ]),
+      Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+        SizedBox(height: 5),
+      ]),
+      Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+        SizedBox(height: 5),
+      ]),
+      Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+        SizedBox(height: 5),
+      ]),
+    ];
+  }
+
   /**
    * @brief This function build all the widgets the user will see on the screen when the home page is loaded. This function is automatically called.
    * @param context -> The context in which the home page is created.
@@ -15,67 +71,19 @@ class SignUpPage extends StatelessWidget {
    */
   @override
   Widget build(BuildContext context) {
-    var nameController = TextEditingController();
-    var pseudoController = TextEditingController();
-    var emailController = TextEditingController();
-    var birthController = TextEditingController();
-    var password1Controller = TextEditingController();
-    var password2Controller = TextEditingController();
-
-    var columnKey = GlobalKey();
-
+    insertRows();
     return Scaffold(
       body: Center(
           child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-        Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              Text("Name: "),
-              SizedBox(height: 35),
-              Text("Pseudo: "),
-              SizedBox(height: 35),
-              Text("Email adress: "),
-              SizedBox(height: 35),
-              Text("Birth date: "),
-              SizedBox(height: 35),
-              Text("Password: "),
-              SizedBox(height: 35),
-              Text("Confirm password: ")
-            ],
-          ),
-          Column(
-            key: columnKey,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              createTextField("", nameController, context, TextInputType.text),
-              SizedBox(height: 5),
-              createTextField(
-                  "", pseudoController, context, TextInputType.text),
-              SizedBox(height: 5),
-              createTextField("ex : username@gmail.com", emailController,
-                  context, TextInputType.emailAddress),
-              SizedBox(height: 5),
-              createTextField("DD/MM/YYYY", birthController, context,
-                  TextInputType.datetime),
-              SizedBox(height: 5),
-              createTextField(
-                  "", password1Controller, context, TextInputType.text,
-                  invisible: true),
-              SizedBox(height: 5),
-              createTextField(
-                  "", password2Controller, context, TextInputType.text,
-                  invisible: true),
-              SizedBox(height: 5),
-            ],
-          )
-        ]),
+        ...rowList,
         ElevatedButton(
             onPressed: () {
               if (nameController.text.trim().isNotEmpty &&
                   pseudoController.text.trim().isNotEmpty &&
                   emailController.text.trim().isNotEmpty &&
-                  birthController.text.trim().isNotEmpty) {
+                  birthController.text.trim().isNotEmpty &&
+                  okayPasswordCreation(
+                      password1Controller.text, password2Controller.text)) {
                 var user = jsonEncode(<String, String>{
                   'name': nameController.text,
                   'pseudo': pseudoController.text,
@@ -89,12 +97,87 @@ class SignUpPage extends StatelessWidget {
               }
             },
             child: Text("Sign Up")),
+        Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+          SizedBox(height: 5),
+        ]),
         ElevatedButton(
             onPressed: () {
               navigateToNextScreen(context, 1);
             },
             child: Text("Cancel"))
       ])),
+    );
+  }
+
+  void insertRows() {
+    rowList.removeAt(0);
+    rowList.insert(
+        0,
+        Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+          Container(
+              width: 150,
+              alignment: Alignment.centerRight,
+              child: Text("Name : ")),
+          createTextField("", nameController, context, TextInputType.text),
+        ]));
+    rowList.removeAt(2);
+    rowList.insert(
+      2,
+      Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+        Container(
+            width: 150,
+            alignment: Alignment.centerRight,
+            child: Text("Pseudo : ")),
+        createTextField("", pseudoController, context, TextInputType.text),
+      ]),
+    );
+    rowList.removeAt(4);
+    rowList.insert(
+      4,
+      Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+        Container(
+            width: 150,
+            alignment: Alignment.centerRight,
+            child: Text("Email : ")),
+        createTextField("ex : username@gmail.com", emailController, context,
+            TextInputType.emailAddress),
+      ]),
+    );
+    rowList.removeAt(6);
+    rowList.insert(
+      6,
+      Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+        Container(
+            width: 150,
+            alignment: Alignment.centerRight,
+            child: Text("Birth date : ")),
+        createTextField(
+            "DD/MM/YYYY", birthController, context, TextInputType.datetime),
+      ]),
+    );
+    rowList.removeAt(8);
+    rowList.insert(
+      8,
+      Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+        Container(
+            width: 150,
+            alignment: Alignment.centerRight,
+            child: Text("Password : ")),
+        createTextField("", password1Controller, context, TextInputType.text,
+            invisible: true),
+      ]),
+    );
+    rowList.removeAt(10);
+    rowList.insert(
+      10,
+      Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+        Container(
+            width: 150,
+            alignment: Alignment.centerRight,
+            child: Text("Confirm Password : ")),
+        createTextField("", password2Controller, context, TextInputType.text,
+            invisible: true),
+      ]),
     );
   }
 
@@ -109,7 +192,6 @@ class SignUpPage extends StatelessWidget {
       BuildContext context, TextInputType _keyboardType,
       {invisible = false}) {
     return Container(
-      key: key,
       width: MediaQuery.of(context).size.width * 0.65,
       height: 50.0,
       decoration: BoxDecoration(
@@ -129,37 +211,32 @@ class SignUpPage extends StatelessWidget {
     );
   }
 
-  void createLabel(String text, GlobalKey key, int spot,
+  void createLabel(String text, int spot,
       {Color color = Colors.red, double fontSize = 16.0}) {
-    final RenderObject renderObject = key.currentContext!.findRenderObject()!;
+    rowList.removeAt(spot);
+    setState(() {
+      rowList.insert(
+          spot,
+          Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+            Container(
+                alignment: Alignment.center,
+                child: Text(
+                  text,
+                  style: TextStyle(color: color),
+                ))
+          ]));
+    });
+  }
 
-    /*if (renderObject is RenderBox) {
-      Container(
-          child: Text(
-        text,
-        style: TextStyle(
-          color: color,
-          fontSize: fontSize,
-        ),
-      ));
-      RenderBox containerRenderBox = renderObject;
-      RenderObject? childRenderObject = containerRenderBox.visitChildren(visitor);
-      for (int i = 0; i < spot; i++) {
-        if (childRenderObject == null) {
-          break;
-        }
-        childRenderObject = childRenderObject!.parentData?.nextSibling;
-      }
-      if (childRenderObject != null) {
-        containerRenderBox.insert(childRenderObject,
-            after: label.renderObject!);
-      } else {
-        containerRenderBox.add(label.renderObject!);
-      }
-
-      // Mark the Column as needing layout
-      renderObject.markNeedsLayout();
-    }*/
+  void removeLabel(String text, int spot) {
+    rowList.removeAt(spot);
+    setState(() {
+      rowList.insert(
+          spot,
+          Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [SizedBox(height: 5)]));
+    });
   }
 
   /**
@@ -169,16 +246,25 @@ class SignUpPage extends StatelessWidget {
    * @param kay_pass1 -> The Global key of the first password container
    * @return true if password are valid.
    */
-  bool okayPasswordCreation(
-      int spot, GlobalKey keyPass1, String password1, String password2) {
+  bool okayPasswordCreation(String password1, String password2) {
+    int spot = 9;
     bool isOkay = true;
-    if (password1 != password2) {
-      createLabel("The two passwords are not the same", keyPass1, spot);
+    if (password1.length < 8) {
+      createLabel("The must be at least 8 characters long!", spot);
       isOkay = false;
-    }
-    if (password1.trim() != password2) {
-      return isOkay;
-    }
+    } else if (password1.replaceAll(RegExp(r'\s'), '*') != password2) {
+      createLabel("The password cannot contain any white characters!", spot);
+      isOkay = false;
+    } else if (password1 != password2) {
+      createLabel("The two passwords must be the same!", spot);
+      isOkay = false;
+    } else {}
     return isOkay;
+  }
+
+  void delayAndExecute(String first, String function,
+      {String second = ""}) async {
+    await Future.delayed(Duration(seconds: 1));
+    print('This message is printed after a 1-second delay.');
   }
 }
