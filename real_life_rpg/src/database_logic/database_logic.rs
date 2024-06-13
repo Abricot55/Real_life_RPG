@@ -27,6 +27,7 @@ pub struct UserType {
     pub email: String,
     pub birth_date: String,
     pub level: i32,
+    pub password: String,
 }
 #[derive(Serialize, Deserialize)]
 pub struct SkillType {

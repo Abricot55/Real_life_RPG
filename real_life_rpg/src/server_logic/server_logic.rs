@@ -122,12 +122,17 @@ fn convert_hash_to_user(params: HashMap<String, String>) -> Result<UserType, Str
             .map_err(|_| "Le level doit être un nombre")?,
         None => 0,
     };
+    let password = match params.get("password") {
+        Some(value) => value.clone(),
+        None => return Err("Aucun mot de passe fourni".to_string()),
+    };
     return Ok(UserType {
         name,
         pseudo,
         email,
         birth_date: birth,
         level,
+        password,
     });
 }
 /**

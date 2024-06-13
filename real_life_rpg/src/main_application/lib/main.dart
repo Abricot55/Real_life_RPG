@@ -6,6 +6,7 @@ import 'package:english_words/english_words.dart';
 import 'package:flutter/material.dart';
 import 'package:main_application/profilePage.dart';
 import 'package:main_application/settingsPage.dart';
+import 'package:main_application/utilities.dart';
 import 'package:provider/provider.dart';
 import 'package:http/http.dart' as http;
 import 'signUpPage.dart';
@@ -166,9 +167,11 @@ bool connexionTest(BuildContext context, String pseudo, String password) {
       navigateToNextScreen(context, 2, data: null);
       return true;
     } else {
-      sendRequest("get", path: "/users/search", urlMap: {"pseudo": pseudo})
+      sendRequest("get",
+              path: "/users/search",
+              urlMap: {"pseudo": pseudo, "password": hash_string(password)})
           .then((value) {
-        if (value.statusCode == 200) {
+        if (value != "[]") {
           navigateToNextScreen(context, 2, data: value);
           return true;
         }

@@ -17,6 +17,7 @@ dependencies:
   #flutter_secure_storage: ^9.2.2  # Use the latest version
   percent_indicator: ^4.0.0
   intl: ^0.17.0
+  crypto: ^3.0.0
 
 dev_dependencies:
   flutter_test:
