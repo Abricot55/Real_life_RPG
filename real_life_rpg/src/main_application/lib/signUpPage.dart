@@ -3,6 +3,8 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'main.dart';
+import 'package:intl/intl.dart';
+import 'package:intl/date_symbol_data_local.dart';
 
 /**
  * @brief This class create represent the object which is the widget on screen when on signup page.
@@ -24,6 +26,7 @@ class SignUpPageState extends State<SignUpPage> {
   @override
   void initState() {
     super.initState();
+    initializeDateFormatting();
     rowList = [
       Row(mainAxisAlignment: MainAxisAlignment.center, children: [
         SizedBox(height: 5),
@@ -78,12 +81,17 @@ class SignUpPageState extends State<SignUpPage> {
         ...rowList,
         ElevatedButton(
             onPressed: () {
-              if (nameController.text.trim().isNotEmpty &&
-                  pseudoController.text.trim().isNotEmpty &&
-                  emailController.text.trim().isNotEmpty &&
-                  birthController.text.trim().isNotEmpty &&
-                  okayPasswordCreation(
-                      password1Controller.text, password2Controller.text)) {
+              pseudoController.text = pseudoController.text.trim();
+              emailController.text = emailController.text.trim();
+              nameController.text = nameController.text.trim();
+              password1Controller.text = password1Controller.text.trim();
+              var b = okayNameCreation(nameController.text);
+              var b2 = okayPseudoCreation(pseudoController.text);
+              var b3 = okayEmailCreation(emailController.text);
+              var b4 = okayBirthCreation(birthController.text);
+              var b5 = okayPasswordCreation(
+                  password1Controller.text, password2Controller.text);
+              if (b && b2 && b3 && b4 && b5) {
                 var user = jsonEncode(<String, String>{
                   'name': nameController.text,
                   'pseudo': pseudoController.text,
@@ -152,7 +160,8 @@ class SignUpPageState extends State<SignUpPage> {
             alignment: Alignment.centerRight,
             child: Text("Birth date : ")),
         createTextField(
-            "DD/MM/YYYY", birthController, context, TextInputType.datetime),
+            "DD/MM/YYYY", birthController, context, TextInputType.datetime,
+            date: true),
       ]),
     );
     rowList.removeAt(8);
@@ -190,25 +199,54 @@ class SignUpPageState extends State<SignUpPage> {
    */
   Container createTextField(String text, TextEditingController controller,
       BuildContext context, TextInputType _keyboardType,
-      {invisible = false}) {
-    return Container(
-      width: MediaQuery.of(context).size.width * 0.65,
-      height: 50.0,
-      decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(10.0),
-          border: Border.all(color: Colors.black)),
-      child: TextField(
-        obscureText: invisible,
-        keyboardType: _keyboardType,
-        autocorrect: false,
-        controller: controller,
-        decoration: new InputDecoration(
-          border: InputBorder.none,
-          contentPadding: EdgeInsets.all(10.0),
-          hintText: text,
-        ),
+      {invisible = false, date = false}) {
+    TextField field = TextField(
+      obscureText: invisible,
+      keyboardType: _keyboardType,
+      autocorrect: false,
+      controller: controller,
+      decoration: new InputDecoration(
+        border: InputBorder.none,
+        contentPadding: EdgeInsets.all(10.0),
+        hintText: text,
       ),
     );
+    if (date) {
+      field = TextField(
+          obscureText: invisible,
+          keyboardType: _keyboardType,
+          autocorrect: false,
+          controller: controller,
+          decoration: new InputDecoration(
+            icon: Icon(Icons.calendar_today),
+            border: InputBorder.none,
+            contentPadding: EdgeInsets.all(10.0),
+            hintText: text,
+          ),
+          readOnly: true,
+          onTap: () async {
+            DateTime? pickedDate = await showDatePicker(
+              context: context,
+              initialDate: DateTime.now(),
+              firstDate: DateTime(1900),
+              lastDate: DateTime(2040),
+            );
+            if (pickedDate != null) {
+              String formattedDate =
+                  DateFormat('dd-MM-yyyy').format(pickedDate);
+              setState(() {
+                controller.text = formattedDate;
+              });
+            }
+          });
+    }
+    return Container(
+        width: MediaQuery.of(context).size.width * 0.65,
+        height: 50.0,
+        decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(10.0),
+            border: Border.all(color: Colors.black)),
+        child: field);
   }
 
   void createLabel(String text, int spot,
@@ -228,7 +266,7 @@ class SignUpPageState extends State<SignUpPage> {
     });
   }
 
-  void removeLabel(String text, int spot) {
+  void removeLabel(int spot) {
     rowList.removeAt(spot);
     setState(() {
       rowList.insert(
@@ -237,6 +275,44 @@ class SignUpPageState extends State<SignUpPage> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [SizedBox(height: 5)]));
     });
+  }
+
+  bool okayPseudoCreation(String pseudo) {
+    bool isOkay = true;
+    int spot = 3;
+    sendRequest("get", path: "users/search/", urlMap: {"pseudo": pseudo})
+        .then((response) {
+      if (response.body != "[]") {
+        createLabel(
+            "This pseudo is already taken, please choose another one", spot);
+        isOkay = false;
+      } else if (pseudo.length > 20) {
+        createLabel("The pseudo must be less than 20 characters", spot);
+        isOkay = false;
+      } else if (pseudo.isEmpty) {
+        createLabel("The pseudo must not be empty", spot);
+        isOkay = false;
+      } else {
+        removeLabel(spot);
+      }
+    });
+    return isOkay;
+  }
+
+  bool okayNameCreation(String name) {
+    bool isOkay = false;
+    int spot = 1;
+    if (name.contains(RegExp(r'[^a-zA-Z\\s]'))) {
+      createLabel("The name must contains only letters", spot);
+    } else if (name.length > 20) {
+      createLabel("The name must be less than 20 characters", spot);
+    } else if (name.isEmpty) {
+      createLabel("The name must not be empty", spot);
+    } else {
+      removeLabel(spot);
+      isOkay = true;
+    }
+    return isOkay;
   }
 
   /**
@@ -250,21 +326,58 @@ class SignUpPageState extends State<SignUpPage> {
     int spot = 9;
     bool isOkay = true;
     if (password1.length < 8) {
-      createLabel("The must be at least 8 characters long!", spot);
-      isOkay = false;
-    } else if (password1.replaceAll(RegExp(r'\s'), '*') != password2) {
-      createLabel("The password cannot contain any white characters!", spot);
+      createLabel("The password must be at least 8 characters long!", spot);
       isOkay = false;
     } else if (password1 != password2) {
       createLabel("The two passwords must be the same!", spot);
       isOkay = false;
-    } else {}
+    } else if (password1.isEmpty) {
+      createLabel("The password cannot be empty!", spot);
+      isOkay = false;
+    } else if (password1.contains(RegExp(r'\s'))) {
+      createLabel("The password cannot contain any white characters!", spot);
+      isOkay = false;
+    } else {
+      removeLabel(spot);
+    }
     return isOkay;
   }
 
-  void delayAndExecute(String first, String function,
-      {String second = ""}) async {
-    await Future.delayed(Duration(seconds: 1));
-    print('This message is printed after a 1-second delay.');
+  bool okayEmailCreation(String email) {
+    int spot = 5;
+    bool isOkay = true;
+    RegExp exp = RegExp(r"^[\w.+-]+@\w+\.\w{2,}$", caseSensitive: false);
+    sendRequest("get", path: "users/search/", urlMap: {"email": email})
+        .then((response) {
+      if (response.body != "[]") {
+        createLabel("An account is already linked to this email", spot);
+        isOkay = false;
+      } else if (exp.hasMatch(email)) {
+        removeLabel(spot);
+      } else {
+        createLabel("The email is invalid", spot);
+        isOkay = false;
+      }
+    });
+    return isOkay;
+  }
+
+  bool okayBirthCreation(String birth) {
+    int spot = 7;
+    try {
+      DateTime birthdate = DateFormat('dd-MM-yyyy').parse(birth);
+      DateTime now = DateTime.now();
+      var boundaryDate = DateTime(now.year - 13, now.month, now.day);
+      if (birthdate.isAfter(boundaryDate)) {
+        createLabel("You must be at least 13 years old to sign up!", spot);
+        return false;
+      } else {
+        removeLabel(spot);
+        return true;
+      }
+    } catch (exception) {
+      createLabel("Please choose a date", spot);
+      return false;
+    }
   }
 }
