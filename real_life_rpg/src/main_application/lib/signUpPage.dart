@@ -238,7 +238,7 @@ class SignUpPageState extends State<SignUpPage> {
           });
     }
     return Container(
-        width: MediaQuery.of(context).size.width * 0.65,
+        width: MediaQuery.of(context).size.width * 0.58,
         height: 50.0,
         decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(10.0),

@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:percent_indicator/circular_percent_indicator.dart';
 import 'package:percent_indicator/linear_percent_indicator.dart';
+import 'User.dart';
 import 'main.dart';
 //import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
@@ -19,10 +20,11 @@ class _ProfilePageState extends State<ProfilePage> {
 
   //varaibles
   var savedUserID = "";
-  var nbFriends = 0;
-  List<String> myFriends = [];
-  var activeSkills = Map<String, double>();
-  var profileDescription = "";
+  late User me;
+  //var nbFriends = 0;
+  //List<String> myFriends = [];
+  //var activeSkills = Map<String, double>();
+  //var profileDescription = "";
   var _selectedIndex = 0;
 
   //containers
@@ -55,7 +57,9 @@ class _ProfilePageState extends State<ProfilePage> {
     return Scaffold(
         bottomNavigationBar: BottomNavigationBar(
             onTap: (int index) {
+              var _me = me;
               setState(() {
+                me = _me;
                 _searchMode = false;
                 _selectedIndex = index;
                 containerGeneral = getMainScreen(index);
@@ -110,7 +114,9 @@ class _ProfilePageState extends State<ProfilePage> {
                       labelNbFriends,
                       GestureDetector(
                           onTap: () {
+                            var _me = me;
                             setState(() {
+                              me = _me;
                               containerGeneral = getFriendsPage();
                             });
                           },
@@ -165,7 +171,9 @@ class _ProfilePageState extends State<ProfilePage> {
                           ),
                           ElevatedButton(
                               onPressed: () {
+                                var _me = me;
                                 setState(() {
+                                  me = _me;
                                   _searchMode = true;
                                   _itemsRecherche = getListeItems("");
                                   containerGeneral = getHomePage(_searchMode);
@@ -192,7 +200,9 @@ class _ProfilePageState extends State<ProfilePage> {
                         children: [
                           ElevatedButton(
                               onPressed: () {
+                                var _me = me;
                                 setState(() {
+                                  me = _me;
                                   _searchMode = false;
                                   containerGeneral = getHomePage(_searchMode);
                                 });
@@ -202,7 +212,9 @@ class _ProfilePageState extends State<ProfilePage> {
                             width: MediaQuery.of(context).size.width - 200,
                             child: TextField(
                               onChanged: (text) {
+                                var _me = me;
                                 setState(() {
+                                  me = _me;
                                   _itemsRecherche = getListeItems(text);
                                   containerGeneral = getHomePage(_searchMode);
                                 });
@@ -261,7 +273,9 @@ class _ProfilePageState extends State<ProfilePage> {
               Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
                 ElevatedButton(
                     onPressed: () {
+                      var _me = me;
                       setState(() {
+                        me = _me;
                         containerGeneral = getMainScreen(1);
                       });
                     },
@@ -286,7 +300,7 @@ class _ProfilePageState extends State<ProfilePage> {
             Row(
               children: [
                 Text(
-                  "All friends (${nbFriends})",
+                  "All friends (${me.nbFriends})",
                   style: TextStyle(fontSize: 20),
                 )
               ],
@@ -301,8 +315,8 @@ class _ProfilePageState extends State<ProfilePage> {
 
   List<Widget> getListAffichageFriends() {
     List<Widget> liste = [];
-    for(var i = 0; i < nbFriends; i++){
-      liste.add(Row(children: [Text(myFriends[i])],));
+    for(var i = 0; i < me.nbFriends; i++){
+      liste.add(Row(children: [Text(me.myFriends[i])],));
     }
     return liste;
   }
@@ -310,35 +324,38 @@ class _ProfilePageState extends State<ProfilePage> {
   Future<void> readUserID() async {
     //trouver le user id
     savedUserID = "testUser"; //(await storage.read(key: "_userID"))!;
-    //_selectedIndex = 0; //(await storage.read(key: "_indexMainApp"))!;
-    //faire les requêtes
+    me = User(savedUserID);
+    //faire les requêtes de Adam
+
     //userTest
     if (savedUserID == "testUser") {
-      myFriends = [
+      me.myFriends = [
         "Adamou",
         "Sbasien",
         "Jean-Jean",
         "Mike Hawks",
         "Marie-Ève Bolduc"
       ];
-      nbFriends = myFriends.length;
-      activeSkills = {
+      me.nbFriends = me.myFriends.length;
+      me.activeSkills = {
         "Cooking": 34.3,
         "Skateboard": 12.1,
         "Chapeau melon": 99.90
       };
-      profileDescription =
+      me.profileDescription =
           "This is a test account made to preview what an actual account could display on a phone when the connection with the server is successful!";
     }
+    var _me = me;
     setState(() {
+      me = _me;
       labelUserIDController = Text(
         savedUserID,
         style: TextStyle(fontSize: 25.0, color: Colors.white),
       );
       labelNbFriends =
-          Text("Friends: ${nbFriends}", style: TextStyle(fontSize: 20.0));
+          Text("Friends: ${me.nbFriends}", style: TextStyle(fontSize: 20.0));
       List<Widget> skills = [];
-      for (MapEntry<String, double> item in activeSkills.entries) {
+      for (MapEntry<String, double> item in me.activeSkills.entries) {
         skills.add(Row(
           children: [
             Text(
@@ -365,12 +382,12 @@ class _ProfilePageState extends State<ProfilePage> {
         ]));
       }
       columnSkills = Column(children: skills);
-      if (profileDescription != "") {
+      if (me.profileDescription != "") {
         containerDescription = Container(
           child: Column(
             children: [
               Text(
-                profileDescription,
+                me.profileDescription,
                 style: TextStyle(fontSize: 18),
                 softWrap: true,
               ),
