@@ -8,6 +8,7 @@ import 'package:flutter/services.dart';
 import 'package:percent_indicator/linear_percent_indicator.dart';
 import 'User.dart';
 import 'main.dart';
+import 'utilities.dart';
 //import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class ProfilePage extends StatefulWidget {
@@ -214,7 +215,8 @@ class _ProfilePageState extends State<ProfilePage> {
                       var _me = me;
                       setState(() {
                         me = _me;
-                        containerGeneral = getFriendsPage(aUser, aUser.getId() == me.getId());
+                        containerGeneral =
+                            getFriendsPage(aUser, aUser.getId() == me.getId());
                       });
                     },
                     child: Text("See all...",
@@ -263,7 +265,9 @@ class _ProfilePageState extends State<ProfilePage> {
               style: TextStyle(fontSize: 15.0),
             )),
         labelUserIDController,
-        SizedBox(width: 70,)
+        SizedBox(
+          width: 70,
+        )
       ]);
     }
   }
@@ -277,17 +281,17 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
   List<Widget> getListeItems(String text) {
-    List<Widget> liste = [];
-    //recherche de Adam
-    if (text != "") {
-      for (var i = 0; i < 5; i++) {
-        liste.add(Row(children: [Text(text + i.toString())]));
-        if (i != 4) {
-          liste.add(Divider());
-        }
+    sendRequest("get", path: "users/relevant", urlMap: {"pseudo": text})
+        .then((liste) {
+      List<Widget> users = [];
+      List<String> search = listUserJsonRetrievePseudo(liste.body);
+      print(search);
+      for (var i in search) {
+        users.add(Text(i));
       }
-    }
-    return liste;
+      return users;
+    });
+    return [];
   }
 
   Center getFriendsPage(User aUser, bool myProfile) {
@@ -342,8 +346,8 @@ class _ProfilePageState extends State<ProfilePage> {
     ]));
   }
 
-  String getFriendTitle(User aUser, bool myProfile){
-    if (myProfile){
+  String getFriendTitle(User aUser, bool myProfile) {
+    if (myProfile) {
       return "My friends";
     } else {
       return "${aUser.getId()}'s friends";
@@ -450,8 +454,7 @@ class _ProfilePageState extends State<ProfilePage> {
 
     //userTest
     if (savedUserID == "testUser") {
-      me.setMyFriends(
-          ["Adamou", "Sbasien", "Jean-Jean", "Mike", "Marie-Ève"]);
+      me.setMyFriends(["Adamou", "Sbasien", "Jean-Jean", "Mike", "Marie-Ève"]);
       me.setNbFriends(me.getMyFriends().length);
       me.setActiveSkills(
           {"Cooking": 34.3, "Skateboard": 12.1, "Chapeau melon": 99.90});
