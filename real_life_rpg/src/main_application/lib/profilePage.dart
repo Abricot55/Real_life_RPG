@@ -2,9 +2,9 @@ import 'dart:convert';
 import 'dart:ffi';
 import 'dart:math';
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:percent_indicator/circular_percent_indicator.dart';
 import 'package:percent_indicator/linear_percent_indicator.dart';
 import 'User.dart';
 import 'main.dart';
@@ -21,10 +21,6 @@ class _ProfilePageState extends State<ProfilePage> {
   //varaibles
   var savedUserID = "";
   late User me;
-  //var nbFriends = 0;
-  //List<String> myFriends = [];
-  //var activeSkills = Map<String, double>();
-  //var profileDescription = "";
   var _selectedIndex = 0;
 
   //containers
@@ -80,61 +76,7 @@ class _ProfilePageState extends State<ProfilePage> {
     if (index == 0) {
       return Center(child: getHomePage(_searchMode));
     } else if (index == 1) {
-      return Center(
-        child: Column(children: [
-          Container(
-              padding: EdgeInsets.only(left: 5.0, right: 5.0),
-              color: Theme.of(context).primaryColor,
-              child: Column(
-                children: [
-                  SizedBox(height: 30),
-                  Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        labelUserIDController,
-                        ElevatedButton(
-                            onPressed: () {
-                              navigateToNextScreen(context, 3);
-                            },
-                            child: Text(
-                              "Settings",
-                              style: TextStyle(fontSize: 15.0),
-                            )),
-                      ])
-                ],
-              )),
-          Container(
-            padding: EdgeInsets.all(5.0),
-            child: Column(
-              children: [
-                containerDescription,
-                Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      labelNbFriends,
-                      GestureDetector(
-                          onTap: () {
-                            var _me = me;
-                            setState(() {
-                              me = _me;
-                              containerGeneral = getFriendsPage();
-                            });
-                          },
-                          child: Text("See all...",
-                              style: TextStyle(
-                                  color: Theme.of(context).primaryColor,
-                                  decoration: TextDecoration.underline)))
-                    ]),
-                Divider(),
-                Row(children: [
-                  Text("My skills", style: TextStyle(fontSize: 20.0))
-                ]),
-                columnSkills
-              ],
-            ),
-          )
-        ]),
-      );
+      return getUserPage(me, true);
     } else if (index == 2) {
       return Center(
           child: Column(
@@ -247,6 +189,93 @@ class _ProfilePageState extends State<ProfilePage> {
     }
   }
 
+  Center getUserPage(User aUser, bool myProfile) {
+    setUserContainer(aUser, myProfile);
+    return Center(
+      child: Column(children: [
+        Container(
+            padding: EdgeInsets.only(left: 5.0, right: 5.0),
+            color: Theme.of(context).primaryColor,
+            child: Column(
+              children: [
+                SizedBox(height: 30),
+                getTopUserPageController(aUser, myProfile)
+              ],
+            )),
+        Container(
+          padding: EdgeInsets.all(5.0),
+          child: Column(
+            children: [
+              containerDescription,
+              Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+                labelNbFriends,
+                GestureDetector(
+                    onTap: () {
+                      var _me = me;
+                      setState(() {
+                        me = _me;
+                        containerGeneral = getFriendsPage(aUser, aUser.getId() == me.getId());
+                      });
+                    },
+                    child: Text("See all...",
+                        style: TextStyle(
+                            color: Theme.of(context).primaryColor,
+                            decoration: TextDecoration.underline)))
+              ]),
+              Divider(),
+              Row(children: [
+                Text(getStringSkills(aUser, myProfile),
+                    style: TextStyle(fontSize: 20.0))
+              ]),
+              columnSkills
+            ],
+          ),
+        )
+      ]),
+    );
+  }
+
+  Row getTopUserPageController(User aUser, bool myProfile) {
+    if (myProfile) {
+      return Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+        labelUserIDController,
+        ElevatedButton(
+            onPressed: () {
+              navigateToNextScreen(context, 3);
+            },
+            child: Text(
+              "Settings",
+              style: TextStyle(fontSize: 15.0),
+            )),
+      ]);
+    } else {
+      return Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+        ElevatedButton(
+            onPressed: () {
+              var _me = me;
+              setState(() {
+                me = _me;
+                containerGeneral = getFriendsPage(me, true);
+              });
+            },
+            child: Text(
+              "Back",
+              style: TextStyle(fontSize: 15.0),
+            )),
+        labelUserIDController,
+        SizedBox(width: 70,)
+      ]);
+    }
+  }
+
+  String getStringSkills(User user, bool myProfile) {
+    if (myProfile) {
+      return "My skills";
+    } else {
+      return "${user.getId()}'s skills";
+    }
+  }
+
   List<Widget> getListeItems(String text) {
     List<Widget> liste = [];
     //recherche de Adam
@@ -261,7 +290,7 @@ class _ProfilePageState extends State<ProfilePage> {
     return liste;
   }
 
-  Center getFriendsPage() {
+  Center getFriendsPage(User aUser, bool myProfile) {
     return Center(
         child: Column(children: [
       Container(
@@ -284,7 +313,7 @@ class _ProfilePageState extends State<ProfilePage> {
                       style: TextStyle(fontSize: 15.0),
                     )),
                 Text(
-                  "My Friends",
+                  getFriendTitle(aUser, myProfile),
                   style: TextStyle(color: Colors.white, fontSize: 25),
                 ),
                 SizedBox(
@@ -300,23 +329,116 @@ class _ProfilePageState extends State<ProfilePage> {
             Row(
               children: [
                 Text(
-                  "All friends (${me.nbFriends})",
+                  "All friends (${aUser.getNbFriends()})",
                   style: TextStyle(fontSize: 20),
                 )
               ],
             ),
             Divider(),
-            Column(children: getListAffichageFriends())
+            Column(children: getListAffichageFriends(aUser))
           ],
         ),
       )
     ]));
   }
 
-  List<Widget> getListAffichageFriends() {
+  String getFriendTitle(User aUser, bool myProfile){
+    if (myProfile){
+      return "My friends";
+    } else {
+      return "${aUser.getId()}'s friends";
+    }
+  }
+
+  void setUserContainer(User aUser, bool myProfile) {
+    labelUserIDController = Text(
+      aUser.getId(),
+      style: TextStyle(fontSize: 25.0, color: Colors.white),
+    );
+    labelNbFriends = Text("Friends: ${aUser.getNbFriends()}",
+        style: TextStyle(fontSize: 20.0));
+    List<Widget> skills = [];
+    for (MapEntry<String, double> item in aUser.getActiveSkills().entries) {
+      skills.add(Row(
+        children: [
+          Text(
+            "${item.key}: ${item.value.toInt()}",
+            style: TextStyle(fontSize: 18.0),
+          )
+        ],
+      ));
+      skills.add(
+          Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+        Text("${item.value.toInt()}"),
+        LinearPercentIndicator(
+          width: MediaQuery.of(context).size.width - 60,
+          progressColor: Theme.of(context).primaryColor,
+          percent: item.value - item.value.toInt(),
+          barRadius: Radius.circular(10),
+          lineHeight: 18,
+          center: Text(
+            "${((item.value - item.value.toInt()) * 100).toInt()}%",
+            style: TextStyle(color: Colors.white),
+          ),
+        ),
+        Text("${item.value.toInt() + 1}")
+      ]));
+    }
+    columnSkills = Column(children: skills);
+    if (aUser.getProfileDescription() != "") {
+      containerDescription = Container(
+        child: Column(
+          children: [
+            Text(
+              aUser.getProfileDescription(),
+              style: TextStyle(fontSize: 18),
+              softWrap: true,
+            ),
+            Divider()
+          ],
+        ),
+      );
+    } else
+      containerDescription = Container();
+  }
+
+  List<Widget> getListAffichageFriends(User aUser) {
     List<Widget> liste = [];
-    for(var i = 0; i < me.nbFriends; i++){
-      liste.add(Row(children: [Text(me.myFriends[i])],));
+    for (var i = 0; i < aUser.getNbFriends(); i++) {
+      User aFriend = User(aUser.getMyFriends()[i]);
+      liste.add(GestureDetector(
+          onTap: () {
+            var _me = me;
+            setState(() {
+              me = _me;
+              containerGeneral = getUserPage(aFriend, false);
+            });
+          },
+          child: Row(
+            children: [
+              CircleAvatar(
+                backgroundColor: aFriend.getProfilePicture(),
+              ),
+              SizedBox(
+                width: 10,
+              ),
+              Flexible(
+                  child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                    Text(aFriend.getId()),
+                    Text(
+                      "${aFriend.getNbFriends()} friends",
+                      style: TextStyle(
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    )
+                  ])),
+            ],
+          )));
+      liste.add(SizedBox(
+        height: 10,
+      ));
     }
     return liste;
   }
@@ -325,77 +447,16 @@ class _ProfilePageState extends State<ProfilePage> {
     //trouver le user id
     savedUserID = "testUser"; //(await storage.read(key: "_userID"))!;
     me = User(savedUserID);
-    //faire les requêtes de Adam
 
     //userTest
     if (savedUserID == "testUser") {
-      me.myFriends = [
-        "Adamou",
-        "Sbasien",
-        "Jean-Jean",
-        "Mike Hawks",
-        "Marie-Ève Bolduc"
-      ];
-      me.nbFriends = me.myFriends.length;
-      me.activeSkills = {
-        "Cooking": 34.3,
-        "Skateboard": 12.1,
-        "Chapeau melon": 99.90
-      };
-      me.profileDescription =
-          "This is a test account made to preview what an actual account could display on a phone when the connection with the server is successful!";
+      me.setMyFriends(
+          ["Adamou", "Sbasien", "Jean-Jean", "Mike", "Marie-Ève"]);
+      me.setNbFriends(me.getMyFriends().length);
+      me.setActiveSkills(
+          {"Cooking": 34.3, "Skateboard": 12.1, "Chapeau melon": 99.90});
+      me.setProfileDescription(
+          "This is a test account made to preview what an actual account could display on a phone when the connection with the server is successful!");
     }
-    var _me = me;
-    setState(() {
-      me = _me;
-      labelUserIDController = Text(
-        savedUserID,
-        style: TextStyle(fontSize: 25.0, color: Colors.white),
-      );
-      labelNbFriends =
-          Text("Friends: ${me.nbFriends}", style: TextStyle(fontSize: 20.0));
-      List<Widget> skills = [];
-      for (MapEntry<String, double> item in me.activeSkills.entries) {
-        skills.add(Row(
-          children: [
-            Text(
-              "${item.key}: ${item.value.toInt()}",
-              style: TextStyle(fontSize: 18.0),
-            )
-          ],
-        ));
-        skills.add(
-            Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-          Text("${item.value.toInt()}"),
-          LinearPercentIndicator(
-            width: MediaQuery.of(context).size.width - 60,
-            progressColor: Theme.of(context).primaryColor,
-            percent: item.value - item.value.toInt(),
-            barRadius: Radius.circular(10),
-            lineHeight: 18,
-            center: Text(
-              "${((item.value - item.value.toInt()) * 100).toInt()}%",
-              style: TextStyle(color: Colors.white),
-            ),
-          ),
-          Text("${item.value.toInt() + 1}")
-        ]));
-      }
-      columnSkills = Column(children: skills);
-      if (me.profileDescription != "") {
-        containerDescription = Container(
-          child: Column(
-            children: [
-              Text(
-                me.profileDescription,
-                style: TextStyle(fontSize: 18),
-                softWrap: true,
-              ),
-              Divider()
-            ],
-          ),
-        );
-      }
-    });
   }
 }
