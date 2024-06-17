@@ -2,8 +2,6 @@ mod database_logic;
 mod server_logic;
 mod util;
 use crate::server_logic::server_logic::*;
-use database_logic::database_logic::search_field;
-use hyper::{body::HttpBody, Body, Response};
 use serde_json::Value;
 use std::collections::HashMap;
 use warp::Filter;

@@ -1,6 +1,9 @@
 import 'dart:convert';
+import 'dart:async';
 
 import 'package:crypto/crypto.dart';
+import 'package:camera/camera.dart';
+import 'package:flutter/material.dart';
 
 /// @brief This function hash a string using SHA256 and return the hashed value.
 /// @param word -> The string that will be hashed.
@@ -21,4 +24,21 @@ List<String> listUserJsonRetrievePseudo(String json) {
     }
   }
   return response;
+}
+
+/// @brief This function retrieve the first or specified camera of the user device
+/// @param [optional] camNumber -> The camera number in the list of camera available on the device.
+/// @return The camera as a Future<CameraDescription>.
+Future<CameraDescription?> findCamera({int camNumber = 0}) async {
+  WidgetsFlutterBinding.ensureInitialized();
+  try {
+    final cameras = await availableCameras();
+    try {
+      return cameras[camNumber];
+    } on Exception {
+      return cameras.first;
+    }
+  } catch (e) {
+    return null;
+  }
 }

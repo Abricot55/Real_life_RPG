@@ -196,7 +196,7 @@ pub async fn search_user_function(
             )
             .into_response()),
         },
-        Err(e) => {;Ok(warp::reply::with_status(e, StatusCode::NOT_ACCEPTABLE).into_response())},
+        Err(e) => {Ok(warp::reply::with_status(e, StatusCode::NOT_ACCEPTABLE).into_response())},
     }
 }
 /**

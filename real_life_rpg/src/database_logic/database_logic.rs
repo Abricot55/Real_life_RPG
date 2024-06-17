@@ -12,6 +12,7 @@ use serde_json::Value;
 pub enum DocumentType {
     User(UserType),
     Skill(SkillType),
+    Photos(PhotoListType),
 }
 
 #[derive(Serialize, Deserialize)]
@@ -53,6 +54,20 @@ pub struct RelationUserSkillType {
     pub level: i32,
     pub challenge_completed: i32,
     pub title: String,
+}
+#[derive(Serialize, Deserialize)]
+pub struct PhotoListType{
+    pub photos : Vec<PhotoType>,
+}
+
+#[derive(Serialize, Deserialize)]
+pub struct PhotoType{
+    pub image : String,
+    pub title : String,
+    pub likes : i32,
+    pub comments : Vec<String>,
+    pub shared : i32,
+    pub description : String,
 }
 
 /**
@@ -187,9 +202,9 @@ pub async fn get_document_in_collection(
                 Ok(json_doc) => return Ok(json_doc),
                 Err(_) => return Err("Conversion en Json impossible".to_string()),
             },
-            Err(e) => return Err("Immposssible de trouver le document".to_string()),
+            Err(_) => return Err("Immposssible de trouver le document".to_string()),
         },
-        Err(e) => return Err("Impossible de trouver la collection".to_string()),
+        Err(_) => return Err("Impossible de trouver la collection".to_string()),
     }
 }
 
