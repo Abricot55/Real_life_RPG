@@ -12,14 +12,13 @@ import 'package:main_application/settingsPage.dart';
 import 'package:main_application/utilities.dart';
 import 'package:provider/provider.dart';
 import 'package:http/http.dart' as http;
+import 'User.dart';
 import 'signUpPage.dart';
 //import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 void main() {
   runApp(MyApp());
 }
-
-
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -74,10 +73,7 @@ class MyHomePage extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Container(
-              width: MediaQuery
-                  .of(context)
-                  .size
-                  .width * 0.8,
+              width: MediaQuery.of(context).size.width * 0.8,
               height: 50.0,
               decoration: BoxDecoration(
                   border: Border.all(color: Colors.black),
@@ -94,10 +90,7 @@ class MyHomePage extends StatelessWidget {
             ),
             SizedBox(height: 5.0),
             Container(
-              width: MediaQuery
-                  .of(context)
-                  .size
-                  .width * 0.8,
+              width: MediaQuery.of(context).size.width * 0.8,
               height: 50.0,
               decoration: BoxDecoration(
                   border: Border.all(color: Colors.black),
@@ -133,16 +126,10 @@ class MyHomePage extends StatelessWidget {
                 child: Text("Picture!")),
             /*This container is the TexField for the server request ***(FOR TEST PURPOSE)****/
             Container(
-              width: MediaQuery
-                  .of(context)
-                  .size
-                  .width * 0.3,
-              height: MediaQuery
-                  .of(context)
-                  .size
-                  .height * 0.1,
+              width: MediaQuery.of(context).size.width * 0.3,
+              height: MediaQuery.of(context).size.height * 0.1,
               decoration:
-              BoxDecoration(border: Border.all(color: Colors.black)),
+                  BoxDecoration(border: Border.all(color: Colors.black)),
               child: TextField(
                 decoration: InputDecoration(border: InputBorder.none),
                 onSubmitted: (value) {
@@ -189,8 +176,8 @@ bool connexionTest(BuildContext context, String pseudo, String password) {
       return true;
     } else {
       sendRequest("get",
-          path: "/users/search",
-          urlMap: {"pseudo": pseudo, "password": hash_string(password)})
+              path: "/users/search",
+              urlMap: {"pseudo": pseudo, "password": hash_string(password)})
           .then((value) {
         if (value != "[]") {
           navigateToNextScreen(context, 2, data: value);
@@ -210,8 +197,8 @@ bool connexionTest(BuildContext context, String pseudo, String password) {
  */
 Future<dynamic> sendRequest(String function,
     {String path = "",
-      Map<String, String>? urlMap,
-      String jsonBody = ""}) async {
+    Map<String, String>? urlMap,
+    String jsonBody = ""}) async {
   var url = Uri.http('127.0.0.1:3000', path, urlMap);
   print(url);
   var response;
@@ -269,7 +256,7 @@ Future<dynamic> newRequest(String path) {
  * @param screenNumber -> The number representing the scene you want to display.
  */
 void navigateToNextScreen(BuildContext context, int screenNumber,
-    {dynamic data}) {
+    {dynamic data, User? me}) {
   switch (screenNumber) {
     case 0:
       Navigator.of(context)
@@ -288,13 +275,16 @@ void navigateToNextScreen(BuildContext context, int screenNumber,
           .push(MaterialPageRoute(builder: (context) => Settingspage()));
       break;
     case 4:
-      findCamera().then((camera) {
-        if (camera != null) {
-          Navigator.of(context).push(MaterialPageRoute(
-              builder: (context) => TakePictureScreen(camera: camera)));
-        } else {
-          print("Aucune camera trouvée");
-        }
-      });
+      if (me != null) {
+        findCamera().then((camera) {
+          if (camera != null) {
+            Navigator.of(context).push(MaterialPageRoute(
+                builder: (context) =>
+                    TakePictureScreen(camera: camera, me: me)));
+          } else {
+            print("Aucune camera trouvée");
+          }
+        });
+      }
   }
 }

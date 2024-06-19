@@ -3,14 +3,19 @@ import 'dart:io';
 
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
+import 'package:main_application/main.dart';
+
+import 'User.dart';
 
 // A screen that allows users to take a picture using a given camera.
 class TakePictureScreen extends StatefulWidget {
   const TakePictureScreen({
     super.key,
     required this.camera,
+    required this.me
   });
 
+  final User me;
   final CameraDescription camera;
 
   @override
@@ -111,7 +116,14 @@ class DisplayPictureScreen extends StatelessWidget {
       appBar: AppBar(title: const Text('Display the Picture')),
       // The image is stored as a file on the device. Use the `Image.file`
       // constructor with the given path to display the image.
-      body: Image.file(File(imagePath)),
+      body: Column(children: [
+        Image.file(File(imagePath)),
+        ElevatedButton(
+            onPressed: () {
+              (){sendRequest()} 
+            },
+            child: Text("ok"))
+      ]),
     );
   }
 }

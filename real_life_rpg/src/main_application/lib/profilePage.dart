@@ -5,6 +5,7 @@ import 'dart:math';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:main_application/picturePage.dart';
 import 'package:percent_indicator/linear_percent_indicator.dart';
 import 'User.dart';
 import 'main.dart';
@@ -79,11 +80,10 @@ class _ProfilePageState extends State<ProfilePage> {
     } else if (index == 1) {
       return getUserPage(me, true);
     } else if (index == 2) {
-      return Center(
-          child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [Text("Tu veux ma photo banane?")],
-      ));
+      navigateToNextScreen(context, 4, me : me);
+      return  Center(
+        child: Text("QU'EST-CE QUE TU FAIS LÀ MAN??"),
+      );
     } else {
       return Center(
         child: Text("QU'EST-CE QUE TU FAIS LÀ MAN??"),

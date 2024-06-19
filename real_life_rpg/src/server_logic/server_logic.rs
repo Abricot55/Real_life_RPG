@@ -219,6 +219,10 @@ pub async fn relevant_search_user_function(
         Err(e) => {;Ok(warp::reply::with_status(e, StatusCode::NOT_ACCEPTABLE).into_response())},
     }
 }
+
+fn add_photo_user(params : HashMap<String, Value>) -> Result<Response<Body>, warp::rejection>{
+    
+}
 /*
 /**
  * @brief Function called when the update request is sent to the server.

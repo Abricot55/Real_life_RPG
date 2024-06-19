@@ -14,6 +14,12 @@ pub async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
         Ok(response) => print!("o"),
         Err(_) => print!("AS")
     }*/
+    let save_photo = warp::path("save")
+        .and(warp::path("photo"))
+        .and(warp::put())
+        .and(warp::body::json())
+        .and_then(add_photo_user);
+    
     let relevant_search_user_route = warp::path("users")
         .and(warp::path("relevant"))
         .and(warp::get())
