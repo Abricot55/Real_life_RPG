@@ -120,7 +120,7 @@ class DisplayPictureScreen extends StatelessWidget {
         Image.file(File(imagePath)),
         ElevatedButton(
             onPressed: () {
-              (){sendRequest()} 
+              (){sendRequest("");};
             },
             child: Text("ok"))
       ]),
