@@ -10,7 +10,7 @@ class User {
   String _profileDescription = "";
   Map<String, double> _activeSkills = {};
   Color _profilePicture = Colors.grey;
-  List<XFile> photos = [];
+  List<XFile> _photos = [];
 
   User(this._id) {
     assert(_id != "");

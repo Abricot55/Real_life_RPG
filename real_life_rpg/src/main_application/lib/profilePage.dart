@@ -5,6 +5,7 @@ import 'dart:math';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:main_application/activeMemory.dart';
 import 'package:main_application/picturePage.dart';
 import 'package:percent_indicator/linear_percent_indicator.dart';
 import 'User.dart';
@@ -23,6 +24,7 @@ class _ProfilePageState extends State<ProfilePage> {
   //varaibles
   var savedUserID = "";
   late User me;
+  late Activememory memory;
   var _selectedIndex = 0;
 
   //containers
@@ -52,13 +54,15 @@ class _ProfilePageState extends State<ProfilePage> {
     if (containerGeneral == null) {
       readUserID();
       containerGeneral = getMainScreen(_selectedIndex);
+    } else {
+      me = memory.getMainUser();
     }
     return Scaffold(
         bottomNavigationBar: BottomNavigationBar(
             onTap: (int index) {
-              var _me = me;
+              var _memory = memory;
               setState(() {
-                me = _me;
+                memory = _memory;
                 _searchMode = false;
                 _selectedIndex = index;
                 containerGeneral = getMainScreen(index);
@@ -125,9 +129,9 @@ class _ProfilePageState extends State<ProfilePage> {
                           ),
                           ElevatedButton(
                               onPressed: () {
-                                var _me = me;
+                                var _memory = memory;
                                 setState(() {
-                                  me = _me;
+                                  memory = _memory;
                                   _searchMode = true;
                                   _itemsRecherche = getListeItems("");
                                   containerGeneral = getHomePage(_searchMode);
@@ -154,9 +158,9 @@ class _ProfilePageState extends State<ProfilePage> {
                         children: [
                           ElevatedButton(
                               onPressed: () {
-                                var _me = me;
+                                var _memory = memory;
                                 setState(() {
-                                  me = _me;
+                                  memory = _memory;
                                   _searchMode = false;
                                   containerGeneral = getHomePage(_searchMode);
                                 });
@@ -166,9 +170,9 @@ class _ProfilePageState extends State<ProfilePage> {
                             width: MediaQuery.of(context).size.width - 200,
                             child: TextField(
                               onChanged: (text) {
-                                var _me = me;
+                                var _memory = memory;
                                 setState(() {
-                                  me = _me;
+                                  memory = _memory;
                                   _itemsRecherche = getListeItems(text);
                                   containerGeneral = getHomePage(_searchMode);
                                 });
@@ -229,9 +233,9 @@ class _ProfilePageState extends State<ProfilePage> {
                 labelNbFriends,
                 GestureDetector(
                     onTap: () {
-                      var _me = me;
+                      var _memory = memory;
                       setState(() {
-                        me = _me;
+                        memory = _memory;
                         containerGeneral =
                             getFriendsPage(aUser, aUser.getId() == me.getId());
                       });
@@ -277,10 +281,11 @@ class _ProfilePageState extends State<ProfilePage> {
       return Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
         ElevatedButton(
             onPressed: () {
-              var _me = me;
+              var _prevUser = memory.pop();
+              var _memory = memory;
               setState(() {
-                me = _me;
-                containerGeneral = getFriendsPage(me, true);
+                memory = _memory;
+                containerGeneral = getFriendsPage(_prevUser, _prevUser == me);
               });
             },
             child: Text(
@@ -342,10 +347,10 @@ class _ProfilePageState extends State<ProfilePage> {
               Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
                 ElevatedButton(
                     onPressed: () {
-                      var _me = me;
+                      var _memory = memory;
                       setState(() {
-                        me = _me;
-                        containerGeneral = getMainScreen(1);
+                        memory = _memory;
+                        containerGeneral = getUserPage(aUser, myProfile);
                       });
                     },
                     child: Text(
@@ -458,9 +463,10 @@ class _ProfilePageState extends State<ProfilePage> {
       User aFriend = User(aUser.getMyFriends()[i]);
       liste.add(GestureDetector(
           onTap: () {
-            var _me = me;
+            memory.push(aUser);
+            var _memory = memory;
             setState(() {
-              me = _me;
+              memory = _memory;
               containerGeneral = getUserPage(aFriend, false);
             });
           },
@@ -497,6 +503,7 @@ class _ProfilePageState extends State<ProfilePage> {
     //trouver le user id
     savedUserID = "testUser"; //(await storage.read(key: "_userID"))!;
     me = User(savedUserID);
+    memory = Activememory(me);
 
     //userTest
     if (savedUserID == "testUser") {
