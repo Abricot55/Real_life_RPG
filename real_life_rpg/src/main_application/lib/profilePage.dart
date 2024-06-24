@@ -48,6 +48,7 @@ class _ProfilePageState extends State<ProfilePage> {
    */
   @override
   Widget build(BuildContext context) {
+    //Initialisation if the profile page gets loaded for the first time
     if (containerGeneral == null) {
       readUserID();
       containerGeneral = getMainScreen(_selectedIndex);
@@ -74,6 +75,11 @@ class _ProfilePageState extends State<ProfilePage> {
         body: containerGeneral);
   }
 
+  /**
+   * @brief this function returns the widget to display when the user interracts with the naviagtion bar
+   * @param index - the index of the item clicked on the navigation bar
+   * @return the widget to display over the navigation bar
+   */
   Center getMainScreen(int index) {
     if (index == 0) {
       return Center(child: getHomePage(_searchMode));
@@ -91,6 +97,11 @@ class _ProfilePageState extends State<ProfilePage> {
     }
   }
 
+  /**
+   * @brief this function returns the widget to display on the home page
+   * @param _sM - the state of the home page (searchMode false or true)
+   * @return the widget of the home screen or search screen
+   */
   Column getHomePage(bool _sM) {
     if (_sM == false) {
       return Column(
@@ -190,6 +201,12 @@ class _ProfilePageState extends State<ProfilePage> {
     }
   }
 
+  /**
+   * @brief this function returns the widget that displays a user page
+   * @param aUser - the user to display
+   * @param myProfile - displaying the main user's profile or someone else's profuile
+   * @return the widget that displays a user page
+   */
   Center getUserPage(User aUser, bool myProfile) {
     setUserContainer(aUser, myProfile);
     return Center(
@@ -237,6 +254,12 @@ class _ProfilePageState extends State<ProfilePage> {
     );
   }
 
+  /**
+   * @brief this function returns the widget that displays the top of a user page
+   * @param aUser - the user to display
+   * @param myProfile - displaying the main user's profile or someone else's profuile
+   * @return the widget that displays the top of a user page
+   */
   Row getTopUserPageController(User aUser, bool myProfile) {
     if (myProfile) {
       return Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
@@ -272,6 +295,12 @@ class _ProfilePageState extends State<ProfilePage> {
     }
   }
 
+  /**
+   * @brief this function returns a string to present a user's skills
+   * @param aUser - the user to display
+   * @param myProfile - displaying the main user's profile or someone else's profuile
+   * @return the correct string
+   */
   String getStringSkills(User user, bool myProfile) {
     if (myProfile) {
       return "My skills";
@@ -279,6 +308,7 @@ class _ProfilePageState extends State<ProfilePage> {
       return "${user.getId()}'s skills";
     }
   }
+
 
   List<Widget> getListeItems(String text) {
     sendRequest("get", path: "users/relevant", urlMap: {"pseudo": text})
@@ -294,6 +324,12 @@ class _ProfilePageState extends State<ProfilePage> {
     return [];
   }
 
+  /**
+   * @brief this function returns the widget that displays the friends of a user
+   * @param aUser - the user to display
+   * @param myProfile - displaying the main user's profile or someone else's profuile
+   * @return the widget that displays the friends of the user
+   */
   Center getFriendsPage(User aUser, bool myProfile) {
     return Center(
         child: Column(children: [
@@ -354,6 +390,11 @@ class _ProfilePageState extends State<ProfilePage> {
     }
   }
 
+  /**
+   * @brief this function sets all of the containers with the user's informtations
+   * @param aUser - the user to display
+   * @param myProfile - displaying the main user's profile or someone else's profuile
+   */
   void setUserContainer(User aUser, bool myProfile) {
     labelUserIDController = Text(
       aUser.getId(),
@@ -406,6 +447,11 @@ class _ProfilePageState extends State<ProfilePage> {
       containerDescription = Container();
   }
 
+  /**
+   * @brief this function returns the interactive widgets of the user's friends
+   * @param aUser - the user to display
+   * @return the interactive widgets of the friends
+   */
   List<Widget> getListAffichageFriends(User aUser) {
     List<Widget> liste = [];
     for (var i = 0; i < aUser.getNbFriends(); i++) {
