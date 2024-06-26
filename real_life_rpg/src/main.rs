@@ -8,13 +8,14 @@ use warp::Filter;
 
 #[tokio::main]
 pub async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
-    /*let mut var: HashMap<String, Value> = HashMap::new();
-    var.insert("pseudo".to_string(), Value::String("s".to_string()));
-    match search_user_function(var).await{
+    /*let mut var: HashMap<String, String> = HashMap::new();
+    var.insert("image".to_string(), "s".to_string());
+    var.insert("key".to_string(), "1234".to_string());
+    match add_photo_user(var).await{
         Ok(response) => print!("o"),
         Err(_) => print!("AS")
     }*/
-    let save_photo = warp::path("save")
+    let save_photo_route = warp::path("save")
         .and(warp::path("photo"))
         .and(warp::put())
         .and(warp::body::json())
@@ -46,7 +47,7 @@ pub async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
     let routes = relevant_search_user_route
         .or(search_user_route)
         .or(get_user_route)
-        .or(post_user_route);
+        .or(post_user_route).or(save_photo_route);
     warp::serve(routes).run(([127, 0, 0, 1], 3000)).await;
     Ok(())
 }

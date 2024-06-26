@@ -5,6 +5,7 @@ use arangors::{
     Database,
 };
 use arangors::{AqlQuery, Document};
+use image::DynamicImage;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 
@@ -57,10 +58,11 @@ pub struct RelationUserSkillType {
 }
 #[derive(Serialize, Deserialize)]
 pub struct PhotoListType{
+    pub _key : Option<String>,
     pub photos : Vec<PhotoType>,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Clone)]
 pub struct PhotoType{
     pub image : String,
     pub title : String,
@@ -368,6 +370,7 @@ pub async fn relevant_search_field(
         Err("There is no search field!".to_string())
     }
 }
+
 
 /**
  * @brief module use to link tests to this librairy

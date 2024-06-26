@@ -1,11 +1,12 @@
 use crate::database_logic::database_logic::*;
-use crate::util::is_valid_email;
+use crate::util::{is_valid_email, json_to_hashmap};
 use hyper::body::to_bytes;
 use hyper::StatusCode;
 use hyper::{Body, Response};
 use serde_json::Value;
 use std::collections::HashMap;
 use std::fmt;
+use warp::filters::path::param;
 use warp::reply::Reply;
 /*
 *@brief Custom error
@@ -39,60 +40,12 @@ pub async fn get_body_map(body: Body) -> Option<HashMap<String, Value>> {
     }
 }
 
-/*fn get_document(args: &Vec<String>, index_value: i32) -> Result<DocumentType, MyError> {
-    //args[index_value] = document type, args[index_value]+ = value
-    match args[index_value as usize].to_lowercase().as_str() {
-        "skill" => {
-            if args.len() >= (index_value + 3) as usize {
-                let skill = SkillType {
-                    _key: args[(index_value + 1) as usize].clone(),
-                    name: args[(index_value + 2) as usize].clone(),
-                };
-                return Ok(crate::database_logic::database_logic::DocumentType::Skill(
-                    skill,
-                ));
-            } else {
-                print!("commande invalide")
-            }
-        }
-        "user" => {
-            if args.len() >= (index_value + 7) as usize {
-                match args[(index_value + 6) as usize].clone().parse::<i32>() {
-                    Ok(_) => {
-                        if true {
-                            let user = UserType {
-                                _key: args[(index_value + 1) as usize].clone(),
-                                name: args[(index_value + 2) as usize].clone(),
-                                pseudo: args[(index_value + 3) as usize].clone(),
-                                email: args[(index_value + 4) as usize].clone(),
-                                birth_date: args[(index_value + 5) as usize].clone(),
-                                level: args[(index_value + 6) as usize]
-                                    .clone()
-                                    .parse::<i32>()
-                                    .unwrap(),
-                            };
-                            return Ok(crate::database_logic::database_logic::DocumentType::User(
-                                user,
-                            ));
-                        }
-                    }
-                    Err(_) => {
-                        return Err(MyError {
-                            details: "erreur lors de conversion string to int".to_string(),
-                        })
-                    }
-                }
-            } else {
-                print!("commande invalide")
-            }
-        }
-        _other => print!("other document type, "),
-    }
-    return Err(MyError {
-        details: "document invalide".to_string(),
-    });
-}*/
 
+/**
+ * @brief This function convert a map containing the user information into a User struture.
+ * @param params -> A map with all necessary information. This map must contains the fields name, email, birthday and password.
+ * @return It return the resulting User.
+ */
 fn convert_hash_to_user(params: HashMap<String, String>) -> Result<UserType, String> {
     let name: String = match params.get("name") {
         Some(value) => value.clone(),
@@ -135,9 +88,60 @@ fn convert_hash_to_user(params: HashMap<String, String>) -> Result<UserType, Str
         password,
     });
 }
+
 /**
- * @brief This function is called when a add request is made to the server.
- * @param args -> A vector of string that contains the request to the server.
+ * @brief This function convert a map containing the photo information into a PhotoType struture.
+ * @param params -> A map with all necessary information. This map must contains the field image.
+ * @return It return the resulting Photo.
+ */
+fn convert_hash_photo(params: HashMap<String, String>) -> Result<PhotoType, String> {
+    let image = match params.get("image") {
+        Some(value) => value.clone(),
+        None => return Err("There is no image".to_string()),
+    };
+    let title: String = match params.get("title") {
+        Some(value) => value.clone(),
+        None => "".to_string(),
+    };
+    let likes: i32 = match params.get("likes") {
+        Some(value) => value
+            .parse::<i32>()
+            .map_err(|_| "The number of like need to be a number")?,
+        None => 0,
+    };
+    let comments: Vec<String> = match params.get("comments") {
+        Some(value) => {
+            let split_strings: Vec<&str> = value[1..value.len() - 1].split(',').collect();
+            split_strings
+                .iter()
+                .map(|s| s.trim_matches('"').to_string())
+                .collect()
+        }
+        None => [].to_vec(),
+    };
+    let shared: i32 = match params.get("shared") {
+        Some(value) => value
+            .parse::<i32>()
+            .map_err(|_| "The number of shares need to be a number")?,
+        None => 0,
+    };
+    let description: String = match params.get("description") {
+        Some(value) => value.clone(),
+        None => "".to_string(),
+    };
+    return Ok(PhotoType {
+        image,
+        title,
+        likes,
+        comments,
+        shared,
+        description,
+    });
+}
+
+/**
+ * @brief This function is called when a add user request is made to the server. It also create a photo collection with the same key as the user.
+ * @param params -> A map containing all the user information. The map must have the name, email, birthday and password field.
  * @return A String which indicate the state of the request.
  */
 pub async fn add_user_function(
@@ -145,6 +149,7 @@ pub async fn add_user_function(
 ) -> Result<Response<Body>, warp::Rejection> {
     match convert_hash_to_user(params) {
         Ok(user) => {
+            let pseudo = user.pseudo.clone();
             match add_document_to_collection(
                 DocumentType::User(user),
                 "Users".to_string(),
@@ -152,7 +157,23 @@ pub async fn add_user_function(
             )
             .await
             {
-                Ok(_) => Ok(Response::new(Body::from("Document Créée".to_string()))),
+                Ok(_) => {
+                    let mut map: HashMap<String, Value> = HashMap::new();
+                    map.insert("pseudo".to_string(), serde_json::Value::String(pseudo));
+                    match search_field(map, "users_view".to_string(), "MainDB".to_string()).await{
+                        Ok(values) => if values.len() > 0 {
+                            match values[0].get("_key"){
+                                Some(key) => match add_document_to_collection(DocumentType::Photos(PhotoListType { _key: Some(key.to_string().clone()), photos: [].to_vec() }), "Photos".to_string(), "MainDB".to_string()).await{
+                                    Ok(_) => Ok(warp::reply::with_status("All document have been created!", StatusCode::NOT_ACCEPTABLE).into_response()),
+                                    Err(_) => Ok(warp::reply::with_status("The photo document couldn't be added to the collection", StatusCode::NOT_FOUND).into_response()),
+                                },
+                                None => Ok(warp::reply::with_status("The document did not have a _key field", StatusCode::NOT_FOUND).into_response()),
+                            }
+                        }else{
+                            Ok(warp::reply::with_status("More than one user have been found", StatusCode::NOT_FOUND).into_response())
+                        },
+                        Err(_) => Ok(warp::reply::with_status("L'utilisateur n'a pas été trouvé", StatusCode::NOT_FOUND).into_response()),
+                    }},
                 Err(e) => Ok(warp::reply::with_status(e, StatusCode::NOT_FOUND).into_response()),
             }
         }
@@ -189,14 +210,14 @@ pub async fn search_user_function(
 ) -> Result<Response<Body>, warp::Rejection> {
     match search_field(params, "users_view".to_string(), "MainDB".to_string()).await {
         Ok(document) => match serde_json::to_string(&document) {
-            Ok(json) => {Ok(Response::new(Body::from(json)))},
+            Ok(json) => Ok(Response::new(Body::from(json))),
             Err(_) => Ok(warp::reply::with_status(
                 "Serialization error",
                 StatusCode::NOT_ACCEPTABLE,
             )
             .into_response()),
         },
-        Err(e) => {Ok(warp::reply::with_status(e, StatusCode::NOT_ACCEPTABLE).into_response())},
+        Err(e) => Ok(warp::reply::with_status(e, StatusCode::NOT_ACCEPTABLE).into_response()),
     }
 }
 /**
@@ -209,20 +230,136 @@ pub async fn relevant_search_user_function(
 ) -> Result<Response<Body>, warp::Rejection> {
     match relevant_search_field(params, "users_view".to_string(), "MainDB".to_string()).await {
         Ok(document) => match serde_json::to_string(&document) {
-            Ok(json) => {Ok(Response::new(Body::from(json)))},
+            Ok(json) => Ok(Response::new(Body::from(json))),
             Err(_) => Ok(warp::reply::with_status(
                 "Serialization error",
                 StatusCode::NOT_ACCEPTABLE,
             )
             .into_response()),
         },
-        Err(e) => {;Ok(warp::reply::with_status(e, StatusCode::NOT_ACCEPTABLE).into_response())},
+        Err(e) => Ok(warp::reply::with_status(e, StatusCode::NOT_ACCEPTABLE).into_response()),
     }
 }
 
-fn add_photo_user(params : HashMap<String, Value>) -> Result<Response<Body>, warp::rejection>{
-    
+/**
+ * @brief This function add a photo in the document with the key provided as a parameter. The map passed in argument must contains the photo and key field for this function to work.
+ * @param params -> A map with all the informations needed. Must contains the key and photo fields.
+ * @return A response containing a message indicating if the operation was successfull.
+ */
+pub async fn add_photo_user(
+    params: HashMap<String, String>,
+) -> Result<Response<Body>, warp::Rejection> {
+    match params.get("key") {
+        Some(key) => match convert_hash_photo(params.clone()) {
+            Ok(photo) => {
+                match get_document_in_collection(
+                    key.clone(),
+                    "Photos".to_string(),
+                    "MainDB".to_string(),
+                )
+                .await
+                {
+                    Ok(document) => match json_to_hashmap(document.as_str().unwrap()) {
+                        Ok(map) => match map.get("photos") {
+                            Some(value) => match serde_json::from_value::<Vec<PhotoType>>(value.clone()) {
+                                Ok(photos) => {
+                                    let mut temp_photos = photos.clone();
+                                    temp_photos.push(photo);
+                                    let photo_list: PhotoListType = PhotoListType {
+                                        _key: Some(key.clone()),
+                                        photos : temp_photos,
+                                    };
+                                    update_document_in_collection(key.clone(), DocumentType::Photos(photo_list), "Photos".to_string(), "MainDB".to_string()).await;
+                                    return Ok(warp::reply::with_status(
+                                        "Photo Succesfully added",
+                                        StatusCode::NOT_ACCEPTABLE,
+                                    )
+                                    .into_response());
+                                }
+                                Err(_) => {
+                                    return Ok(warp::reply::with_status(
+                                        "cannot get the photo as vector",
+                                        StatusCode::NOT_ACCEPTABLE,
+                                    )
+                                    .into_response())
+                                }
+                            },
+                            None => {
+                                return Ok(warp::reply::with_status(
+                                    "Cannot convert to photo list",
+                                    StatusCode::NOT_ACCEPTABLE,
+                                )
+                                .into_response())
+                            }
+                        },
+                        Err(e) => {
+                            return Ok(warp::reply::with_status(e, StatusCode::NOT_ACCEPTABLE)
+                                .into_response());
+                        }
+                    },
+                    Err(e) => {
+                        return Ok(
+                            warp::reply::with_status(e, StatusCode::NOT_ACCEPTABLE).into_response()
+                        );
+                    }
+                }
+            }
+            Err(e) => {
+                return Ok(warp::reply::with_status(e, StatusCode::NOT_ACCEPTABLE).into_response());
+            }
+        },
+        None => {
+            return Ok(warp::reply::with_status(
+                "No key provided".to_string(),
+                StatusCode::NOT_ACCEPTABLE,
+            )
+            .into_response());
+        }
+    }
 }
+
+
+/**
+ * @brief This function get a list of photo in the database depending of the key passed as an argument.
+ * @param params -> a Map that contains the key of the list of the document in the photo collection.
+ * @return A response containing the document or a string if it didn't worked.
+ */
+pub async fn get_photo_list(
+    params: HashMap<String, String>,
+) -> Result<Response<Body>, warp::Rejection> {
+    match params.get("key") {
+        Some(key) => {
+            match get_document_in_collection(
+                key.clone(),
+                "Photos".to_string(),
+                "MainDB".to_string(),
+            )
+            .await
+            {
+                Ok(document) => match serde_json::to_string(&document) {
+                    Ok(json) => Ok(Response::new(Body::from(json))),
+                    Err(_) => Ok(warp::reply::with_status(
+                        "Serialization error",
+                        StatusCode::NOT_ACCEPTABLE,
+                    )
+                    .into_response()),
+                },
+                Err(e) => {
+                    return Ok(
+                        warp::reply::with_status(e, StatusCode::NOT_ACCEPTABLE).into_response()
+                    )
+                }
+            }
+        }
+        None => {
+            return Ok(
+                warp::reply::with_status("No Key provided", StatusCode::NOT_ACCEPTABLE)
+                    .into_response(),
+            )
+        }
+    }
+}
+
 /*
 /**
  * @brief Function called when the update request is sent to the server.
