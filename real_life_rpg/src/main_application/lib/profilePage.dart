@@ -60,6 +60,7 @@ class _ProfilePageState extends State<ProfilePage> {
     return Scaffold(
         bottomNavigationBar: BottomNavigationBar(
             onTap: (int index) {
+              memory.clearStack();
               var _memory = memory;
               setState(() {
                 memory = _memory;
@@ -88,7 +89,7 @@ class _ProfilePageState extends State<ProfilePage> {
     if (index == 0) {
       return Center(child: getHomePage(_searchMode));
     } else if (index == 1) {
-      return getUserPage(me, true);
+      return getUserPage(me, true, memory.isStackEmpty());
     } else if (index == 2) {
       navigateToNextScreen(context, 4, me : me);
       return  Center(
@@ -211,7 +212,7 @@ class _ProfilePageState extends State<ProfilePage> {
    * @param myProfile - displaying the main user's profile or someone else's profuile
    * @return the widget that displays a user page
    */
-  Center getUserPage(User aUser, bool myProfile) {
+  Center getUserPage(User aUser, bool myProfile, bool emptyStack) {
     setUserContainer(aUser, myProfile);
     return Center(
       child: Column(children: [
@@ -221,7 +222,7 @@ class _ProfilePageState extends State<ProfilePage> {
             child: Column(
               children: [
                 SizedBox(height: 30),
-                getTopUserPageController(aUser, myProfile)
+                getTopUserPageController(aUser, myProfile, emptyStack)
               ],
             )),
         Container(
@@ -264,9 +265,29 @@ class _ProfilePageState extends State<ProfilePage> {
    * @param myProfile - displaying the main user's profile or someone else's profuile
    * @return the widget that displays the top of a user page
    */
-  Row getTopUserPageController(User aUser, bool myProfile) {
+  Row getTopUserPageController(User aUser, bool myProfile, bool emptyStack) {
+    Container container = Container(child: SizedBox(width: 95,),);
+    if (!emptyStack){
+      container = Container(child: Row(children: [
+        ElevatedButton(
+            onPressed: () {
+              var _prevUser = memory.pop();
+              var _memory = memory;
+              setState(() {
+                memory = _memory;
+                containerGeneral = getFriendsPage(_prevUser, _prevUser == me);
+              });
+            },
+            child: Text(
+              "Back",
+              style: TextStyle(fontSize: 15.0),
+            )),
+        SizedBox(width: 10,)
+      ],),);
+    }
     if (myProfile) {
       return Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+        container,
         labelUserIDController,
         ElevatedButton(
             onPressed: () {
@@ -350,7 +371,7 @@ class _ProfilePageState extends State<ProfilePage> {
                       var _memory = memory;
                       setState(() {
                         memory = _memory;
-                        containerGeneral = getUserPage(aUser, myProfile);
+                        containerGeneral = getUserPage(aUser, myProfile, memory.isStackEmpty());
                       });
                     },
                     child: Text(
@@ -460,14 +481,14 @@ class _ProfilePageState extends State<ProfilePage> {
   List<Widget> getListAffichageFriends(User aUser) {
     List<Widget> liste = [];
     for (var i = 0; i < aUser.getNbFriends(); i++) {
-      User aFriend = User(aUser.getMyFriends()[i]);
+      User aFriend = aUser.getMyFriends()[i];
       liste.add(GestureDetector(
           onTap: () {
             memory.push(aUser);
             var _memory = memory;
             setState(() {
               memory = _memory;
-              containerGeneral = getUserPage(aFriend, false);
+              containerGeneral = getUserPage(aFriend, aFriend.getId() == me.getId(), memory.isStackEmpty());
             });
           },
           child: Row(
@@ -507,8 +528,9 @@ class _ProfilePageState extends State<ProfilePage> {
 
     //userTest
     if (savedUserID == "testUser") {
-      me.setMyFriends(["Adamou", "Sbasien", "Jean-Jean", "Mike", "Marie-Ève"]);
-      me.setNbFriends(me.getMyFriends().length);
+      User adamou = User("Adamou");
+      adamou.setMyFriends([me, User("Fifiloulou")]);
+      me.setMyFriends([adamou, User("Sbasien"), User("Jean-Jean"), User("Mike"), User("Marie-Ève")]);
       me.setActiveSkills(
           {"Cooking": 34.3, "Skateboard": 12.1, "Chapeau melon": 99.90});
       me.setProfileDescription(

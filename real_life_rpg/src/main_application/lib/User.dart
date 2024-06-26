@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 class User {
   final String _id;
   String _name = "";
-  List<String> _myFriends = [];
+  List<User> _myFriends = [];
   int _nbFriends = 0;
   String _profileDescription = "";
   Map<String, double> _activeSkills = {};
@@ -31,15 +31,16 @@ class User {
     this._name = name;
   }
 
-  List<String> getMyFriends() {
+  List<User> getMyFriends() {
     if (_myFriends == []) {
       //load the list of the user's friend's id
     }
     return _myFriends;
   }
 
-  void setMyFriends(List<String> myFriends) {
+  void setMyFriends(List<User> myFriends) {
     this._myFriends = myFriends;
+    this._nbFriends = myFriends.length;
   }
 
   int getNbFriends() {

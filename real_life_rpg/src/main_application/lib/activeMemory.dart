@@ -24,4 +24,13 @@ class Activememory {
     _stackLength -= 1;
     return _stack[_stackLength];
   }
+
+  void clearStack(){
+    _stackLength = 0;
+    _stack.clear();
+  }
+
+  bool isStackEmpty(){
+    return _stackLength == 0;
+  }
 }
