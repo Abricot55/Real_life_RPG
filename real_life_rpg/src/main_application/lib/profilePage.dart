@@ -91,10 +91,28 @@ class _ProfilePageState extends State<ProfilePage> {
     } else if (index == 1) {
       return getUserPage(me, true, memory.isStackEmpty());
     } else if (index == 2) {
-      navigateToNextScreen(context, 4, me : me);
-      return  Center(
-        child: Text("QU'EST-CE QUE TU FAIS LÀ MAN??"),
-      );
+      //navigateToNextScreen(context, 4, me : me);
+      if (me != null) {
+        var _this = this;
+        findCamera().then((camera) {
+          if (camera != null) {
+            var _memory = memory;
+            _this.setState(() {
+              memory = _memory;
+              containerGeneral = TakePictureScreen(camera: camera, me: me);
+            });
+          } else {
+            var _memory = memory;
+            _this.setState(() {
+              memory = _memory;
+              containerGeneral = Text("No camera found");
+            });
+          }
+        });
+        return Center(child: Text("Waiting for camera"));
+      } else {
+        return Center(child: Text("Utilisateur invalide"));
+      }
     } else {
       return Center(
         child: Text("QU'EST-CE QUE TU FAIS LÀ MAN??"),

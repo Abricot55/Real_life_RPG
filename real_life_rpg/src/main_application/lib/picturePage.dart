@@ -9,11 +9,7 @@ import 'User.dart';
 
 // A screen that allows users to take a picture using a given camera.
 class TakePictureScreen extends StatefulWidget {
-  const TakePictureScreen({
-    super.key,
-    required this.camera,
-    required this.me
-  });
+  const TakePictureScreen({super.key, required this.camera, required this.me});
 
   final User me;
   final CameraDescription camera;
@@ -52,7 +48,6 @@ class TakePictureScreenState extends State<TakePictureScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Take a picture')),
       // You must wait until the controller is initialized before displaying the
       // camera preview. Use a FutureBuilder to display a loading spinner until the
       // controller has finished initializing.
@@ -61,7 +56,13 @@ class TakePictureScreenState extends State<TakePictureScreen> {
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.done) {
             // If the Future is complete, display the preview.
-            return CameraPreview(_controller);
+            return Column(children: [
+              SizedBox(
+                height: 25,
+              ),
+              Text("Take a picture", style: TextStyle(fontSize: 25),),
+              CameraPreview(_controller)
+            ]);
           } else {
             // Otherwise, display a loading indicator.
             return const Center(child: CircularProgressIndicator());
@@ -120,7 +121,9 @@ class DisplayPictureScreen extends StatelessWidget {
         Image.file(File(imagePath)),
         ElevatedButton(
             onPressed: () {
-              (){sendRequest("");};
+              () {
+                sendRequest("");
+              };
             },
             child: Text("ok"))
       ]),
