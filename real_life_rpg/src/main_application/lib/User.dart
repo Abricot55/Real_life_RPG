@@ -2,6 +2,8 @@ import 'package:camera/camera.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
+import 'Message.dart';
+
 class User {
   final String _id;
   String _name = "";
@@ -11,6 +13,8 @@ class User {
   Map<String, double> _activeSkills = {};
   Color _profilePicture = Colors.grey;
   List<XFile> _photos = [];
+  Map<String, List<Message>> _myMessages = {};
+  List<User> _myContacts = [];
 
   User(this._id) {
     assert(_id != "");
@@ -86,4 +90,33 @@ class User {
   void setProfilePicture(Color profilePicture) {
     this._profilePicture = profilePicture;
   }
+
+  Map<String, List<Message>> getMyMessages() {
+    return _myMessages;
+  }
+
+  void setMyMessages(Map<String, List<Message>> myMessages) {
+    this._myMessages = myMessages;
+
+    _myContacts.clear();
+    //update contacts UNOPTIMIZED
+    for (MapEntry<String, List<Message>> item in _myMessages.entries) {
+      bool isFriend = false;
+      for (int i = 0; i < _myFriends.length && !isFriend; i++) {
+        if (_myFriends[i].getId() == item.key) {
+          isFriend = true;
+          _myContacts.add(_myFriends[i]);
+        }
+      }
+      //new user
+      if (!isFriend) {
+        _myContacts.add(User(item.key));
+      }
+    }
+  }
+
+  List<User> getMyContacts(){
+    return this._myContacts;
+  }
+
 }

@@ -8,6 +8,7 @@ import 'package:flutter/services.dart';
 import 'package:main_application/activeMemory.dart';
 import 'package:main_application/picturePage.dart';
 import 'package:percent_indicator/linear_percent_indicator.dart';
+import 'Message.dart';
 import 'User.dart';
 import 'main.dart';
 import 'utilities.dart';
@@ -289,24 +290,35 @@ class _ProfilePageState extends State<ProfilePage> {
    * @return the widget that displays the top of a user page
    */
   Row getTopUserPageController(User aUser, bool myProfile, bool emptyStack) {
-    Container container = Container(child: SizedBox(width: 95,),);
-    if (!emptyStack){
-      container = Container(child: Row(children: [
-        ElevatedButton(
-            onPressed: () {
-              var _prevUser = memory.pop();
-              var _memory = memory;
-              setState(() {
-                memory = _memory;
-                containerGeneral = getFriendsPage(_prevUser, _prevUser == me);
-              });
-            },
-            child: Text(
-              "Back",
-              style: TextStyle(fontSize: 15.0),
-            )),
-        SizedBox(width: 10,)
-      ],),);
+    Container container = Container(
+      child: SizedBox(
+        width: 95,
+      ),
+    );
+    if (!emptyStack) {
+      container = Container(
+        child: Row(
+          children: [
+            ElevatedButton(
+                onPressed: () {
+                  var _prevUser = memory.pop();
+                  var _memory = memory;
+                  setState(() {
+                    memory = _memory;
+                    containerGeneral =
+                        getFriendsPage(_prevUser, _prevUser == me);
+                  });
+                },
+                child: Text(
+                  "Back",
+                  style: TextStyle(fontSize: 15.0),
+                )),
+            SizedBox(
+              width: 10,
+            )
+          ],
+        ),
+      );
     }
     if (myProfile) {
       return Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
@@ -358,7 +370,6 @@ class _ProfilePageState extends State<ProfilePage> {
     }
   }
 
-
   List<Widget> getListeItems(String text) {
     sendRequest("get", path: "users/relevant", urlMap: {"pseudo": text})
         .then((liste) {
@@ -394,7 +405,8 @@ class _ProfilePageState extends State<ProfilePage> {
                       var _memory = memory;
                       setState(() {
                         memory = _memory;
-                        containerGeneral = getUserPage(aUser, myProfile, memory.isStackEmpty());
+                        containerGeneral = getUserPage(
+                            aUser, myProfile, memory.isStackEmpty());
                       });
                     },
                     child: Text(
@@ -511,7 +523,8 @@ class _ProfilePageState extends State<ProfilePage> {
             var _memory = memory;
             setState(() {
               memory = _memory;
-              containerGeneral = getUserPage(aFriend, aFriend.getId() == me.getId(), memory.isStackEmpty());
+              containerGeneral = getUserPage(aFriend,
+                  aFriend.getId() == me.getId(), memory.isStackEmpty());
             });
           },
           child: Row(
@@ -551,13 +564,7 @@ class _ProfilePageState extends State<ProfilePage> {
 
     //userTest
     if (savedUserID == "testUser") {
-      User adamou = User("Adamou");
-      adamou.setMyFriends([me, User("Fifiloulou")]);
-      me.setMyFriends([adamou, User("Sbasien"), User("Jean-Jean"), User("Mike"), User("Marie-Ève")]);
-      me.setActiveSkills(
-          {"Cooking": 34.3, "Skateboard": 12.1, "Chapeau melon": 99.90});
-      me.setProfileDescription(
-          "This is a test account made to preview what an actual account could display on a phone when the connection with the server is successful!");
+      setUserTest(me);
     }
   }
 }

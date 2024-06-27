@@ -13,6 +13,7 @@ import 'package:main_application/settingsPage.dart';
 import 'package:main_application/utilities.dart';
 import 'package:provider/provider.dart';
 import 'package:http/http.dart' as http;
+import 'Message.dart';
 import 'User.dart';
 import 'signUpPage.dart';
 //import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -280,4 +281,34 @@ void navigateToNextScreen(BuildContext context, int screenNumber,
           .push(MaterialPageRoute(builder: (context) => ChatPage()));
       break;
   }
+}
+
+void setUserTest(User me) {
+  User adamou = User("Adamou");
+  adamou.setMyFriends([me, User("Fifiloulou")]);
+  me.setMyFriends([
+    adamou,
+    User("Sbasien"),
+    User("Jean-Jean"),
+    User("Mike"),
+    User("Marie-Ève")
+  ]);
+  me.setActiveSkills(
+      {"Cooking": 34.3, "Skateboard": 12.1, "Chapeau melon": 99.90});
+  me.setProfileDescription(
+      "This is a test account made to preview what an actual account could display on a phone when the connection with the server is successful!");
+  me.setMyMessages({
+    adamou.getId(): [
+      Message(DateTime(5), adamou.getId(), me.getId(), "Epic mate!"),
+      Message(DateTime(4), me.getId(), adamou.getId(),
+          "Go check my new post! I just got level 99 in chapeau melon!"),
+      Message(DateTime(3), adamou.getId(), me.getId(), "Heyyy testUser!!"),
+      Message(DateTime(2), me.getId(), adamou.getId(), "Hello!"),
+    ],
+    "nonFriendUser": [
+      Message(DateTime(2), me.getId(), "nonFriendUser", "Thanks mate!"),
+      Message(
+          DateTime(1), "nonFriendUser", me.getId(), "Nice account buddy <3"),
+    ]
+  });
 }
