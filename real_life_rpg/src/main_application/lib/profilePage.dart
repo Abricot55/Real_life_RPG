@@ -156,7 +156,12 @@ class _ProfilePageState extends State<ProfilePage> {
                                   containerGeneral = getHomePage(_searchMode);
                                 });
                               },
-                              child: Text("Search"))
+                              child: Text("Search")),
+                          ElevatedButton(
+                              onPressed: () {
+                                navigateToNextScreen(context, 4);
+                              },
+                              child: Text("Chat"))
                         ]),
                     Divider()
                   ]))

@@ -6,6 +6,7 @@ import 'dart:io';
 import 'package:camera/camera.dart';
 import 'package:english_words/english_words.dart';
 import 'package:flutter/material.dart';
+import 'package:main_application/chatPage.dart';
 import 'package:main_application/picturePage.dart';
 import 'package:main_application/profilePage.dart';
 import 'package:main_application/settingsPage.dart';
@@ -275,16 +276,8 @@ void navigateToNextScreen(BuildContext context, int screenNumber,
           .push(MaterialPageRoute(builder: (context) => Settingspage()));
       break;
     case 4:
-      if (me != null) {
-        findCamera().then((camera) {
-          if (camera != null) {
-            Navigator.of(context).push(MaterialPageRoute(
-                builder: (context) =>
-                    TakePictureScreen(camera: camera, me: me)));
-          } else {
-            print("Aucune camera trouvée");
-          }
-        });
-      }
+      Navigator.of(context)
+          .push(MaterialPageRoute(builder: (context) => ChatPage()));
+      break;
   }
 }
