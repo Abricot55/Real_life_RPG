@@ -1,11 +1,13 @@
 use crate::database_logic::database_logic::*;
-use crate::util::{is_valid_email, json_to_hashmap};
+use crate::util::{is_valid_email, json_to_hashmap, weird_json_normal_str};
 use hyper::body::to_bytes;
 use hyper::StatusCode;
 use hyper::{Body, Response};
 use serde_json::Value;
 use std::collections::HashMap;
 use std::fmt;
+use std::time::Duration;
+use tokio::time::sleep;
 use warp::filters::path::param;
 use warp::reply::Reply;
 /*
@@ -39,7 +41,6 @@ pub async fn get_body_map(body: Body) -> Option<HashMap<String, Value>> {
         Err(_) => return None,
     }
 }
-
 
 /**
  * @brief This function convert a map containing the user information into a User struture.
@@ -159,25 +160,104 @@ pub async fn add_user_function(
             {
                 Ok(_) => {
                     let mut map: HashMap<String, Value> = HashMap::new();
-                    map.insert("pseudo".to_string(), serde_json::Value::String(pseudo));
-                    match search_field(map, "users_view".to_string(), "MainDB".to_string()).await{
-                        Ok(values) => if values.len() > 0 {
-                            match values[0].get("_key"){
-                                Some(key) => match add_document_to_collection(DocumentType::Photos(PhotoListType { _key: Some(key.to_string().clone()), photos: [].to_vec() }), "Photos".to_string(), "MainDB".to_string()).await{
-                                    Ok(_) => Ok(warp::reply::with_status("All document have been created!", StatusCode::NOT_ACCEPTABLE).into_response()),
-                                    Err(_) => Ok(warp::reply::with_status("The photo document couldn't be added to the collection", StatusCode::NOT_FOUND).into_response()),
-                                },
-                                None => Ok(warp::reply::with_status("The document did not have a _key field", StatusCode::NOT_FOUND).into_response()),
+                    map.insert(
+                        "pseudo".to_string(),
+                        serde_json::Value::String(pseudo.clone()),
+                    );
+                    sleep(Duration::from_millis(100)).await;
+
+                    let mut retries = 5;
+                    while retries > 0 {
+                        match search_field(
+                            map.clone(),
+                            "users_view".to_string(),
+                            "MainDB".to_string(),
+                        )
+                        .await
+                        {
+                            Ok(values) => {
+                                if values.len() > 0 {
+                                    print!("Received user data.");
+                                    match values[0].get("_key") {
+                                        Some(key) => {
+                                            let real_key: String = weird_json_normal_str(key.to_string());
+                                            let temp_photo: PhotoListType = PhotoListType {
+                                                _key: Some(real_key),
+                                                photos: vec![],
+                                            };
+                                            match add_document_to_collection(
+                                                DocumentType::Photos(temp_photo),
+                                                "Photos".to_string(),
+                                                "MainDB".to_string(),
+                                            )
+                                            .await
+                                            {
+                                                Ok(_) => {
+                                                    print!("Photo document added successfully.");
+                                                    return Ok(warp::reply::with_status(
+                                                        "All documents have been created!",
+                                                        StatusCode::CREATED,
+                                                    )
+                                                    .into_response());
+                                                }
+                                                Err(err) => {
+                                                    eprintln!(
+                                                        "Failed to add photo document: {:?}",
+                                                        err
+                                                    );
+                                                    return Ok(warp::reply::with_status("The photo document couldn't be added to the collection", StatusCode::INTERNAL_SERVER_ERROR).into_response());
+                                                }
+                                            }
+                                        }
+                                        None => {
+                                            return Ok(warp::reply::with_status(
+                                                "The document did not have a _key field",
+                                                StatusCode::NOT_FOUND,
+                                            )
+                                            .into_response())
+                                        }
+                                    }
+                                } else {
+                                    print!("No user found, retrying...");
+                                }
                             }
-                        }else{
-                            Ok(warp::reply::with_status("More than one user have been found", StatusCode::NOT_FOUND).into_response())
-                        },
-                        Err(_) => Ok(warp::reply::with_status("L'utilisateur n'a pas été trouvé", StatusCode::NOT_FOUND).into_response()),
-                    }},
-                Err(e) => Ok(warp::reply::with_status(e, StatusCode::NOT_FOUND).into_response()),
+                            Err(err) => {
+                                eprintln!("Failed to search user: {:?}", err);
+                                return Ok(warp::reply::with_status(
+                                    "User search failed",
+                                    StatusCode::INTERNAL_SERVER_ERROR,
+                                )
+                                .into_response());
+                            }
+                        }
+
+                        retries -= 1;
+                        sleep(Duration::from_millis(200)).await;
+                    }
+
+                    Ok(warp::reply::with_status(
+                        "No user found after retries",
+                        StatusCode::NOT_FOUND,
+                    )
+                    .into_response())
+                }
+                Err(err) => {
+                    eprintln!("Failed to add user document: {:?}", err);
+                    Ok(warp::reply::with_status(
+                        "Failed to add user",
+                        StatusCode::INTERNAL_SERVER_ERROR,
+                    )
+                    .into_response())
+                }
             }
         }
-        Err(e) => Ok(warp::reply::with_status(e, StatusCode::NOT_ACCEPTABLE).into_response()),
+        Err(err) => {
+            eprintln!("Failed to convert params to user: {:?}", err);
+            Ok(
+                warp::reply::with_status("Invalid user data", StatusCode::BAD_REQUEST)
+                    .into_response(),
+            )
+        }
     }
 }
 
@@ -261,29 +341,37 @@ pub async fn add_photo_user(
                 {
                     Ok(document) => match json_to_hashmap(document.as_str().unwrap()) {
                         Ok(map) => match map.get("photos") {
-                            Some(value) => match serde_json::from_value::<Vec<PhotoType>>(value.clone()) {
-                                Ok(photos) => {
-                                    let mut temp_photos = photos.clone();
-                                    temp_photos.push(photo);
-                                    let photo_list: PhotoListType = PhotoListType {
-                                        _key: Some(key.clone()),
-                                        photos : temp_photos,
-                                    };
-                                    update_document_in_collection(key.clone(), DocumentType::Photos(photo_list), "Photos".to_string(), "MainDB".to_string()).await;
-                                    return Ok(warp::reply::with_status(
-                                        "Photo Succesfully added",
-                                        StatusCode::NOT_ACCEPTABLE,
-                                    )
-                                    .into_response());
+                            Some(value) => {
+                                match serde_json::from_value::<Vec<PhotoType>>(value.clone()) {
+                                    Ok(photos) => {
+                                        let mut temp_photos = photos.clone();
+                                        temp_photos.push(photo);
+                                        let photo_list: PhotoListType = PhotoListType {
+                                            _key: Some(key.clone()),
+                                            photos: temp_photos,
+                                        };
+                                        update_document_in_collection(
+                                            key.clone(),
+                                            DocumentType::Photos(photo_list),
+                                            "Photos".to_string(),
+                                            "MainDB".to_string(),
+                                        )
+                                        .await;
+                                        return Ok(warp::reply::with_status(
+                                            "Photo Succesfully added",
+                                            StatusCode::NOT_ACCEPTABLE,
+                                        )
+                                        .into_response());
+                                    }
+                                    Err(_) => {
+                                        return Ok(warp::reply::with_status(
+                                            "cannot get the photo as vector",
+                                            StatusCode::NOT_ACCEPTABLE,
+                                        )
+                                        .into_response())
+                                    }
                                 }
-                                Err(_) => {
-                                    return Ok(warp::reply::with_status(
-                                        "cannot get the photo as vector",
-                                        StatusCode::NOT_ACCEPTABLE,
-                                    )
-                                    .into_response())
-                                }
-                            },
+                            }
                             None => {
                                 return Ok(warp::reply::with_status(
                                     "Cannot convert to photo list",
@@ -317,7 +405,6 @@ pub async fn add_photo_user(
         }
     }
 }
-
 
 /**
  * @brief This function get a list of photo in the database depending of the key passed as an argument.

@@ -9,9 +9,12 @@ use warp::Filter;
 #[tokio::main]
 pub async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
     /*let mut var: HashMap<String, String> = HashMap::new();
-    var.insert("image".to_string(), "s".to_string());
-    var.insert("key".to_string(), "1234".to_string());
-    match add_photo_user(var).await{
+    var.insert("name".to_string(), "test".to_string());
+    var.insert("pseudo".to_string(), "test".to_string());
+    var.insert("birthday".to_string(), "oui".to_string());
+    var.insert("email".to_string(),"allo@gmail.com".to_string());
+    var.insert("password".to_string(),"OUI".to_string());
+    match add_user_function(var).await{
         Ok(response) => print!("o"),
         Err(_) => print!("AS")
     }*/

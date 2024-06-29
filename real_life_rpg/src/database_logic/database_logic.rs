@@ -171,6 +171,7 @@ pub async fn add_document_to_collection(
 ) -> Result<String, String> {
     match convert_doc_json(document) {
         Ok(json_doc) => {
+            print!("{}",json_doc);
             let aql = format!("INSERT {} INTO {}", json_doc.to_string(), collection_name);
             let query: AqlQuery = AqlQuery::builder().query(&aql).build();
             match connect_to_db(database_name).await {

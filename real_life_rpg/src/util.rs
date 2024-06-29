@@ -5,6 +5,7 @@ use image::{DynamicImage, ImageFormat};
 use regex::Regex;
 use serde::de::value;
 use serde_json::{Map, Value};
+use warp::filters::body::json;
 
 pub fn is_valid_email(email: &str) -> bool {
     let pattern = r"^[\w.+-]+@\w+\.\w{2,}$";
@@ -28,4 +29,8 @@ pub fn json_to_hashmap(doc: &str) -> Result<Map<String, Value>,String>{
         Ok(val) => return Ok(val),
         Err(e) => return Err("The json couldn't be parsed".to_string())
     }
+}
+
+pub fn weird_json_normal_str(json_str : String)->String{
+    json_str.replace(r#"""#, "")
 }
