@@ -95,6 +95,18 @@ class User {
     return _myMessages;
   }
 
+  void addMessage(Message message){
+    String idOtherUser = message.idSentFrom;
+    if (idOtherUser == _id){
+      idOtherUser = message.idSentTo;
+    }
+    if (_myMessages.keys.contains(idOtherUser)){
+      _myMessages[idOtherUser] = (_myMessages[idOtherUser]! + [message]);
+    } else {
+      _myMessages[idOtherUser] = [message];
+    }
+  }
+
   void setMyMessages(Map<String, List<Message>> myMessages) {
     this._myMessages = myMessages;
 

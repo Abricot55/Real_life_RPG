@@ -299,16 +299,16 @@ void setUserTest(User me) {
       "This is a test account made to preview what an actual account could display on a phone when the connection with the server is successful!");
   me.setMyMessages({
     adamou.getId(): [
-      Message(DateTime(5), adamou.getId(), me.getId(), "Epic mate!"),
+      Message(DateTime(2), me.getId(), adamou.getId(), "Hello!"),
+      Message(DateTime(3), adamou.getId(), me.getId(), "Heyyy testUser!!"),
       Message(DateTime(4), me.getId(), adamou.getId(),
           "Go check my new post! I just got level 99 in chapeau melon!"),
-      Message(DateTime(3), adamou.getId(), me.getId(), "Heyyy testUser!!"),
-      Message(DateTime(2), me.getId(), adamou.getId(), "Hello!"),
+      Message(DateTime(5), adamou.getId(), me.getId(), "Epic mate!"),
     ],
     "nonFriendUser": [
-      Message(DateTime(2), me.getId(), "nonFriendUser", "Thanks mate!"),
       Message(
           DateTime(1), "nonFriendUser", me.getId(), "Nice account buddy <3"),
+      Message(DateTime(2), me.getId(), "nonFriendUser", "Thanks mate!"),
     ]
   });
 }
