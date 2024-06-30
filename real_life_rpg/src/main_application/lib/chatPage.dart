@@ -254,15 +254,29 @@ class _ChatPageState extends State<ChatPage> {
       //add message
       var alignment = MainAxisAlignment.end;
       var _color = Theme.of(context).primaryColor;
+      Container pdp = Container();
+      double _maxWidth = MediaQuery.of(context).size.width * 0.8;
       if (messages![i].idSentFrom != me.getId()) {
+        _maxWidth = (MediaQuery.of(context).size.width * 0.8) - 30;
         alignment = MainAxisAlignment.start;
         _color = Colors.black54;
+        pdp = Container(
+            child: Row(children: [
+          CircleAvatar(
+              radius: 20,
+              backgroundColor:
+                  me.getMyContacts()[indexContactTalking].getProfilePicture()),
+          SizedBox(
+            width: 10,
+          )
+        ]));
       }
       widgetsMessages.add(Container(
           padding: EdgeInsets.all(5.0),
           child: Row(
             mainAxisAlignment: alignment,
             children: [
+              pdp,
               Flexible(
                   child: GestureDetector(
                       onTap: () {
@@ -276,7 +290,7 @@ class _ChatPageState extends State<ChatPage> {
                       child: Container(
                           constraints: BoxConstraints(
                               maxWidth:
-                                  MediaQuery.of(context).size.width * 0.8),
+                                  _maxWidth),
                           decoration: BoxDecoration(
                             borderRadius:
                                 BorderRadius.all(Radius.circular(10.0)),
@@ -329,6 +343,7 @@ class _ChatPageState extends State<ChatPage> {
           child: Row(
             children: [
               CircleAvatar(
+                radius: 20,
                 backgroundColor: aContact.getProfilePicture(),
               ),
               SizedBox(

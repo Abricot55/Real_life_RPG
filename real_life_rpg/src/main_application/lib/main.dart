@@ -307,7 +307,7 @@ void setUserTest(User me) {
     ],
     "nonFriendUser": [
       Message(
-          DateTime(1), "nonFriendUser", me.getId(), "Nice account buddy <3"),
+          DateTime(1), "nonFriendUser", me.getId(), "Nice account buddy <3 I would love to be you firend in real life!"),
       Message(DateTime(2), me.getId(), "nonFriendUser", "Thanks mate!"),
     ]
   });
