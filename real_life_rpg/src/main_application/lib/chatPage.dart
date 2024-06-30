@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
@@ -47,10 +48,13 @@ class _ChatPageState extends State<ChatPage> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (scrollDown) {
         if (adjustToKeyboardUP) {
-          chatScrollController
-              .jumpTo(position + MediaQuery.of(context).viewInsets.bottom);
+          chatScrollController.animateTo(
+              position + MediaQuery.of(context).viewInsets.bottom,
+              duration: Duration(milliseconds: 200),
+              curve: Curves.easeOut);
         } else if (adjustToKeyboardDOWN) {
-          chatScrollController.jumpTo(position);
+          chatScrollController.animateTo(position,
+              duration: Duration(milliseconds: 200), curve: Curves.easeOut);
         } else {
           if (animate) {
             chatScrollController.animateTo(
@@ -244,7 +248,8 @@ class _ChatPageState extends State<ChatPage> {
     List<Widget> widgetsMessages = [];
     List<Message>? messages =
         me.getMyMessages()[me.getMyContacts()[indexContactTalking].getId()];
-    widgetsMessages.add(getWidgetDate(messages![0], false));
+    widgetsMessages
+        .add(getWidgetDate(messages![0], messageDateFocus == messages[0]));
     DateTime prevDate = messages[0].date;
     for (int i = 0; i < (messages?.length)!; i++) {
       //add date
@@ -309,21 +314,39 @@ class _ChatPageState extends State<ChatPage> {
                                   color: Colors.white, fontSize: 20)))))
             ],
           )));
-    }
-    if (messages[messages.length - 1].idSentFrom == me.getId()) {
-      var _text = "Sending...";
-      if(messages[messages.length-1].isSent){
-        _text = "Sent";
+      //state
+      if (i == messages.length - 1 && messages[i].idSentFrom == me.getId()) {
+        widgetsMessages.add(getWidgetState(messages[messages.length - 1]));
+      } else if (messages[i] == messageDateFocus &&
+          messages[i].idSentFrom == me.getId()) {
+        widgetsMessages.add(getWidgetState(messages[i]));
       }
-      if(messages[messages.length-1].isSeen){
-        _text = "Seen";
-      }
-      widgetsMessages.add(Row(
-        mainAxisAlignment: MainAxisAlignment.end,
-        children: [Text(_text), SizedBox(width: 5,)],
-      ));
     }
     return widgetsMessages;
+  }
+
+  /**
+   * @brief This function build the widget that displays the state of a message
+   * * @param message -> The message to display the state
+   * @return The widget which displays the state
+   */
+  Row getWidgetState(Message message) {
+    var _text = "Sending...";
+    if (message.isSent) {
+      _text = "Sent";
+    }
+    if (message.isSeen) {
+      _text = "Seen";
+    }
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.end,
+      children: [
+        Text(_text),
+        SizedBox(
+          width: 5,
+        )
+      ],
+    );
   }
 
   /**
@@ -364,11 +387,11 @@ class _ChatPageState extends State<ChatPage> {
       String _text = "";
       if (lastMessage.idSentFrom == me.getId()) {
         sentFrom = "You: ";
-        if (lastMessage.isSent == false){
+        if (lastMessage.isSent == false) {
           _text = "Sending...";
         }
       }
-      if(_text != "Sending...") {
+      if (_text != "Sending...") {
         _text = sentFrom + lastMessage.text;
       }
       widgetContacts.add(GestureDetector(

@@ -297,6 +297,9 @@ void setUserTest(User me) {
       {"Cooking": 34.3, "Skateboard": 12.1, "Chapeau melon": 99.90});
   me.setProfileDescription(
       "This is a test account made to preview what an actual account could display on a phone when the connection with the server is successful!");
+  var m1 = Message(DateTime(2), me.getId(), "nonFriendUser", "Thanks mate!");
+  m1.setSentMessage(true);
+  m1.setSeeMessage(true);
   me.setMyMessages({
     adamou.getId(): [
       Message(DateTime(2), me.getId(), adamou.getId(), "Hello!"),
@@ -308,7 +311,7 @@ void setUserTest(User me) {
     "nonFriendUser": [
       Message(
           DateTime(1), "nonFriendUser", me.getId(), "Nice account buddy <3 I would love to be you firend in real life!"),
-      Message(DateTime(2), me.getId(), "nonFriendUser", "Thanks mate!"),
+      m1,
     ]
   });
 }
