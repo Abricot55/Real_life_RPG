@@ -4,7 +4,7 @@ class Message {
   String idSentFrom;
   String idSentTo;
   bool isSent = false;
-  bool isSeen = true;
+  bool isSeen = false;
 
   Message(this.date, this.idSentFrom, this.idSentTo, this.text) {
     //this.date = date.toUtc();

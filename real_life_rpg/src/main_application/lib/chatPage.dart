@@ -136,6 +136,11 @@ class _ChatPageState extends State<ChatPage> {
       return getConvoContact(indexContactTalking);
   }
 
+  /**
+   * @brief This function build the conversation with a contact.
+   * @param index -> The index of the contact to display the conversation in me._myContacts.
+   * @return The widget which is all the stuff on screen.
+   */
   Scaffold getConvoContact(int index) {
     User aContact = me.getMyContacts()[index];
     messagesController = getWidgetsMessages();
@@ -231,6 +236,10 @@ class _ChatPageState extends State<ChatPage> {
     return convoContact;
   }
 
+  /**
+   * @brief This function returns the lift of all the elements ton display on the conversation
+   * @return The widgets of the conversation.
+   */
   List<Widget> getWidgetsMessages() {
     List<Widget> widgetsMessages = [];
     List<Message>? messages =
@@ -272,7 +281,7 @@ class _ChatPageState extends State<ChatPage> {
         ]));
       }
       widgetsMessages.add(Container(
-          padding: EdgeInsets.all(5.0),
+          padding: EdgeInsets.only(top: 10, left: 5, right: 5),
           child: Row(
             mainAxisAlignment: alignment,
             children: [
@@ -288,9 +297,7 @@ class _ChatPageState extends State<ChatPage> {
                         });
                       },
                       child: Container(
-                          constraints: BoxConstraints(
-                              maxWidth:
-                                  _maxWidth),
+                          constraints: BoxConstraints(maxWidth: _maxWidth),
                           decoration: BoxDecoration(
                             borderRadius:
                                 BorderRadius.all(Radius.circular(10.0)),
@@ -303,10 +310,29 @@ class _ChatPageState extends State<ChatPage> {
             ],
           )));
     }
+    if (messages[messages.length - 1].idSentFrom == me.getId()) {
+      var _text = "Sending...";
+      if(messages[messages.length-1].isSent){
+        _text = "Sent";
+      }
+      if(messages[messages.length-1].isSeen){
+        _text = "Seen";
+      }
+      widgetsMessages.add(Row(
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: [Text(_text), SizedBox(width: 5,)],
+      ));
+    }
     return widgetsMessages;
   }
 
-  Row getWidgetDate(Message message, bool heure) {
+  /**
+   * @brief This function build the widget that displays the hour of a message
+   * * @param message -> The message to display the hour
+   * @param heure -> If you display the hour
+   * @return The widget which displays the hour
+   */
+  Container getWidgetDate(Message message, bool heure) {
     DateTime _date = message.date.toLocal();
     String text =
         "${DateFormat('MMMM').format(DateTime(0, _date.month))} ${_date.day}";
@@ -316,12 +342,17 @@ class _ChatPageState extends State<ChatPage> {
     if (heure) {
       text += " ${_date.hour}h${_date.minute}";
     }
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [Text(text)],
-    );
+    return Container(
+        padding: EdgeInsets.only(top: 5),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [Text(text)],
+        ));
   }
 
+  /**
+   * @brief This function build all the widgets that lets the user select the conversation they want to open
+   */
   void setColumnContacts() {
     widgetContacts.clear();
     var contacts = me.getMyContacts();
@@ -330,8 +361,15 @@ class _ChatPageState extends State<ChatPage> {
       Message lastMessage = me.getMyMessages()[aContact.getId()]![
           me.getMyMessages()[aContact.getId()]!.length - 1];
       String sentFrom = "";
+      String _text = "";
       if (lastMessage.idSentFrom == me.getId()) {
         sentFrom = "You: ";
+        if (lastMessage.isSent == false){
+          _text = "Sending...";
+        }
+      }
+      if(_text != "Sending...") {
+        _text = sentFrom + lastMessage.text;
       }
       widgetContacts.add(GestureDetector(
           onTap: () {
@@ -355,7 +393,7 @@ class _ChatPageState extends State<ChatPage> {
                       children: [
                     Text(aContact.getId()),
                     Text(
-                      "${sentFrom}${lastMessage.text}",
+                      "${_text}",
                       style: TextStyle(
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -369,6 +407,10 @@ class _ChatPageState extends State<ChatPage> {
     }
   }
 
+  /**
+   * @brief This function send the message to the servers and update the conversation on screen
+   * * @param message -> The message to send
+   */
   void sendMessage(Message message) {
     chatTextFieldController.text = "";
     me.addMessage(message);
