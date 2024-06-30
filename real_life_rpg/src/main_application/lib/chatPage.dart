@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:intl/intl.dart';
 import 'Message.dart';
 import 'User.dart';
 import 'main.dart';
@@ -20,6 +21,12 @@ class _ChatPageState extends State<ChatPage> {
   //variables
   bool inConvo = false;
   int indexContactTalking = 0;
+  bool animate = false;
+  bool scrollDown = true;
+  bool adjustToKeyboardUP = false;
+  bool adjustToKeyboardDOWN = false;
+  double position = 0;
+  var messageDateFocus = null;
 
   //containers
   List<Widget> widgetContacts = [];
@@ -38,10 +45,25 @@ class _ChatPageState extends State<ChatPage> {
   @override
   Widget build(BuildContext context) {
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      chatScrollController
-          .animateTo(chatScrollController.position.maxScrollExtent, duration: Duration(milliseconds: 500), curve: Curves.easeOut);
+      if (scrollDown) {
+        if (adjustToKeyboardUP) {
+          chatScrollController
+              .jumpTo(position + MediaQuery.of(context).viewInsets.bottom);
+        } else if (adjustToKeyboardDOWN) {
+          chatScrollController.jumpTo(position);
+        } else {
+          if (animate) {
+            chatScrollController.animateTo(
+                chatScrollController.position.maxScrollExtent,
+                duration: Duration(milliseconds: 500),
+                curve: Curves.easeOut);
+          } else {
+            chatScrollController
+                .jumpTo(chatScrollController.position.maxScrollExtent);
+          }
+        }
+      }
     });
-
     if (me == null) {
       me = User("testUser");
       readUserID();
@@ -129,6 +151,10 @@ class _ChatPageState extends State<ChatPage> {
                     onPressed: () {
                       setState(() {
                         inConvo = false;
+                        animate = false;
+                        messageDateFocus = null;
+                        adjustToKeyboardDOWN = false;
+                        adjustToKeyboardUP = false;
                       });
                     },
                     child: Text("back")),
@@ -151,6 +177,23 @@ class _ChatPageState extends State<ChatPage> {
                 Container(
                   width: MediaQuery.of(context).size.width - 90,
                   child: TextField(
+                    onSubmitted: (String blabla) {
+                      if (adjustToKeyboardDOWN == false) {
+                        adjustToKeyboardUP = false;
+                        adjustToKeyboardDOWN = true;
+                        position = chatScrollController.position.pixels -
+                            MediaQuery.of(context).viewInsets.bottom;
+                      }
+                    },
+                    onTap: () {
+                      if (adjustToKeyboardUP == false) {
+                        adjustToKeyboardUP = true;
+                        adjustToKeyboardDOWN = false;
+                        position = chatScrollController.position.pixels;
+                      }
+                      animate = true;
+                      scrollDown = true;
+                    },
                     style: TextStyle(fontSize: 20.0),
                     controller: chatTextFieldController,
                     onChanged: (text) {},
@@ -168,9 +211,12 @@ class _ChatPageState extends State<ChatPage> {
                 ),
                 ElevatedButton(
                     onPressed: () {
+                      scrollDown = true;
+                      adjustToKeyboardUP = false;
+                      adjustToKeyboardDOWN = false;
                       if (chatTextFieldController.text.trim() != "") {
                         sendMessage(Message(
-                            DateTime.now(),
+                            DateTime.now().toUtc(),
                             me.getId(),
                             me.getMyContacts()[indexContactTalking].getId(),
                             chatTextFieldController.text.trim()));
@@ -189,7 +235,23 @@ class _ChatPageState extends State<ChatPage> {
     List<Widget> widgetsMessages = [];
     List<Message>? messages =
         me.getMyMessages()[me.getMyContacts()[indexContactTalking].getId()];
+    widgetsMessages.add(getWidgetDate(messages![0], false));
+    DateTime prevDate = messages[0].date;
     for (int i = 0; i < (messages?.length)!; i++) {
+      //add date
+      if (i > 0) {
+        Duration diff = messages[i].date.difference(prevDate);
+        if (messageDateFocus == messages[i]) {
+          widgetsMessages.add(getWidgetDate(messages[i], true));
+          if (diff.inDays > 0) {
+            prevDate = messages[i].date;
+          }
+        } else if (diff.inDays > 0) {
+          widgetsMessages.add(getWidgetDate(messages[i], false));
+          prevDate = messages[i].date;
+        }
+      }
+      //add message
       var alignment = MainAxisAlignment.end;
       var _color = Theme.of(context).primaryColor;
       if (messages![i].idSentFrom != me.getId()) {
@@ -202,20 +264,48 @@ class _ChatPageState extends State<ChatPage> {
             mainAxisAlignment: alignment,
             children: [
               Flexible(
-                  child: Container(
-                      constraints: BoxConstraints(
-                          maxWidth: MediaQuery.of(context).size.width * 0.8),
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.all(Radius.circular(10.0)),
-                        color: _color,
-                      ),
-                      padding: EdgeInsets.all(5),
-                      child: Text(messages![i].text,
-                          style: TextStyle(color: Colors.white, fontSize: 20))))
+                  child: GestureDetector(
+                      onTap: () {
+                        scrollDown = false;
+                        messageDateFocus = messages[i];
+                        var _me = me;
+                        setState(() {
+                          me = _me;
+                        });
+                      },
+                      child: Container(
+                          constraints: BoxConstraints(
+                              maxWidth:
+                                  MediaQuery.of(context).size.width * 0.8),
+                          decoration: BoxDecoration(
+                            borderRadius:
+                                BorderRadius.all(Radius.circular(10.0)),
+                            color: _color,
+                          ),
+                          padding: EdgeInsets.all(5),
+                          child: Text(messages![i].text,
+                              style: TextStyle(
+                                  color: Colors.white, fontSize: 20)))))
             ],
           )));
     }
     return widgetsMessages;
+  }
+
+  Row getWidgetDate(Message message, bool heure) {
+    DateTime _date = message.date.toLocal();
+    String text =
+        "${DateFormat('MMMM').format(DateTime(0, _date.month))} ${_date.day}";
+    if (_date.year != DateTime.now().year) {
+      text += " ${_date.year}";
+    }
+    if (heure) {
+      text += " ${_date.hour}h${_date.minute}";
+    }
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [Text(text)],
+    );
   }
 
   void setColumnContacts() {
