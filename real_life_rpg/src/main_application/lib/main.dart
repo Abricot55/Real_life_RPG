@@ -296,7 +296,7 @@ void setUserTest(User me) {
       {"Cooking": 34.3, "Skateboard": 12.1, "Chapeau melon": 99.90});
   me.setProfileDescription(
       "This is a test account made to preview what an actual account could display on a phone when the connection with the server is successful!");
-  var m1 = Message(DateTime(2), me.getId(), "nonFriendUser", "Thanks mate!");
+  var m1 = Message(DateTime(2), me.getId(), "nonFriendUser", "Thanks mate! This is a really long message to preview the display on the contact page");
   m1.setSentMessage(true);
   m1.setSeeMessage(true);
   me.setMyMessages({

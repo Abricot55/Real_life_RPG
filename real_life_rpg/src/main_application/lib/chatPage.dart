@@ -113,7 +113,7 @@ class _ChatPageState extends State<ChatPage> {
                     Row(
                       children: [
                         Container(
-                          width: MediaQuery.of(context).size.width - 120,
+                          width: MediaQuery.of(context).size.width - 15,
                           child: TextField(
                             onChanged: (text) {},
                             decoration: new InputDecoration(
@@ -129,11 +129,11 @@ class _ChatPageState extends State<ChatPage> {
                         SizedBox(
                           width: 5,
                         ),
-                        ElevatedButton(
-                            onPressed: () {
+                        //ElevatedButton(
+                            //onPressed: () {
                               //rien
-                            },
-                            child: Text("Search"))
+                            //},
+                            //child: Text("Search"))
                       ],
                     ),
                     Divider()

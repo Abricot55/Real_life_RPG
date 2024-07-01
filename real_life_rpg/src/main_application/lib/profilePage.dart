@@ -193,7 +193,7 @@ class _ProfilePageState extends State<ProfilePage> {
                               },
                               child: Text("back")),
                           Container(
-                            width: MediaQuery.of(context).size.width - 200,
+                            width: MediaQuery.of(context).size.width - 100,
                             child: TextField(
                               onChanged: (text) {
                                 var _memory = memory;
@@ -213,11 +213,11 @@ class _ProfilePageState extends State<ProfilePage> {
                                           Radius.circular(25.0)))),
                             ),
                           ),
-                          ElevatedButton(
-                              onPressed: () {
+                          //ElevatedButton(
+                              //onPressed: () {
                                 //rien
-                              },
-                              child: Text("Search"))
+                              //},
+                              //child: Text("Search"))
                         ]),
                     Divider()
                   ])),
