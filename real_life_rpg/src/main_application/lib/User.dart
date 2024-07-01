@@ -131,4 +131,13 @@ class User {
     return this._myContacts;
   }
 
+  void addContact(User aUser){
+    _myContacts.add(aUser);
+    _myMessages[aUser.getId()] = [];
+  }
+
+  void removeGhostContact(User aUser){
+    _myContacts.remove(aUser);
+  }
+
 }

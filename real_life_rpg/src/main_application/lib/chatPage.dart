@@ -1,9 +1,7 @@
-import 'dart:convert';
-
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:intl/intl.dart';
+
 import 'Message.dart';
 import 'User.dart';
 import 'main.dart';
@@ -15,19 +13,20 @@ class ChatPage extends StatefulWidget {
 }
 
 class _ChatPageState extends State<ChatPage> {
-  //final storage = const FlutterSecureStorage();
-  String savedUserID = "testUser";
+  final storage = const FlutterSecureStorage();
+  String savedUserID = "";
   var me = null;
 
   //variables
   bool inConvo = false;
-  int indexContactTalking = 0;
+  User userTalking = User("testUser");
   bool animate = false;
   bool scrollDown = true;
   bool adjustToKeyboardUP = false;
   bool adjustToKeyboardDOWN = false;
   double position = 0;
   var messageDateFocus = null;
+  bool firstBuild = true;
 
   //containers
   List<Widget> widgetContacts = [];
@@ -68,12 +67,22 @@ class _ChatPageState extends State<ChatPage> {
         }
       }
     });
-    if (me == null) {
-      me = User("testUser");
-      readUserID();
-      setUserTest(me);
+    if (firstBuild == true) {
+      firstBuild = false;
+      readUserID().then((var value) {
+        if (savedUserID == "testUser") {
+          setUserTest(me);
+        }
+        setColumnContacts();
+        getContextOpen();
+        var _me = me;
+        setState(() {
+          me = _me;
+        });
+      });
+    } else {
+      setColumnContacts();
     }
-    setColumnContacts();
     if (inConvo == false) {
       return Scaffold(
           body: Column(
@@ -92,9 +101,9 @@ class _ChatPageState extends State<ChatPage> {
                               onPressed: () {
                                 navigateToNextScreen(context, 2);
                               },
-                              child: Text("back")),
+                              child: Text("Home")),
                           Text(
-                            me.getId(),
+                            savedUserID,
                             style: TextStyle(fontSize: 25),
                           ),
                           SizedBox(
@@ -137,7 +146,7 @@ class _ChatPageState extends State<ChatPage> {
             ])
           ]));
     } else
-      return getConvoContact(indexContactTalking);
+      return getConvoContact(userTalking);
   }
 
   /**
@@ -145,9 +154,10 @@ class _ChatPageState extends State<ChatPage> {
    * @param index -> The index of the contact to display the conversation in me._myContacts.
    * @return The widget which is all the stuff on screen.
    */
-  Scaffold getConvoContact(int index) {
-    User aContact = me.getMyContacts()[index];
-    messagesController = getWidgetsMessages();
+  Scaffold getConvoContact(User aContact) {
+    if(me.getMyMessages()[aContact.getId()]!.length > 0) {
+      messagesController = getWidgetsMessages();
+    }
     Scaffold convoContact = Scaffold(
       body: Column(
           //mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -164,6 +174,9 @@ class _ChatPageState extends State<ChatPage> {
                         messageDateFocus = null;
                         adjustToKeyboardDOWN = false;
                         adjustToKeyboardUP = false;
+                        if(me.getMyMessages()[userTalking.getId()]!.length == 0){
+                          me.removeGhostContact(userTalking);
+                        }
                       });
                     },
                     child: Text("back")),
@@ -227,7 +240,7 @@ class _ChatPageState extends State<ChatPage> {
                         sendMessage(Message(
                             DateTime.now().toUtc(),
                             me.getId(),
-                            me.getMyContacts()[indexContactTalking].getId(),
+                            userTalking.getId(),
                             chatTextFieldController.text.trim()));
                       }
                     },
@@ -247,7 +260,7 @@ class _ChatPageState extends State<ChatPage> {
   List<Widget> getWidgetsMessages() {
     List<Widget> widgetsMessages = [];
     List<Message>? messages =
-        me.getMyMessages()[me.getMyContacts()[indexContactTalking].getId()];
+        me.getMyMessages()[userTalking.getId()];
     widgetsMessages
         .add(getWidgetDate(messages![0], messageDateFocus == messages[0]));
     DateTime prevDate = messages[0].date;
@@ -279,7 +292,7 @@ class _ChatPageState extends State<ChatPage> {
           CircleAvatar(
               radius: 20,
               backgroundColor:
-                  me.getMyContacts()[indexContactTalking].getProfilePicture()),
+                  userTalking.getProfilePicture()),
           SizedBox(
             width: 10,
           )
@@ -381,8 +394,11 @@ class _ChatPageState extends State<ChatPage> {
     var contacts = me.getMyContacts();
     for (int i = 0; i < contacts.length; i++) {
       User aContact = contacts[i];
-      Message lastMessage = me.getMyMessages()[aContact.getId()]![
-          me.getMyMessages()[aContact.getId()]!.length - 1];
+      Message lastMessage = Message(DateTime(0), "", "", '');
+      if ( me.getMyMessages()[aContact.getId()]!.length > 0) {
+        lastMessage = me.getMyMessages()[aContact.getId()]![
+        me.getMyMessages()[aContact.getId()]!.length - 1];
+      }
       String sentFrom = "";
       String _text = "";
       if (lastMessage.idSentFrom == me.getId()) {
@@ -398,7 +414,7 @@ class _ChatPageState extends State<ChatPage> {
           onTap: () {
             setState(() {
               inConvo = true;
-              indexContactTalking = i;
+              userTalking = me.getMyContacts()[i];
             });
           },
           child: Row(
@@ -443,7 +459,38 @@ class _ChatPageState extends State<ChatPage> {
     });
   }
 
+  Future<void> getContextOpen() async {
+    final userToTalk = await storage.read(key: "_userToTalk");
+    if (userToTalk != null) {
+      if (userToTalk != "") {
+        inConvo = true;
+        bool found = false;
+        for(var i = 0; i < me.getMyContacts().length; i++){
+          if(userToTalk == me.getMyContacts()[i].getId()){
+            userTalking = me.getMyContacts()[i];
+            found = true;
+          }
+        }
+        if(!found) {
+          //amis
+          for(var i = 0; i < me.getMyFriends().length; i++){
+            if(userToTalk == me.getMyFriends()[i].getId()){
+              userTalking = me.getMyFriends()[i];
+              found = true;
+              //addContact
+              me.addContact(userTalking);
+            }
+          }
+        }
+        if(!found){
+          //ni ami ni contact
+        }
+      }
+    }
+  }
+
   Future<void> readUserID() async {
-    //savedUserID = (await storage.read(key: "_userID"))!;
+    savedUserID = (await storage.read(key: "_userID"))!;
+    me = User(savedUserID);
   }
 }

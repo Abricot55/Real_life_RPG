@@ -12,7 +12,7 @@ import 'Message.dart';
 import 'User.dart';
 import 'main.dart';
 import 'utilities.dart';
-//import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class ProfilePage extends StatefulWidget {
   @override
@@ -20,7 +20,7 @@ class ProfilePage extends StatefulWidget {
 }
 
 class _ProfilePageState extends State<ProfilePage> {
-  //final storage = const FlutterSecureStorage();
+  final storage = const FlutterSecureStorage();
 
   //varaibles
   var savedUserID = "";
@@ -160,6 +160,7 @@ class _ProfilePageState extends State<ProfilePage> {
                               child: Text("Search")),
                           ElevatedButton(
                               onPressed: () {
+                                writeStorage("_userToTalk", "");
                                 navigateToNextScreen(context, 4);
                               },
                               child: Text("Chat"))
@@ -349,9 +350,13 @@ class _ProfilePageState extends State<ProfilePage> {
               style: TextStyle(fontSize: 15.0),
             )),
         labelUserIDController,
-        SizedBox(
-          width: 70,
-        )
+        ElevatedButton(onPressed: (){
+          writeStorage("_userToTalk", aUser.getId());
+          navigateToNextScreen(context, 4);
+        }, child: Text(
+          "Chat",
+          style: TextStyle(fontSize: 15.0),
+        )),
       ]);
     }
   }
@@ -558,7 +563,7 @@ class _ProfilePageState extends State<ProfilePage> {
 
   Future<void> readUserID() async {
     //trouver le user id
-    savedUserID = "testUser"; //(await storage.read(key: "_userID"))!;
+    savedUserID = (await storage.read(key: "_userID"))!;//"testUser";
     me = User(savedUserID);
     memory = Activememory(me);
 
@@ -567,4 +572,9 @@ class _ProfilePageState extends State<ProfilePage> {
       setUserTest(me);
     }
   }
+
+  Future<void> writeStorage(_key, _value) async {
+    storage.write(key: _key, value: _value);
+  }
+
 }
