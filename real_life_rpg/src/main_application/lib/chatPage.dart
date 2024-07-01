@@ -459,6 +459,9 @@ class _ChatPageState extends State<ChatPage> {
     });
   }
 
+  /**
+   * @brief This function reads the stoarage to know what discussion to display if the context asks it
+   */
   Future<void> getContextOpen() async {
     final userToTalk = await storage.read(key: "_userToTalk");
     if (userToTalk != null) {

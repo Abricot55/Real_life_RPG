@@ -1,5 +1,4 @@
 import 'package:camera/camera.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 import 'Message.dart';
@@ -92,19 +91,35 @@ class User {
   }
 
   Map<String, List<Message>> getMyMessages() {
+    if (_myMessages == {}) {
+      //load messages
+    }
     return _myMessages;
   }
 
-  void addMessage(Message message){
+  void addMessage(Message message) {
     String idOtherUser = message.idSentFrom;
-    if (idOtherUser == _id){
+    if (idOtherUser == _id) {
       idOtherUser = message.idSentTo;
     }
-    if (_myMessages.keys.contains(idOtherUser)){
+    if (_myMessages.keys.contains(idOtherUser)) {
       _myMessages[idOtherUser] = (_myMessages[idOtherUser]! + [message]);
     } else {
       _myMessages[idOtherUser] = [message];
     }
+    //update contact order
+    int indexUser = -1;
+    late User otherUser;
+    for (var i = 0; i < _myContacts.length && indexUser == -1; i++) {
+      if (_myContacts[i].getId() == idOtherUser) {
+        indexUser = i;
+        otherUser = _myContacts[i];
+      }
+    }
+    for(var i = indexUser; i > 0; i--){
+      _myContacts[i] = _myContacts[i-1];
+    }
+    _myContacts[0] = otherUser;
   }
 
   void setMyMessages(Map<String, List<Message>> myMessages) {
@@ -127,17 +142,23 @@ class User {
     }
   }
 
-  List<User> getMyContacts(){
+  List<User> getMyContacts() {
+    if (_myContacts == []){
+      //load my contacts
+    }
     return this._myContacts;
   }
 
-  void addContact(User aUser){
+  void addContact(User aUser) {
     _myContacts.add(aUser);
     _myMessages[aUser.getId()] = [];
   }
 
-  void removeGhostContact(User aUser){
+  /**
+   * @brief Remove the contact if no messages has been sent after opening a new conversation with a non-contact
+   * @param aUser - The ghost contact
+   */
+  void removeGhostContact(User aUser) {
     _myContacts.remove(aUser);
   }
-
 }
