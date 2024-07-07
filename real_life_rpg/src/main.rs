@@ -8,22 +8,22 @@ use warp::Filter;
 
 #[tokio::main]
 pub async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
-    /*let mut var: HashMap<String, String> = HashMap::new();
-    var.insert("name".to_string(), "test".to_string());
-    var.insert("pseudo".to_string(), "test".to_string());
+    let mut var: HashMap<String, String> = HashMap::new();
+    var.insert("from".to_string(), "Users/1807".to_string());
+    var.insert("to".to_string(), "Users/1806".to_string());
     var.insert("birthday".to_string(), "oui".to_string());
     var.insert("email".to_string(),"allo@gmail.com".to_string());
     var.insert("password".to_string(),"OUI".to_string());
-    match add_user_function(var).await{
+    match add_friend_function(var).await{
         Ok(response) => print!("o"),
         Err(_) => print!("AS")
-    }*/
-    let save_photo_route = warp::path("save")
+    }
+    /*let save_photo_route = warp::path("save")
         .and(warp::path("photo"))
         .and(warp::put())
         .and(warp::body::json())
         .and_then(add_photo_user);
-    
+
     let relevant_search_user_route = warp::path("users")
         .and(warp::path("relevant"))
         .and(warp::get())
@@ -47,10 +47,17 @@ pub async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
         .and(warp::body::json())
         .and_then(add_user_function);
 
+    let post_friend_route = warp::path("friend")
+        .and(warp::post())
+        .and(warp::body::json())
+        .and_then(add_friend_function);
+
     let routes = relevant_search_user_route
         .or(search_user_route)
         .or(get_user_route)
-        .or(post_user_route).or(save_photo_route);
-    warp::serve(routes).run(([127, 0, 0, 1], 3000)).await;
+        .or(post_user_route)
+        .or(save_photo_route)
+        .or(post_friend_route);
+    warp::serve(routes).run(([127, 0, 0, 1], 3000)).await;*/
     Ok(())
 }

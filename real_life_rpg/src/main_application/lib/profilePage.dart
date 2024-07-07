@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:main_application/activeMemory.dart';
@@ -242,7 +244,11 @@ class _ProfilePageState extends State<ProfilePage> {
       containerAdd = Container(child:ElevatedButton(
           onPressed: () {
             if (!me.getMyFriends().contains(aUser)) {
-
+              var relation = jsonEncode(<String, String>{
+                'from': me.getId(),
+                'to': aUser.getId(),
+              });
+              sendRequest("ADD",path: "friend", jsonBody: relation);
               me.addFriend(aUser);
               var _memory = memory;
               setState(() {

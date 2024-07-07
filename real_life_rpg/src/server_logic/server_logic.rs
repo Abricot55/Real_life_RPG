@@ -7,6 +7,7 @@ use serde_json::Value;
 use std::collections::HashMap;
 use std::fmt;
 use std::time::Duration;
+use tokio::time::error::Elapsed;
 use tokio::time::sleep;
 use warp::filters::path::param;
 use warp::reply::Reply;
@@ -141,6 +142,49 @@ fn convert_hash_photo(params: HashMap<String, String>) -> Result<PhotoType, Stri
 }
 
 /**
+ * @brief This function convert a map containing the relation information into a RelationUserUserType struture.
+ * @param params -> A map with all necessary information. This map must contains the fields from and to.
+ * @return It returns the resulting Relation.
+ */
+async fn convert_hash_to_UU_relation(
+    params: HashMap<String, String>,
+) -> Result<RelationUserUserType, String> {
+    let _from = match params.get("from") {
+        Some(value) => value.clone(),
+        None => return Err("The relation needs to come from someone".to_string()),
+    };
+
+    let _to = match params.get("to") {
+        Some(value) => value.clone(),
+        None => return Err("The relation need to go to someone".to_string()),
+    };
+
+    let force = match params.get("force") {
+        Some(value) => value
+            .parse::<i32>()
+            .map_err(|_| "The force need to be a number")?,
+        None => 0,
+    };
+
+    let time = match params.get("time") {
+        Some(value) => value
+            .parse::<i32>()
+            .map_err(|_| "The time need to be a number")?,
+        None => 0,
+    };
+
+    let relation_type = "friends".to_string();
+
+    return Ok(RelationUserUserType {
+        _from,
+        _to,
+        force,
+        time,
+        relation_type,
+    });
+}
+
+/**
  * @brief This function is called when a add user request is made to the server. It also create a photo collection with the same key as the user.
  * @param params -> A map containing all the user information. The map must have the name, email, birthday and password field.
  * @return A String which indicate the state of the request.
@@ -180,7 +224,8 @@ pub async fn add_user_function(
                                     print!("Received user data.");
                                     match values[0].get("_key") {
                                         Some(key) => {
-                                            let real_key: String = weird_json_normal_str(key.to_string());
+                                            let real_key: String =
+                                                weird_json_normal_str(key.to_string());
                                             let temp_photo: PhotoListType = PhotoListType {
                                                 _key: Some(real_key),
                                                 photos: vec![],
@@ -447,46 +492,6 @@ pub async fn get_photo_list(
     }
 }
 
-/*
-/**
- * @brief Function called when the update request is sent to the server.
- * @param args -> A vector of string that contains the request to the server
- * @return A String which indicate the state of the request.
- */
-async fn update_function(args: &Vec<String>) -> Response<Body> {
-    if args.len() >= 2 {
-        match args[1].to_lowercase().as_str() {
-            //"database" => print!("update database"),
-            //"collection" => print!("update collection"),
-            "document" => {
-                if args.len() >= 6 {
-                    //document key, collection name, database name, docutment type, value...
-                    match get_document(&args, 5) {
-                        Ok(doc) => {
-                            update_document_in_collection(
-                                args[2].clone(),
-                                doc,
-                                args[3].clone(),
-                                args[4].clone(),
-                            )
-                            .await;
-                            return Response::new(Body::from(
-                                "Le document à été mis à jour!".to_string(),
-                            ));
-                        }
-                        Err(e) => return status(StatusCode::NOT_ACCEPTABLE),
-                    }
-                } else {
-                    return status(StatusCode::NOT_ACCEPTABLE);
-                }
-            }
-            //"relation" => print!("update relation"),
-            _other => return status(StatusCode::ACCEPTED),
-        }
-    }
-    return status(StatusCode::NOT_ACCEPTABLE);
-}
-*/
 /**
  * @brief Function called when the delete request is sent to the server.
  * @param args -> A vector of string that contains the request to the server
@@ -513,6 +518,42 @@ async fn delete_function(args: &Vec<String>) -> Response<Body> {
         }
     }
     return status(StatusCode::NOT_ACCEPTABLE);
+}
+
+/**
+ * @brief This function add a new edge document in the friend collection in the database.
+ * @param params -> The informations concerning the relation, it needs the keys : from, to and the keys force and time are optional
+ * @return The response into a Response<Body>.
+ */
+pub async fn add_friend_function(
+    params: HashMap<String, String>,
+) -> Result<Response<Body>, warp::Rejection> {
+    match convert_hash_to_UU_relation(params).await {
+        Ok(relation) => {
+            match add_document_to_collection(
+                DocumentType::Uu(relation),
+                "Friends".to_string(),
+                "MainDB".to_string(),
+            )
+            .await
+            {
+                Ok(_) => {
+                    return Ok(
+                        warp::reply::with_status("Relation Created", StatusCode::ACCEPTED)
+                            .into_response(),
+                    )
+                }
+                Err(e) => {
+                    return Ok(
+                        warp::reply::with_status(e, StatusCode::NOT_ACCEPTABLE).into_response()
+                    )
+                }
+            }
+        }
+        Err(e) => {
+            return Ok(warp::reply::with_status(e, StatusCode::NOT_ACCEPTABLE).into_response())
+        }
+    }
 }
 
 /**

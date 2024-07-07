@@ -14,6 +14,8 @@ pub enum DocumentType {
     User(UserType),
     Skill(SkillType),
     Photos(PhotoListType),
+    Uu(RelationUserUserType),
+    Us(RelationUserSkillType),
 }
 
 #[derive(Serialize, Deserialize)]
@@ -39,11 +41,10 @@ pub struct SkillType {
 
 #[derive(Serialize, Deserialize)]
 pub struct RelationUserUserType {
-    pub _key: String,
-    pub from: String,
-    pub to: String,
-    pub force: Option<i32>,
-    pub time: Option<i32>,
+    pub _from: String,
+    pub _to: String,
+    pub force: i32,
+    pub time: i32,
     pub relation_type: String,
 }
 
