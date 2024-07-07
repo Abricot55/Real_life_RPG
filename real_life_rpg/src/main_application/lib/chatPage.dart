@@ -61,8 +61,10 @@ class _ChatPageState extends State<ChatPage> {
                 duration: Duration(milliseconds: 500),
                 curve: Curves.easeOut);
           } else {
-            chatScrollController
-                .jumpTo(chatScrollController.position.maxScrollExtent);
+            if (chatScrollController.hasClients) {
+              chatScrollController
+                  .jumpTo(chatScrollController.position.maxScrollExtent);
+            }
           }
         }
       }
@@ -130,10 +132,10 @@ class _ChatPageState extends State<ChatPage> {
                           width: 5,
                         ),
                         //ElevatedButton(
-                            //onPressed: () {
-                              //rien
-                            //},
-                            //child: Text("Search"))
+                        //onPressed: () {
+                        //rien
+                        //},
+                        //child: Text("Search"))
                       ],
                     ),
                     Divider()
@@ -155,7 +157,8 @@ class _ChatPageState extends State<ChatPage> {
    * @return The widget which is all the stuff on screen.
    */
   Scaffold getConvoContact(User aContact) {
-    if(me.getMyMessages()[aContact.getId()]!.length > 0) {
+    var messages = me.getMyMessages()[aContact.getId()];
+    if (messages != null && messages.length > 0) {
       messagesController = getWidgetsMessages();
     }
     Scaffold convoContact = Scaffold(
@@ -174,7 +177,8 @@ class _ChatPageState extends State<ChatPage> {
                         messageDateFocus = null;
                         adjustToKeyboardDOWN = false;
                         adjustToKeyboardUP = false;
-                        if(me.getMyMessages()[userTalking.getId()]!.length == 0){
+                        if (me.getMyMessages()[userTalking.getId()]!.length ==
+                            0) {
                           me.removeGhostContact(userTalking);
                         }
                       });
@@ -259,8 +263,7 @@ class _ChatPageState extends State<ChatPage> {
    */
   List<Widget> getWidgetsMessages() {
     List<Widget> widgetsMessages = [];
-    List<Message>? messages =
-        me.getMyMessages()[userTalking.getId()];
+    List<Message>? messages = me.getMyMessages()[userTalking.getId()];
     widgetsMessages
         .add(getWidgetDate(messages![0], messageDateFocus == messages[0]));
     DateTime prevDate = messages[0].date;
@@ -290,9 +293,7 @@ class _ChatPageState extends State<ChatPage> {
         pdp = Container(
             child: Row(children: [
           CircleAvatar(
-              radius: 20,
-              backgroundColor:
-                  userTalking.getProfilePicture()),
+              radius: 20, backgroundColor: userTalking.getProfilePicture()),
           SizedBox(
             width: 10,
           )
@@ -395,9 +396,9 @@ class _ChatPageState extends State<ChatPage> {
     for (int i = 0; i < contacts.length; i++) {
       User aContact = contacts[i];
       Message lastMessage = Message(DateTime(0), "", "", '');
-      if ( me.getMyMessages()[aContact.getId()]!.length > 0) {
+      if (me.getMyMessages()[aContact.getId()]!.length > 0) {
         lastMessage = me.getMyMessages()[aContact.getId()]![
-        me.getMyMessages()[aContact.getId()]!.length - 1];
+            me.getMyMessages()[aContact.getId()]!.length - 1];
       }
       String sentFrom = "";
       String _text = "";
@@ -468,16 +469,16 @@ class _ChatPageState extends State<ChatPage> {
       if (userToTalk != "") {
         inConvo = true;
         bool found = false;
-        for(var i = 0; i < me.getMyContacts().length; i++){
-          if(userToTalk == me.getMyContacts()[i].getId()){
+        for (var i = 0; i < me.getMyContacts().length; i++) {
+          if (userToTalk == me.getMyContacts()[i].getId()) {
             userTalking = me.getMyContacts()[i];
             found = true;
           }
         }
-        if(!found) {
+        if (!found) {
           //amis
-          for(var i = 0; i < me.getMyFriends().length; i++){
-            if(userToTalk == me.getMyFriends()[i].getId()){
+          for (var i = 0; i < me.getMyFriends().length; i++) {
+            if (userToTalk == me.getMyFriends()[i].getId()) {
               userTalking = me.getMyFriends()[i];
               found = true;
               //addContact
@@ -485,8 +486,9 @@ class _ChatPageState extends State<ChatPage> {
             }
           }
         }
-        if(!found){
-          //ni ami ni contact
+        if (!found) {
+          userTalking = User(userToTalk);
+          me.addContact(userTalking);
         }
       }
     }

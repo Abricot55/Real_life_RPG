@@ -1,18 +1,13 @@
-import 'dart:convert';
-import 'dart:ffi';
-import 'dart:math';
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:main_application/activeMemory.dart';
 import 'package:main_application/picturePage.dart';
 import 'package:percent_indicator/linear_percent_indicator.dart';
-import 'Message.dart';
+
 import 'User.dart';
 import 'main.dart';
 import 'utilities.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class ProfilePage extends StatefulWidget {
   @override
@@ -35,7 +30,7 @@ class _ProfilePageState extends State<ProfilePage> {
   var containerHomePage = Column();
   var containerRecherche = Column();
   var _searchMode = false;
-  var searchController;
+  TextEditingController searchController = TextEditingController();
   List<Widget> _itemsRecherche = [];
 
   //containers profilepage
@@ -152,6 +147,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                 var _memory = memory;
                                 setState(() {
                                   memory = _memory;
+                                  searchController.text = "";
                                   _searchMode = true;
                                   _itemsRecherche = getListeItems("");
                                   containerGeneral = getHomePage(_searchMode);
@@ -195,6 +191,7 @@ class _ProfilePageState extends State<ProfilePage> {
                           Container(
                             width: MediaQuery.of(context).size.width - 100,
                             child: TextField(
+                              controller: searchController,
                               onChanged: (text) {
                                 var _memory = memory;
                                 setState(() {
@@ -214,10 +211,10 @@ class _ProfilePageState extends State<ProfilePage> {
                             ),
                           ),
                           //ElevatedButton(
-                              //onPressed: () {
-                                //rien
-                              //},
-                              //child: Text("Search"))
+                          //onPressed: () {
+                          //rien
+                          //},
+                          //child: Text("Search"))
                         ]),
                     Divider()
                   ])),
@@ -338,11 +335,15 @@ class _ProfilePageState extends State<ProfilePage> {
       return Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
         ElevatedButton(
             onPressed: () {
-              var _prevUser = memory.pop();
               var _memory = memory;
               setState(() {
                 memory = _memory;
-                containerGeneral = getFriendsPage(_prevUser, _prevUser == me);
+                switch(memory.getStartStack()){
+                  case 0:
+                    _searchMode = true;
+                    containerGeneral = getHomePage(_searchMode);
+                    break;
+                }
               });
             },
             child: Text(
@@ -350,13 +351,15 @@ class _ProfilePageState extends State<ProfilePage> {
               style: TextStyle(fontSize: 15.0),
             )),
         labelUserIDController,
-        ElevatedButton(onPressed: (){
-          writeStorage("_userToTalk", aUser.getId());
-          navigateToNextScreen(context, 4);
-        }, child: Text(
-          "Chat",
-          style: TextStyle(fontSize: 15.0),
-        )),
+        ElevatedButton(
+            onPressed: () {
+              writeStorage("_userToTalk", aUser.getId());
+              navigateToNextScreen(context, 4);
+            },
+            child: Text(
+              "Chat",
+              style: TextStyle(fontSize: 15.0),
+            )),
       ]);
     }
   }
@@ -376,14 +379,39 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
   List<Widget> getListeItems(String text) {
-    if(text!="") {
+    if (text != "") {
       sendRequest("get", path: "users/relevant", urlMap: {"pseudo": text})
           .then((liste) {
         List<Widget> users = [];
         List<String> search = listUserJsonRetrievePseudo(liste.body);
         print(search);
         for (var i in search) {
-          users.add(Text(i));
+          User aFriend = User(i);
+          users.add(GestureDetector(
+            onTap: () {
+              var _memory = memory;
+              setState(() {
+                memory = _memory;
+                if(aFriend.getId() == me.getId()) {
+                  _selectedIndex = 1;
+                  containerGeneral = getMainScreen(_selectedIndex);
+                } else {
+                  containerGeneral = getUserPage(aFriend,
+                      aFriend.getId() == me.getId(), memory.isStackEmpty());
+                }
+              });
+            },
+            child: Row(
+              children: [
+                CircleAvatar(
+                  backgroundColor: aFriend.getProfilePicture(),
+                ),
+                SizedBox(
+                  width: 10,
+                ),
+                Text(i)],
+            ),
+          ));
         }
         var _memory = memory;
         setState(() {
@@ -570,7 +598,7 @@ class _ProfilePageState extends State<ProfilePage> {
 
   Future<void> readUserID() async {
     //trouver le user id
-    savedUserID = (await storage.read(key: "_userID"))!;//"testUser";
+    savedUserID = (await storage.read(key: "_userID"))!; //"testUser";
     me = User(savedUserID);
     memory = Activememory(me);
 
@@ -583,5 +611,4 @@ class _ProfilePageState extends State<ProfilePage> {
   Future<void> writeStorage(_key, _value) async {
     storage.write(key: _key, value: _value);
   }
-
 }
