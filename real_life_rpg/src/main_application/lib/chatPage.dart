@@ -190,7 +190,7 @@ class _ChatPageState extends State<ChatPage> {
                         _searchMode = false;
                         searchController.text = "";
                         var messages = me.getMyMessages()[userTalking.getId()];
-                        if (messages == null) {
+                        if (messages == null || messages.length == 0) {
                           me.removeGhostContact(userTalking);
                         }
                       });
