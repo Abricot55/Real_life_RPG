@@ -1,4 +1,3 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:main_application/activeMemory.dart';
@@ -25,6 +24,7 @@ class _ProfilePageState extends State<ProfilePage> {
 
   //containers
   var containerGeneral = null;
+  Container containerAdd = Container();
 
   //containers homePage
   var containerHomePage = Column();
@@ -236,6 +236,64 @@ class _ProfilePageState extends State<ProfilePage> {
    */
   Center getUserPage(User aUser, bool myProfile, bool emptyStack) {
     setUserContainer(aUser, myProfile);
+    Row userRow = Row();
+    containerAdd = Container();
+    if(!me.getMyFriends().contains(aUser)){
+      containerAdd = Container(child:ElevatedButton(
+          onPressed: () {
+            if (!me.getMyFriends().contains(aUser)) {
+
+              me.addFriend(aUser);
+              var _memory = memory;
+              setState(() {
+                memory = _memory;
+                containerGeneral = getUserPage(aUser, myProfile, emptyStack);
+              });
+            }
+          },
+          child: Text("Add friend")));
+    }
+    if (myProfile) {
+      userRow = Row(children: [
+        CircleAvatar(radius: 50, backgroundColor: aUser.getProfilePicture()),
+        SizedBox(
+          width: 5,
+        ),
+        Column(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+          labelUserIDController,
+        ])
+      ]);
+    } else {
+      userRow = Row(
+        children: [
+          CircleAvatar(radius: 50, backgroundColor: aUser.getProfilePicture()),
+          SizedBox(
+            width: 5,
+          ),
+          Column(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              SizedBox(
+                  width: MediaQuery.of(context).size.width - 115,
+                  child: Row(children: [labelUserIDController])),
+              SizedBox(
+                  width: MediaQuery.of(context).size.width - 115,
+                  child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        containerAdd,
+                        ElevatedButton(
+                            onPressed: () {
+                              writeStorage("_userToTalk", aUser.getId());
+                              navigateToNextScreen(context, 4);
+                            },
+                            child: Text("Chat"))
+                      ]))
+            ],
+          )
+        ],
+      );
+    }
     return Center(
       child: Column(children: [
         Container(
@@ -244,7 +302,11 @@ class _ProfilePageState extends State<ProfilePage> {
             child: Column(
               children: [
                 SizedBox(height: 30),
-                getTopUserPageController(aUser, myProfile, emptyStack)
+                getTopUserPageController(aUser, myProfile, emptyStack),
+                userRow,
+                SizedBox(
+                  height: 5,
+                )
               ],
             )),
         Container(
@@ -321,7 +383,6 @@ class _ProfilePageState extends State<ProfilePage> {
     if (myProfile) {
       return Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
         container,
-        labelUserIDController,
         ElevatedButton(
             onPressed: () {
               navigateToNextScreen(context, 3);
@@ -338,26 +399,21 @@ class _ProfilePageState extends State<ProfilePage> {
               var _memory = memory;
               setState(() {
                 memory = _memory;
-                switch(memory.getStartStack()){
-                  case 0:
-                    _searchMode = true;
-                    containerGeneral = getHomePage(_searchMode);
-                    break;
+                if (emptyStack) {
+                  switch (memory.getStartStack()) {
+                    case 0:
+                      _searchMode = true;
+                      containerGeneral = getHomePage(_searchMode);
+                      break;
+                  }
+                } else {
+                  var _prevUser = memory.pop();
+                  containerGeneral = getFriendsPage(_prevUser, _prevUser == me);
                 }
               });
             },
             child: Text(
               "Back",
-              style: TextStyle(fontSize: 15.0),
-            )),
-        labelUserIDController,
-        ElevatedButton(
-            onPressed: () {
-              writeStorage("_userToTalk", aUser.getId());
-              navigateToNextScreen(context, 4);
-            },
-            child: Text(
-              "Chat",
               style: TextStyle(fontSize: 15.0),
             )),
       ]);
@@ -392,7 +448,7 @@ class _ProfilePageState extends State<ProfilePage> {
               var _memory = memory;
               setState(() {
                 memory = _memory;
-                if(aFriend.getId() == me.getId()) {
+                if (aFriend.getId() == me.getId()) {
                   _selectedIndex = 1;
                   containerGeneral = getMainScreen(_selectedIndex);
                 } else {
@@ -409,7 +465,8 @@ class _ProfilePageState extends State<ProfilePage> {
                 SizedBox(
                   width: 10,
                 ),
-                Text(i)],
+                Text(i)
+              ],
             ),
           ));
         }

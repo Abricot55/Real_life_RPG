@@ -54,6 +54,13 @@ class User {
     return _nbFriends;
   }
 
+  void addFriend(User aFriend){
+    _nbFriends += 1;
+    _myFriends.add(aFriend);
+
+    //upload the new friend!!
+  }
+
   void setNbFriends(int nbFriends) {
     this._nbFriends = nbFriends;
   }
@@ -106,6 +113,16 @@ class User {
     if (_myMessages.keys.contains(idOtherUser)) {
       _myMessages[idOtherUser] = (_myMessages[idOtherUser]! + [message]);
     } else {
+      bool trouve = false;
+      for(var i = 0; i < _nbFriends && !trouve; i++){
+        if(idOtherUser == _myFriends[i].getId()){
+          addContact(_myFriends[i]);
+          trouve = true;
+        }
+      }
+      if (!trouve) {
+        addContact(User(idOtherUser));
+      }
       _myMessages[idOtherUser] = [message];
     }
     //update contact order
@@ -121,6 +138,8 @@ class User {
       _myContacts[i] = _myContacts[i-1];
     }
     _myContacts[0] = otherUser;
+
+    //updload myContacts and myMessages
   }
 
   void setMyMessages(Map<String, List<Message>> myMessages) {

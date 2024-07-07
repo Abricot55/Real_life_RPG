@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:intl/intl.dart';
+import 'package:main_application/utilities.dart';
 
 import 'Message.dart';
 import 'User.dart';
@@ -27,15 +28,18 @@ class _ChatPageState extends State<ChatPage> {
   double position = 0;
   var messageDateFocus = null;
   bool firstBuild = true;
+  bool _searchMode = false;
 
   //containers
   List<Widget> widgetContacts = [];
   List<Widget> messagesController = [];
 
+
   //controllers
   TextEditingController chatTextFieldController =
       TextEditingController(text: "");
   ScrollController chatScrollController = ScrollController();
+  TextEditingController searchController = TextEditingController();
 
   /**
    * @brief This function build all the widgets the user will see on the screen when the profile page is loaded. This function is automatically called.
@@ -83,7 +87,9 @@ class _ChatPageState extends State<ChatPage> {
         });
       });
     } else {
-      setColumnContacts();
+      if (_searchMode == false) {
+        setColumnContacts();
+      }
     }
     if (inConvo == false) {
       return Scaffold(
@@ -117,7 +123,10 @@ class _ChatPageState extends State<ChatPage> {
                         Container(
                           width: MediaQuery.of(context).size.width - 15,
                           child: TextField(
-                            onChanged: (text) {},
+                            controller: searchController,
+                            onChanged: (text) {
+                              getListeItems(text);
+                            },
                             decoration: new InputDecoration(
                                 hintText: "Search a user",
                                 contentPadding:
@@ -157,6 +166,7 @@ class _ChatPageState extends State<ChatPage> {
    * @return The widget which is all the stuff on screen.
    */
   Scaffold getConvoContact(User aContact) {
+    messagesController.clear();
     var messages = me.getMyMessages()[aContact.getId()];
     if (messages != null && messages.length > 0) {
       messagesController = getWidgetsMessages();
@@ -177,8 +187,10 @@ class _ChatPageState extends State<ChatPage> {
                         messageDateFocus = null;
                         adjustToKeyboardDOWN = false;
                         adjustToKeyboardUP = false;
-                        if (me.getMyMessages()[userTalking.getId()]!.length ==
-                            0) {
+                        _searchMode = false;
+                        searchController.text = "";
+                        var messages = me.getMyMessages()[userTalking.getId()];
+                        if (messages == null) {
                           me.removeGhostContact(userTalking);
                         }
                       });
@@ -492,6 +504,50 @@ class _ChatPageState extends State<ChatPage> {
         }
       }
     }
+  }
+
+  List<Widget> getListeItems(String text) {
+    if (text != "") {
+      sendRequest("get", path: "users/relevant", urlMap: {"pseudo": text})
+          .then((liste) {
+        List<Widget> users = [];
+        List<String> search = listUserJsonRetrievePseudo(liste.body);
+        print(search);
+        for (var i in search) {
+          if (i != me.getId()) {
+            User aFriend = User(i);
+            users.add(GestureDetector(
+              onTap: () {
+                setState(() {
+                  inConvo = true;
+                  userTalking = aFriend;
+                });
+              },
+              child: Row(
+                children: [
+                  CircleAvatar(
+                    backgroundColor: aFriend.getProfilePicture(),
+                  ),
+                  SizedBox(
+                    width: 10,
+                  ),
+                  Text(i)
+                ],
+              ),
+            ));
+          }
+        }
+        setState(() {
+          _searchMode = true;
+          widgetContacts = users;
+        });
+      });
+    } else{
+      setState(() {
+        _searchMode = false;
+      });
+    }
+    return [];
   }
 
   Future<void> readUserID() async {
