@@ -166,6 +166,8 @@ class _ChatPageState extends State<ChatPage> {
    * @return The widget which is all the stuff on screen.
    */
   Scaffold getConvoContact(User aContact) {
+    //TODO ADAM - méthode qui update les messages à "seen"... je trouve un moyen que l'autre recoive l'info
+
     messagesController.clear();
     var messages = me.getMyMessages()[aContact.getId()];
     if (messages != null && messages.length > 0) {
@@ -470,6 +472,8 @@ class _ChatPageState extends State<ChatPage> {
     setState(() {
       me = _me;
     });
+
+    //TODO ADAM - méthode envoyer avec .then qui update le status "sent" du message
   }
 
   /**

@@ -5,6 +5,8 @@ import 'Message.dart';
 import 'main.dart';
 
 class User {
+  //TODO ADAM -  tout les load et upload
+
   final String _id;
   String _name = "";
   List<User> _myFriends = [];
