@@ -376,16 +376,23 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
   List<Widget> getListeItems(String text) {
-    sendRequest("get", path: "users/relevant", urlMap: {"pseudo": text})
-        .then((liste) {
-      List<Widget> users = [];
-      List<String> search = listUserJsonRetrievePseudo(liste.body);
-      print(search);
-      for (var i in search) {
-        users.add(Text(i));
-      }
-      return users;
-    });
+    if(text!="") {
+      sendRequest("get", path: "users/relevant", urlMap: {"pseudo": text})
+          .then((liste) {
+        List<Widget> users = [];
+        List<String> search = listUserJsonRetrievePseudo(liste.body);
+        print(search);
+        for (var i in search) {
+          users.add(Text(i));
+        }
+        var _memory = memory;
+        setState(() {
+          memory = _memory;
+          _itemsRecherche = users;
+          containerGeneral = getHomePage(_searchMode);
+        });
+      });
+    }
     return [];
   }
 

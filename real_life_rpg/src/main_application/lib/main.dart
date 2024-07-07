@@ -147,7 +147,7 @@ class MyHomePage extends StatelessWidget {
   void setupConnect(BuildContext context) {
     writeStorage("_userID", pseudoController.text);
     if (connexionTest(
-        context, pseudoController.text, motDePasseController.text)) {
+        context, pseudoController.text, motDePasseController.text, storage)) {
       savedUsername = pseudoController.text;
       writeStorage("_username", savedUsername);
     }
@@ -170,7 +170,7 @@ class MyHomePage extends StatelessWidget {
  * @param pseudo -> The pseudo of the user.
  * @return A boolean which represent the existence of the user.
  */
-bool connexionTest(BuildContext context, String pseudo, String password) {
+bool connexionTest(BuildContext context, String pseudo, String password, FlutterSecureStorage storage) {
   if (pseudo.isNotEmpty) {
     if (pseudo == "testUser" && password == "test") {
       navigateToNextScreen(context, 2, data: null);
@@ -181,6 +181,7 @@ bool connexionTest(BuildContext context, String pseudo, String password) {
               urlMap: {"pseudo": pseudo, "password": hash_string(password)})
           .then((value) {
         if (value != "[]") {
+          storage.write(key: "_username", value: pseudo);
           navigateToNextScreen(context, 2, data: value);
           return true;
         }

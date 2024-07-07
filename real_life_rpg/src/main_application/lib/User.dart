@@ -2,6 +2,7 @@ import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 
 import 'Message.dart';
+import 'main.dart';
 
 class User {
   final String _id;
