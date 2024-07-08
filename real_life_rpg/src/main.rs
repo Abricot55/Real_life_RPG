@@ -8,7 +8,7 @@ use warp::Filter;
 
 #[tokio::main]
 pub async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
-    let mut var: HashMap<String, String> = HashMap::new();
+    /*let mut var: HashMap<String, String> = HashMap::new();
     var.insert("from".to_string(), "Users/1807".to_string());
     var.insert("to".to_string(), "Users/1806".to_string());
     var.insert("birthday".to_string(), "oui".to_string());
@@ -17,7 +17,7 @@ pub async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
     match add_friend_function(var).await{
         Ok(response) => print!("o"),
         Err(_) => print!("AS")
-    }
+    }*/
     let save_photo_route = warp::path("save")
         .and(warp::path("photo"))
         .and(warp::put())

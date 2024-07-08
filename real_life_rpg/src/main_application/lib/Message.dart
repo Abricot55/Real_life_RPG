@@ -1,13 +1,15 @@
+import 'User.dart';
+
 enum MessageState {sending, sent, seen}
 
 class Message {
   DateTime date;
   String text;
-  String idSentFrom;
-  String idSentTo;
+  User isSentFrom;
+  User isSentTo;
   MessageState state = MessageState.sending;
 
-  Message(this.date, this.idSentFrom, this.idSentTo, this.text) {
+  Message(this.date, this.isSentFrom, this.isSentTo, this.text) {
     //this.date = date.toUtc();
   }
 

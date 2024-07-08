@@ -292,7 +292,10 @@ class _ProfilePageState extends State<ProfilePage> {
                   });
                 }
               },
-              child: Text("Add friend", style: TextStyle(fontSize: 15),)));
+              child: Text(
+                "Add friend",
+                style: TextStyle(fontSize: 15),
+              )));
     } else {
       containerAdd = Container(
           child: ElevatedButton(
@@ -303,11 +306,13 @@ class _ProfilePageState extends State<ProfilePage> {
                 var _memory = memory;
                 setState(() {
                   memory = _memory;
-                  containerGeneral =
-                      getUserPage(aUser, myProfile, emptyStack);
+                  containerGeneral = getUserPage(aUser, myProfile, emptyStack);
                 });
               },
-              child: Text("Remove friend", style: TextStyle(fontSize: 15),)));
+              child: Text(
+                "Remove friend",
+                style: TextStyle(fontSize: 15),
+              )));
     }
     if (myProfile) {
       userRow = Row(children: [
@@ -380,8 +385,13 @@ class _ProfilePageState extends State<ProfilePage> {
                                 child: Row(
                                     mainAxisAlignment: MainAxisAlignment.center,
                                     children: [
-                                      Text("Chat", style: TextStyle(fontSize: 15),),
-                                      SizedBox(width: 5,),
+                                      Text(
+                                        "Chat",
+                                        style: TextStyle(fontSize: 15),
+                                      ),
+                                      SizedBox(
+                                        width: 5,
+                                      ),
                                       Icon(
                                         Icons.chat,
                                         size: 20.0,
@@ -545,10 +555,11 @@ class _ProfilePageState extends State<ProfilePage> {
       sendRequest("get", path: "users/relevant", urlMap: {"pseudo": text})
           .then((liste) {
         List<Widget> users = [];
-        List<String> search = listUserJsonRetrievePseudo(liste.body);
+        List<User> search = loadUserMultiple(liste.body);
+        print("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
         print(search);
         for (var i in search) {
-          User aFriend = User(i);
+          User aFriend = i;
           users.add(GestureDetector(
             onTap: () {
               var _memory = memory;
@@ -571,7 +582,7 @@ class _ProfilePageState extends State<ProfilePage> {
                 SizedBox(
                   width: 10,
                 ),
-                Text(i)
+                Text(i.getId())
               ],
             ),
           ));
@@ -762,8 +773,9 @@ class _ProfilePageState extends State<ProfilePage> {
 
   Future<void> readUserID() async {
     //trouver le user id
+    //TODO SEBASTIEN, COMME D'HABITUDE
     savedUserID = (await storage.read(key: "_userID"))!; //"testUser";
-    me = User(savedUserID);
+    me = User(savedUserID, "", "", "");
     memory = Activememory(me);
 
     //userTest

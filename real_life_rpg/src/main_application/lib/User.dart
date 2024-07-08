@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:camera/camera.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -7,7 +9,7 @@ import 'main.dart';
 
 class User {
   //TODO ADAM -  tout les load et upload
-
+  final String _key;
   final String _id;
   String _nickname = "";
   String _firstName = "";
@@ -19,14 +21,15 @@ class User {
   String _profileDescription = "";
   Map<String, double> _activeSkills = {};
 
-  NetworkImage basicPdp = NetworkImage("https://www.voici.fr/imgre/fit/~1~voi~2023~01~11~419636a9-5bf9-46de-bc19-e9184b465242.jpeg/1200x675/quality/80/focus-point/2050%2C1352/pitbull-que-devient-l-interprete-du-titre-i-know-you-want-me.jpg");
+  NetworkImage basicPdp = NetworkImage(
+      "https://www.voici.fr/imgre/fit/~1~voi~2023~01~11~419636a9-5bf9-46de-bc19-e9184b465242.jpeg/1200x675/quality/80/focus-point/2050%2C1352/pitbull-que-devient-l-interprete-du-titre-i-know-you-want-me.jpg");
   late NetworkImage _profilePicture;
   List<XFile> _photos = [];
 
   Map<String, List<Message>> _myMessages = {};
   List<User> _myContacts = [];
 
-  User(this._id) {
+  User(this._id, this._key, this._firstName, this._nickname) {
     assert(_id != "");
     _profilePicture = basicPdp;
   }
@@ -87,14 +90,14 @@ class User {
     return _nbFriends;
   }
 
-  void addFriend(User aFriend){
+  void addFriend(User aFriend) {
     _nbFriends += 1;
     _myFriends.add(aFriend);
 
     //upload the new friend!!
   }
 
-  void removeFriend(User aFriend){
+  void removeFriend(User aFriend) {
     _nbFriends -= 1;
     _myFriends.remove(aFriend);
 
@@ -146,22 +149,22 @@ class User {
   }
 
   void addMessage(Message message) {
-    String idOtherUser = message.idSentFrom;
+    String idOtherUser = message.isSentFrom.getId();
     if (idOtherUser == _id) {
-      idOtherUser = message.idSentTo;
+      idOtherUser = message.isSentTo.getId();
     }
     if (_myMessages.keys.contains(idOtherUser)) {
       _myMessages[idOtherUser] = (_myMessages[idOtherUser]! + [message]);
     } else {
       bool trouve = false;
-      for(var i = 0; i < _nbFriends && !trouve; i++){
-        if(idOtherUser == _myFriends[i].getId()){
+      for (var i = 0; i < _nbFriends && !trouve; i++) {
+        if (idOtherUser == _myFriends[i].getId()) {
           addContact(_myFriends[i]);
           trouve = true;
         }
       }
       if (!trouve) {
-        addContact(User(idOtherUser));
+        addContact(message.isSentFrom);
       }
       _myMessages[idOtherUser] = [message];
     }
@@ -174,8 +177,8 @@ class User {
         otherUser = _myContacts[i];
       }
     }
-    for(var i = indexUser; i > 0; i--){
-      _myContacts[i] = _myContacts[i-1];
+    for (var i = indexUser; i > 0; i--) {
+      _myContacts[i] = _myContacts[i - 1];
     }
     _myContacts[0] = otherUser;
 
@@ -196,14 +199,15 @@ class User {
         }
       }
       //new user
-      if (!isFriend) {
-        _myContacts.add(User(item.key));
-      }
+      // TODO SEBASTIEN, JAI OTÉ CA PARCE QUE CA MARCHAIT PAS AVEC LE NOUVEAU CONSTRUCTEUR DE USER, SI TU TROUVE UN MOYEN VITE FAIT DE RÉGLER TANT MIEU JAI PAS ENVIE DE REVERSE ENGINEER TON CODE
+      // if (!isFriend) {
+      //   _myContacts.add(User(item.key));
+      //}
     }
   }
 
   List<User> getMyContacts() {
-    if (_myContacts == []){
+    if (_myContacts == []) {
       //load my contacts
     }
     return this._myContacts;
@@ -221,4 +225,40 @@ class User {
   void removeGhostContact(User aUser) {
     _myContacts.remove(aUser);
   }
+}
+
+User? loadUser(String json) {
+  dynamic decodedJson = jsonDecode(json)[0];
+  User? user;
+  if (decodedJson is Map<String, dynamic>) {
+    try {
+      var _id = decodedJson['_id'] as String;
+      var _key = decodedJson['_key'] as String;
+      var pseudo = decodedJson['pseudo'] as String;
+      var name = decodedJson['name'] as String;
+      user = User(_id, _key, name, pseudo);
+    } catch (Exception) {
+      print("OH NO");
+    }
+  }
+  return user;
+}
+
+List<User> loadUserMultiple(String json) {
+  List<dynamic> decodedJson = jsonDecode(json);
+  List<User> liste = [];
+  for (dynamic i in decodedJson) {
+    if (i is Map<String, dynamic>) {
+      try {
+        var _id = i['_id'] as String;
+        var _key = i['_key'] as String;
+        var pseudo = i['pseudo'] as String;
+        var name = i['name'] as String;
+        liste.add(User(_id, _key, name, pseudo));
+      } catch (Exception) {
+        print("OH NO");
+      }
+    }
+  }
+  return liste;
 }

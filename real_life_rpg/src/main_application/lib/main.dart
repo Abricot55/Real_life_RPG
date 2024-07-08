@@ -180,8 +180,10 @@ bool connexionTest(BuildContext context, String pseudo, String password, Flutter
               path: "/users/search",
               urlMap: {"pseudo": pseudo, "password": hash_string(password)})
           .then((value) {
-        if (value != "[]") {
+        if (value.body != "[]") {
           storage.write(key: "_username", value: pseudo);
+          // TODO SEBASTIEN OU ADAM -> il faut faire dequoi avec ce user la quand on se connecte non?
+          print(loadUser(value.body));
           navigateToNextScreen(context, 2, data: value);
           return true;
         }
@@ -287,36 +289,36 @@ void setUserTest(User me) {
   me.setFirstName("Test");
   me.setSurname("User");
   me.setNickame("testUser");
-  User adamou = User("Adamou");
+  User adamou = User("Adamou","","","");
   adamou.setNickame("Adamou");
   adamou.setFirstName("Adam");
   adamou.setSurname("madA");
-  adamou.setMyFriends([me, User("Fifiloulou")]);
+  adamou.setMyFriends([me, User("Fifiloulou","","","")]);
   me.setMyFriends([
     adamou,
-    User("Sbasien"),
-    User("Jean-Jean"),
-    User("Mike"),
-    User("Marie-Ève")
+    User("Sbasien","","",""),
+    User("Jean-Jean","","",""),
+    User("Mike","","",""),
+    User("Marie-Ève","","","")
   ]);
   me.setActiveSkills(
       {"Cooking": 34.3, "Skateboard": 12.1, "Chapeau melon": 99.90});
   me.setProfileDescription(
       "This is a test account made to preview what an actual account could display on a phone when the connection with the server is successful!");
-  var m1 = Message(DateTime(2), me.getId(), "nonFriendUser", "Thanks mate! This is a really long message to preview the display on the contact page");
+  var m1 = Message(DateTime(2), me, User("","","",""), "Thanks mate! This is a really long message to preview the display on the contact page");
   m1.updateState(MessageState.seen);
   me.setMyMessages({
     adamou.getId(): [
-      Message(DateTime(2), me.getId(), adamou.getId(), "Hello!"),
-      Message(DateTime(3), adamou.getId(), me.getId(), "Heyyy testUser!!"),
-      Message(DateTime(4), me.getId(), adamou.getId(),
+      Message(DateTime(2), me, adamou, "Hello!"),
+      Message(DateTime(3), adamou, me, "Heyyy testUser!!"),
+      Message(DateTime(4), me, adamou,
           "Go check my new post! I just got level 99 in chapeau melon!"),
-      Message(DateTime(5), adamou.getId(), me.getId(), "Epic mate! Lololololololololololololololololol"),
+      Message(DateTime(5), adamou, me, "Epic mate! Lololololololololololololololololol"),
     ],
-    "Sbasien" :[Message(DateTime(4), "Sbasien", me.getId(), "Yeah")],
+    "Sbasien" :[Message(DateTime(4), User("Sbasien","","",""), me, "Yeah")],
     "nonFriendUser": [
       Message(
-          DateTime(1), "nonFriendUser", me.getId(), "Nice account buddy <3 I would love to be you firend in real life!"),
+          DateTime(1), User("not friend","","",""), me, "Nice account buddy <3 I would love to be you firend in real life!"),
       m1,
     ]
   });

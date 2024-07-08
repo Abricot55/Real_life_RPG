@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
@@ -22,7 +23,7 @@ class _ChatPageState extends State<ChatPage> {
 
   //variables
   bool inConvo = false;
-  User userTalking = User("testUser");
+  User userTalking = User("testUser", "testUser", "testUser", "testUser");
   bool animate = false;
   bool scrollDown = true;
   bool adjustToKeyboardUP = false;
@@ -264,11 +265,8 @@ class _ChatPageState extends State<ChatPage> {
                       adjustToKeyboardUP = false;
                       adjustToKeyboardDOWN = false;
                       if (chatTextFieldController.text.trim() != "") {
-                        sendMessage(Message(
-                            DateTime.now().toUtc(),
-                            me.getId(),
-                            userTalking.getId(),
-                            chatTextFieldController.text.trim()));
+                        sendMessage(Message(DateTime.now().toUtc(), me,
+                            userTalking, chatTextFieldController.text.trim()));
                       }
                     },
                     child: Icon(
@@ -313,7 +311,7 @@ class _ChatPageState extends State<ChatPage> {
       var _color = Theme.of(context).primaryColor;
       Container pdp = Container();
       double _maxWidth = MediaQuery.of(context).size.width * 0.8;
-      if (messages![i].idSentFrom != me.getId()) {
+      if (messages![i].isSentFrom != me) {
         _maxWidth = (MediaQuery.of(context).size.width * 0.8) - 30;
         alignment = MainAxisAlignment.start;
         _color = Colors.black54;
@@ -356,10 +354,10 @@ class _ChatPageState extends State<ChatPage> {
             ],
           )));
       //state
-      if (i == messages.length - 1 && messages[i].idSentFrom == me.getId()) {
+      if (i == messages.length - 1 && messages[i].isSentFrom == me) {
         widgetsMessages.add(getWidgetState(messages[messages.length - 1]));
       } else if (messages[i] == messageDateFocus &&
-          messages[i].idSentFrom == me.getId()) {
+          messages[i].isSentFrom == me) {
         widgetsMessages.add(getWidgetState(messages[i]));
       }
     }
@@ -422,14 +420,18 @@ class _ChatPageState extends State<ChatPage> {
     var contacts = me.getMyContacts();
     for (int i = 0; i < contacts.length; i++) {
       User aContact = contacts[i];
-      Message lastMessage = Message(DateTime(0), "", "", '');
+      Message lastMessage = Message(
+          DateTime(0),
+          User("test", "test", "test", "test"),
+          User("test", "test", "test", "test"),
+          '');
       if (me.getMyMessages()[aContact.getId()]!.length > 0) {
         lastMessage = me.getMyMessages()[aContact.getId()]![
             me.getMyMessages()[aContact.getId()]!.length - 1];
       }
       String sentFrom = "";
       String _text = "";
-      if (lastMessage.idSentFrom == me.getId()) {
+      if (lastMessage.isSentFrom == me) {
         sentFrom = "You: ";
         if (lastMessage.state == MessageState.sending) {
           _text = "Sending...";
@@ -487,7 +489,8 @@ class _ChatPageState extends State<ChatPage> {
                                       10 -
                                       40 -
                                       10 -
-                                      textPainter.size.width - 15),
+                                      textPainter.size.width -
+                                      15),
                               child: textDate),
                           Text(_date)
                         ]),
@@ -542,7 +545,8 @@ class _ChatPageState extends State<ChatPage> {
           }
         }
         if (!found) {
-          userTalking = User(userToTalk);
+          //TODO SEBASTIEN, MEME CHose ici
+          userTalking = User(userToTalk, "", "", "");
           me.addContact(userTalking);
         }
       }
@@ -554,11 +558,11 @@ class _ChatPageState extends State<ChatPage> {
       sendRequest("get", path: "users/relevant", urlMap: {"pseudo": text})
           .then((liste) {
         List<Widget> users = [];
-        List<String> search = listUserJsonRetrievePseudo(liste.body);
+        List<User> search = loadUserMultiple(liste.body);
         print(search);
         for (var i in search) {
-          if (i != me.getId()) {
-            User aFriend = User(i);
+          if (i != me) {
+            User aFriend = i;
             users.add(GestureDetector(
               onTap: () {
                 setState(() {
@@ -574,7 +578,7 @@ class _ChatPageState extends State<ChatPage> {
                   SizedBox(
                     width: 10,
                   ),
-                  Text(i)
+                  Text(i.getId())
                 ],
               ),
             ));
@@ -594,7 +598,8 @@ class _ChatPageState extends State<ChatPage> {
   }
 
   Future<void> readUserID() async {
+    // TODO SEBASTIEN, JE SAVAIS PAS TROP COMMENT REGLER DES TRUCS DE STORAGE SO JTE LAISSE FAIRE CA
     savedUserID = (await storage.read(key: "_userID"))!;
-    me = User(savedUserID);
+    me = User(savedUserID, "", "", "");
   }
 }
