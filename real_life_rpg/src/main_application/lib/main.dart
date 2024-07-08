@@ -305,7 +305,7 @@ void setUserTest(User me) {
       Message(DateTime(3), adamou.getId(), me.getId(), "Heyyy testUser!!"),
       Message(DateTime(4), me.getId(), adamou.getId(),
           "Go check my new post! I just got level 99 in chapeau melon!"),
-      Message(DateTime(5), adamou.getId(), me.getId(), "Epic mate!"),
+      Message(DateTime(5), adamou.getId(), me.getId(), "Epic mate! Lololololololololololololololololol"),
     ],
     "Sbasien" :[Message(DateTime(4), "Sbasien", me.getId(), "Yeah")],
     "nonFriendUser": [

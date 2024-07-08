@@ -1,4 +1,4 @@
-import 'dart:io';
+import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -35,7 +35,6 @@ class _ChatPageState extends State<ChatPage> {
   //containers
   List<Widget> widgetContacts = [];
   List<Widget> messagesController = [];
-
 
   //controllers
   TextEditingController chatTextFieldController =
@@ -436,9 +435,28 @@ class _ChatPageState extends State<ChatPage> {
           _text = "Sending...";
         }
       }
+      String _date = "";
+      DateTime now = DateTime.now();
       if (_text != "Sending...") {
         _text = sentFrom + lastMessage.text;
       }
+      _date =
+          "${DateFormat('MMMM').format(DateTime(0, lastMessage.date.month))} ${lastMessage.date.day}";
+      if (lastMessage.date.year != now.year) {
+        _date += " ${lastMessage.date.year}";
+      } else if (now.day == lastMessage.date.day &&
+          now.month == lastMessage.date.month) {
+        _date = "${lastMessage.date.hour}:${lastMessage.date.minute}";
+      }
+      Text textDate = Text(_text,
+          style: TextStyle(
+            overflow: TextOverflow.ellipsis,
+          ));
+      TextPainter textPainter = TextPainter(
+          text: TextSpan(text: _date, style: textDate.style),
+          maxLines: 1,
+          textDirection: ui.TextDirection.rtl);
+      textPainter.layout(minWidth: 0.0, maxWidth: double.infinity);
       widgetContacts.add(GestureDetector(
           onTap: () {
             setState(() {
@@ -460,12 +478,19 @@ class _ChatPageState extends State<ChatPage> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                     Text(aContact.getId()),
-                    Text(
-                      "${_text}",
-                      style: TextStyle(
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    )
+                    Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Container(
+                              constraints: BoxConstraints(
+                                  maxWidth: MediaQuery.of(context).size.width -
+                                      10 -
+                                      40 -
+                                      10 -
+                                      textPainter.size.width - 15),
+                              child: textDate),
+                          Text(_date)
+                        ]),
                   ])),
             ],
           )));
@@ -560,7 +585,7 @@ class _ChatPageState extends State<ChatPage> {
           widgetContacts = users;
         });
       });
-    } else{
+    } else {
       setState(() {
         _searchMode = false;
       });
