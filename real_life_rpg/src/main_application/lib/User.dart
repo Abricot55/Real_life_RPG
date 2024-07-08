@@ -1,6 +1,7 @@
 import 'package:camera/camera.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-
+import 'package:flutter_profile_picture/flutter_profile_picture.dart';
 import 'Message.dart';
 import 'main.dart';
 
@@ -13,13 +14,15 @@ class User {
   int _nbFriends = 0;
   String _profileDescription = "";
   Map<String, double> _activeSkills = {};
-  Color _profilePicture = Colors.grey;
+  NetworkImage basicPdp = NetworkImage("https://www.voici.fr/imgre/fit/~1~voi~2023~01~11~419636a9-5bf9-46de-bc19-e9184b465242.jpeg/1200x675/quality/80/focus-point/2050%2C1352/pitbull-que-devient-l-interprete-du-titre-i-know-you-want-me.jpg");
+  late NetworkImage _profilePicture;
   List<XFile> _photos = [];
   Map<String, List<Message>> _myMessages = {};
   List<User> _myContacts = [];
 
   User(this._id) {
     assert(_id != "");
+    _profilePicture = basicPdp;
   }
 
   String getId() {
@@ -89,14 +92,14 @@ class User {
     this._activeSkills = activeSkills;
   }
 
-  Color getProfilePicture() {
-    if (_profilePicture == Colors.grey) {
+  NetworkImage getProfilePicture() {
+    if (_profilePicture == basicPdp) {
       //load profile picture
     }
     return _profilePicture;
   }
 
-  void setProfilePicture(Color profilePicture) {
+  void setProfilePicture(NetworkImage profilePicture) {
     this._profilePicture = profilePicture;
   }
 

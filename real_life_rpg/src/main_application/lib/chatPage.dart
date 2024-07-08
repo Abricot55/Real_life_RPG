@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:intl/intl.dart';
@@ -307,7 +309,7 @@ class _ChatPageState extends State<ChatPage> {
         pdp = Container(
             child: Row(children: [
           CircleAvatar(
-              radius: 20, backgroundColor: userTalking.getProfilePicture()),
+              radius: 20, backgroundImage: userTalking.getProfilePicture()),
           SizedBox(
             width: 10,
           )
@@ -436,7 +438,7 @@ class _ChatPageState extends State<ChatPage> {
             children: [
               CircleAvatar(
                 radius: 20,
-                backgroundColor: aContact.getProfilePicture(),
+                backgroundImage: userTalking.getProfilePicture(),
               ),
               SizedBox(
                 width: 10,
@@ -530,7 +532,7 @@ class _ChatPageState extends State<ChatPage> {
               child: Row(
                 children: [
                   CircleAvatar(
-                    backgroundColor: aFriend.getProfilePicture(),
+                    backgroundImage: userTalking.getProfilePicture(),
                   ),
                   SizedBox(
                     width: 10,

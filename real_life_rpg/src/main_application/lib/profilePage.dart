@@ -261,7 +261,7 @@ class _ProfilePageState extends State<ProfilePage> {
     }
     if (myProfile) {
       userRow = Row(children: [
-        CircleAvatar(radius: 50, backgroundColor: aUser.getProfilePicture()),
+        CircleAvatar(radius: 50, backgroundImage: aUser.getProfilePicture()),
         SizedBox(
           width: 5,
         ),
@@ -272,7 +272,7 @@ class _ProfilePageState extends State<ProfilePage> {
     } else {
       userRow = Row(
         children: [
-          CircleAvatar(radius: 50, backgroundColor: aUser.getProfilePicture()),
+          CircleAvatar(radius: 50, backgroundImage: aUser.getProfilePicture()),
           SizedBox(
             width: 5,
           ),
@@ -466,7 +466,7 @@ class _ProfilePageState extends State<ProfilePage> {
             child: Row(
               children: [
                 CircleAvatar(
-                  backgroundColor: aFriend.getProfilePicture(),
+                  backgroundImage: aFriend.getProfilePicture(),
                 ),
                 SizedBox(
                   width: 10,
@@ -633,7 +633,7 @@ class _ProfilePageState extends State<ProfilePage> {
           child: Row(
             children: [
               CircleAvatar(
-                backgroundColor: aFriend.getProfilePicture(),
+                backgroundImage: aFriend.getProfilePicture(),
               ),
               SizedBox(
                 width: 10,
