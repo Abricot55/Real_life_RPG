@@ -18,7 +18,7 @@ pub async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
         Ok(response) => print!("o"),
         Err(_) => print!("AS")
     }
-    /*let save_photo_route = warp::path("save")
+    let save_photo_route = warp::path("save")
         .and(warp::path("photo"))
         .and(warp::put())
         .and(warp::body::json())
@@ -58,6 +58,6 @@ pub async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
         .or(post_user_route)
         .or(save_photo_route)
         .or(post_friend_route);
-    warp::serve(routes).run(([127, 0, 0, 1], 3000)).await;*/
+    warp::serve(routes).run(([127, 0, 0, 1], 3000)).await;
     Ok(())
 }

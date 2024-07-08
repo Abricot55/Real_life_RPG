@@ -71,9 +71,24 @@ class _ProfilePageState extends State<ProfilePage> {
             currentIndex: _selectedIndex,
             selectedItemColor: Theme.of(context).primaryColor,
             items: [
-              BottomNavigationBarItem(icon: Container(), label: "Home"),
-              BottomNavigationBarItem(icon: Container(), label: "My profile"),
-              BottomNavigationBarItem(icon: Container(), label: "Picture")
+              BottomNavigationBarItem(
+                  icon: Icon(
+                    Icons.home,
+                    size: 35.0,
+                  ),
+                  label: "Home"),
+              BottomNavigationBarItem(
+                  icon: Icon(
+                    Icons.account_circle_sharp,
+                    size: 35.0,
+                  ),
+                  label: "My profile"),
+              BottomNavigationBarItem(
+                  icon: Icon(
+                    Icons.camera_alt,
+                    size: 35.0,
+                  ),
+                  label: "Picture")
             ]),
         body: containerGeneral);
   }
@@ -144,8 +159,9 @@ class _ProfilePageState extends State<ProfilePage> {
                                 fontSize: 30,
                                 color: Theme.of(context).primaryColor),
                           ),
-                          ElevatedButton(
-                              onPressed: () {
+                          Row(children: [
+                            GestureDetector(
+                              onTap: () {
                                 var _memory = memory;
                                 setState(() {
                                   memory = _memory;
@@ -155,13 +171,26 @@ class _ProfilePageState extends State<ProfilePage> {
                                   containerGeneral = getHomePage(_searchMode);
                                 });
                               },
-                              child: Text("Search")),
-                          ElevatedButton(
-                              onPressed: () {
-                                writeStorage("_userToTalk", "");
-                                navigateToNextScreen(context, 4);
-                              },
-                              child: Text("Chat"))
+                              child: Icon(
+                                Icons.search_rounded,
+                                color: Theme.of(context).primaryColor,
+                                size: 35.0,
+                              ),
+                            ),
+                            SizedBox(
+                              width: 10,
+                            ),
+                            GestureDetector(
+                                onTap: () {
+                                  writeStorage("_userToTalk", "");
+                                  navigateToNextScreen(context, 4);
+                                },
+                                child: Icon(
+                                  Icons.chat,
+                                  color: Theme.of(context).primaryColor,
+                                  size: 35.0,
+                                ))
+                          ])
                         ]),
                     Divider()
                   ]))
@@ -180,8 +209,8 @@ class _ProfilePageState extends State<ProfilePage> {
                     Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          ElevatedButton(
-                              onPressed: () {
+                          GestureDetector(
+                              onTap: () {
                                 var _memory = memory;
                                 setState(() {
                                   memory = _memory;
@@ -189,9 +218,13 @@ class _ProfilePageState extends State<ProfilePage> {
                                   containerGeneral = getHomePage(_searchMode);
                                 });
                               },
-                              child: Text("back")),
+                              child: Icon(
+                                Icons.arrow_back,
+                                color: Theme.of(context).primaryColor,
+                                size: 35.0,
+                              )),
                           Container(
-                            width: MediaQuery.of(context).size.width - 100,
+                            width: MediaQuery.of(context).size.width - 45,
                             child: TextField(
                               controller: searchController,
                               onChanged: (text) {
@@ -240,24 +273,26 @@ class _ProfilePageState extends State<ProfilePage> {
     setUserContainer(aUser, myProfile);
     Row userRow = Row();
     containerAdd = Container();
-    if(!me.getMyFriends().contains(aUser)){
-      containerAdd = Container(child:ElevatedButton(
-          onPressed: () {
-            if (!me.getMyFriends().contains(aUser)) {
-              var relation = jsonEncode(<String, String>{
-                'from': me.getId(),
-                'to': aUser.getId(),
-              });
-              sendRequest("ADD",path: "friend", jsonBody: relation);
-              me.addFriend(aUser);
-              var _memory = memory;
-              setState(() {
-                memory = _memory;
-                containerGeneral = getUserPage(aUser, myProfile, emptyStack);
-              });
-            }
-          },
-          child: Text("Add friend")));
+    if (!me.getMyFriends().contains(aUser)) {
+      containerAdd = Container(
+          child: ElevatedButton(
+              onPressed: () {
+                if (!me.getMyFriends().contains(aUser)) {
+                  var relation = jsonEncode(<String, String>{
+                    'from': me.getId(),
+                    'to': aUser.getId(),
+                  });
+                  sendRequest("ADD", path: "friend", jsonBody: relation);
+                  me.addFriend(aUser);
+                  var _memory = memory;
+                  setState(() {
+                    memory = _memory;
+                    containerGeneral =
+                        getUserPage(aUser, myProfile, emptyStack);
+                  });
+                }
+              },
+              child: Text("Add friend")));
     }
     if (myProfile) {
       userRow = Row(children: [
@@ -288,12 +323,16 @@ class _ProfilePageState extends State<ProfilePage> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         containerAdd,
-                        ElevatedButton(
-                            onPressed: () {
+                        GestureDetector(
+                            onTap: () {
                               writeStorage("_userToTalk", aUser.getId());
                               navigateToNextScreen(context, 4);
                             },
-                            child: Text("Chat"))
+                            child: Icon(
+                              Icons.chat,
+                              color: Colors.white,
+                              size: 35.0,
+                            ))
                       ]))
             ],
           )
@@ -365,8 +404,8 @@ class _ProfilePageState extends State<ProfilePage> {
       container = Container(
         child: Row(
           children: [
-            ElevatedButton(
-                onPressed: () {
+            GestureDetector(
+                onTap: () {
                   var _prevUser = memory.pop();
                   var _memory = memory;
                   setState(() {
@@ -375,9 +414,10 @@ class _ProfilePageState extends State<ProfilePage> {
                         getFriendsPage(_prevUser, _prevUser == me);
                   });
                 },
-                child: Text(
-                  "Back",
-                  style: TextStyle(fontSize: 15.0),
+                child: Icon(
+                  Icons.arrow_back,
+                  color: Colors.white,
+                  size: 35.0,
                 )),
             SizedBox(
               width: 10,
@@ -389,19 +429,25 @@ class _ProfilePageState extends State<ProfilePage> {
     if (myProfile) {
       return Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
         container,
-        ElevatedButton(
-            onPressed: () {
-              navigateToNextScreen(context, 3);
-            },
-            child: Text(
-              "Settings",
-              style: TextStyle(fontSize: 15.0),
-            )),
+        Row(children: [
+          GestureDetector(
+              onTap: () {
+                navigateToNextScreen(context, 3);
+              },
+              child: Icon(
+                Icons.settings,
+                color: Colors.white,
+                size: 35.0,
+              )),
+          SizedBox(
+            width: 5,
+          )
+        ]),
       ]);
     } else {
       return Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-        ElevatedButton(
-            onPressed: () {
+        GestureDetector(
+            onTap: () {
               var _memory = memory;
               setState(() {
                 memory = _memory;
@@ -418,9 +464,10 @@ class _ProfilePageState extends State<ProfilePage> {
                 }
               });
             },
-            child: Text(
-              "Back",
-              style: TextStyle(fontSize: 15.0),
+            child: Icon(
+              Icons.arrow_back,
+              color: Colors.white,
+              size: 35.0,
             )),
       ]);
     }
@@ -503,8 +550,8 @@ class _ProfilePageState extends State<ProfilePage> {
             children: [
               SizedBox(height: 30),
               Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-                ElevatedButton(
-                    onPressed: () {
+                GestureDetector(
+                    onTap: () {
                       var _memory = memory;
                       setState(() {
                         memory = _memory;
@@ -512,9 +559,10 @@ class _ProfilePageState extends State<ProfilePage> {
                             aUser, myProfile, memory.isStackEmpty());
                       });
                     },
-                    child: Text(
-                      "Back",
-                      style: TextStyle(fontSize: 15.0),
+                    child: Icon(
+                      Icons.arrow_back,
+                      color: Colors.white,
+                      size: 35.0,
                     )),
                 Text(
                   getFriendTitle(aUser, myProfile),

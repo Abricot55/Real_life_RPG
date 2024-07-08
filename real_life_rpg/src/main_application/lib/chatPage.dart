@@ -107,11 +107,15 @@ class _ChatPageState extends State<ChatPage> {
                     Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          ElevatedButton(
-                              onPressed: () {
+                          GestureDetector(
+                              onTap: () {
                                 navigateToNextScreen(context, 2);
                               },
-                              child: Text("Home")),
+                              child: Icon(
+                                Icons.home,
+                                color: Theme.of(context).primaryColor,
+                                size: 35.0,
+                              )),
                           Text(
                             savedUserID,
                             style: TextStyle(fontSize: 25),
@@ -183,8 +187,8 @@ class _ChatPageState extends State<ChatPage> {
                 child: Column(children: [
               SizedBox(height: 30),
               Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-                ElevatedButton(
-                    onPressed: () {
+                GestureDetector(
+                    onTap: () {
                       setState(() {
                         inConvo = false;
                         animate = false;
@@ -199,7 +203,11 @@ class _ChatPageState extends State<ChatPage> {
                         }
                       });
                     },
-                    child: Text("back")),
+                    child: Icon(
+                      Icons.arrow_back,
+                      color: Theme.of(context).primaryColor,
+                      size: 35.0,
+                    )),
                 Text(
                   aContact.getId(),
                   style: TextStyle(fontSize: 25),
@@ -217,7 +225,7 @@ class _ChatPageState extends State<ChatPage> {
             Row(
               children: [
                 Container(
-                  width: MediaQuery.of(context).size.width - 90,
+                  width: MediaQuery.of(context).size.width - 40,
                   child: TextField(
                     onSubmitted: (String blabla) {
                       if (adjustToKeyboardDOWN == false) {
@@ -251,8 +259,8 @@ class _ChatPageState extends State<ChatPage> {
                 SizedBox(
                   width: 5,
                 ),
-                ElevatedButton(
-                    onPressed: () {
+                GestureDetector(
+                    onTap: () {
                       scrollDown = true;
                       adjustToKeyboardUP = false;
                       adjustToKeyboardDOWN = false;
@@ -264,7 +272,11 @@ class _ChatPageState extends State<ChatPage> {
                             chatTextFieldController.text.trim()));
                       }
                     },
-                    child: Text("Send"))
+                    child: Icon(
+                      Icons.send,
+                      color: Theme.of(context).primaryColor,
+                      size: 35.0,
+                    ))
               ],
             ),
           ]),
