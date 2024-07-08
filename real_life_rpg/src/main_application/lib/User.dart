@@ -9,14 +9,20 @@ class User {
   //TODO ADAM -  tout les load et upload
 
   final String _id;
-  String _name = "";
+  String _nickname = "";
+  String _firstName = "";
+  String _surname = "";
+
   List<User> _myFriends = [];
   int _nbFriends = 0;
+
   String _profileDescription = "";
   Map<String, double> _activeSkills = {};
+
   NetworkImage basicPdp = NetworkImage("https://www.voici.fr/imgre/fit/~1~voi~2023~01~11~419636a9-5bf9-46de-bc19-e9184b465242.jpeg/1200x675/quality/80/focus-point/2050%2C1352/pitbull-que-devient-l-interprete-du-titre-i-know-you-want-me.jpg");
   late NetworkImage _profilePicture;
   List<XFile> _photos = [];
+
   Map<String, List<Message>> _myMessages = {};
   List<User> _myContacts = [];
 
@@ -29,15 +35,37 @@ class User {
     return _id;
   }
 
-  String getName() {
-    if (_name == "") {
+  String getNickame() {
+    if (_nickname == "") {
       //load the name
     }
-    return _name;
+    return _nickname;
   }
 
-  void setName(String name) {
-    this._name = name;
+  void setNickame(String nickname) {
+    this._nickname = nickname;
+  }
+
+  String getFirstName() {
+    if (_firstName == "") {
+      //load the name
+    }
+    return _firstName;
+  }
+
+  void setFirstName(String firstName) {
+    this._firstName = firstName;
+  }
+
+  String getSurname() {
+    if (_surname == "") {
+      //load the name
+    }
+    return _surname;
+  }
+
+  void setSurname(String surname) {
+    this._surname = surname;
   }
 
   List<User> getMyFriends() {
@@ -64,6 +92,13 @@ class User {
     _myFriends.add(aFriend);
 
     //upload the new friend!!
+  }
+
+  void removeFriend(User aFriend){
+    _nbFriends -= 1;
+    _myFriends.remove(aFriend);
+
+    //upload the new friend list!!
   }
 
   void setNbFriends(int nbFriends) {

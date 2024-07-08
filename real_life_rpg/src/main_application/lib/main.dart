@@ -284,7 +284,13 @@ void navigateToNextScreen(BuildContext context, int screenNumber,
 }
 
 void setUserTest(User me) {
+  me.setFirstName("Test");
+  me.setSurname("User");
+  me.setNickame("testUser");
   User adamou = User("Adamou");
+  adamou.setNickame("Adamou");
+  adamou.setFirstName("Adam");
+  adamou.setSurname("madA");
   adamou.setMyFriends([me, User("Fifiloulou")]);
   me.setMyFriends([
     adamou,

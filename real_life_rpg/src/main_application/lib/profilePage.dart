@@ -292,50 +292,104 @@ class _ProfilePageState extends State<ProfilePage> {
                   });
                 }
               },
-              child: Text("Add friend")));
+              child: Text("Add friend", style: TextStyle(fontSize: 15),)));
+    } else {
+      containerAdd = Container(
+          child: ElevatedButton(
+              onPressed: () {
+                //TODO ADAM - Unfriend
+
+                me.removeFriend(aUser);
+                var _memory = memory;
+                setState(() {
+                  memory = _memory;
+                  containerGeneral =
+                      getUserPage(aUser, myProfile, emptyStack);
+                });
+              },
+              child: Text("Remove friend", style: TextStyle(fontSize: 15),)));
     }
     if (myProfile) {
       userRow = Row(children: [
         CircleAvatar(radius: 50, backgroundImage: aUser.getProfilePicture()),
         SizedBox(
-          width: 5,
+          width: 10,
         ),
-        Column(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-          labelUserIDController,
-        ])
+        Flexible(
+            child: Container(
+          height: 90,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Row(children: [
+                Text(
+                  "${aUser.getFirstName()} ${aUser.getSurname()}",
+                  style: labelUserIDController.style,
+                )
+              ]),
+              Row(children: [
+                ElevatedButton(
+                    onPressed: () {},
+                    child: Container(
+                        width: 96,
+                        child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(
+                                "Edit profile",
+                                style: TextStyle(fontSize: 15),
+                              ),
+                              Icon(
+                                Icons.edit,
+                                size: 20,
+                              ),
+                            ])))
+              ])
+            ],
+          ),
+        ))
       ]);
     } else {
       userRow = Row(
         children: [
           CircleAvatar(radius: 50, backgroundImage: aUser.getProfilePicture()),
           SizedBox(
-            width: 5,
+            width: 10,
           ),
-          Column(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              SizedBox(
-                  width: MediaQuery.of(context).size.width - 115,
-                  child: Row(children: [labelUserIDController])),
-              SizedBox(
-                  width: MediaQuery.of(context).size.width - 115,
-                  child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        containerAdd,
-                        GestureDetector(
-                            onTap: () {
-                              writeStorage("_userToTalk", aUser.getId());
-                              navigateToNextScreen(context, 4);
-                            },
-                            child: Icon(
-                              Icons.chat,
-                              color: Colors.white,
-                              size: 35.0,
-                            ))
-                      ]))
-            ],
-          )
+          Flexible(
+              child: Container(
+                  height: 90,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Row(children: [
+                        Text(
+                          "${aUser.getFirstName()} ${aUser.getSurname()}",
+                          style: labelUserIDController.style,
+                        )
+                      ]),
+                      Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            containerAdd,
+                            ElevatedButton(
+                                onPressed: () {
+                                  writeStorage("_userToTalk", aUser.getId());
+                                  navigateToNextScreen(context, 4);
+                                },
+                                child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Text("Chat", style: TextStyle(fontSize: 15),),
+                                      SizedBox(width: 5,),
+                                      Icon(
+                                        Icons.chat,
+                                        size: 20.0,
+                                      )
+                                    ]))
+                          ])
+                    ],
+                  )))
         ],
       );
     }
@@ -397,12 +451,14 @@ class _ProfilePageState extends State<ProfilePage> {
   Row getTopUserPageController(User aUser, bool myProfile, bool emptyStack) {
     Container container = Container(
       child: SizedBox(
-        width: 95,
+        width: 35,
       ),
     );
     if (!emptyStack) {
+      //ajouter la flèche back
       container = Container(
         child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             GestureDetector(
                 onTap: () {
@@ -419,9 +475,6 @@ class _ProfilePageState extends State<ProfilePage> {
                   color: Colors.white,
                   size: 35.0,
                 )),
-            SizedBox(
-              width: 10,
-            )
           ],
         ),
       );
@@ -429,20 +482,16 @@ class _ProfilePageState extends State<ProfilePage> {
     if (myProfile) {
       return Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
         container,
-        Row(children: [
-          GestureDetector(
-              onTap: () {
-                navigateToNextScreen(context, 3);
-              },
-              child: Icon(
-                Icons.settings,
-                color: Colors.white,
-                size: 35.0,
-              )),
-          SizedBox(
-            width: 5,
-          )
-        ]),
+        labelUserIDController,
+        GestureDetector(
+            onTap: () {
+              navigateToNextScreen(context, 3);
+            },
+            child: Icon(
+              Icons.settings,
+              color: Colors.white,
+              size: 35.0,
+            )),
       ]);
     } else {
       return Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
@@ -469,6 +518,10 @@ class _ProfilePageState extends State<ProfilePage> {
               color: Colors.white,
               size: 35.0,
             )),
+        labelUserIDController,
+        SizedBox(
+          width: 35,
+        )
       ]);
     }
   }
@@ -609,7 +662,7 @@ class _ProfilePageState extends State<ProfilePage> {
    */
   void setUserContainer(User aUser, bool myProfile) {
     labelUserIDController = Text(
-      aUser.getId(),
+      aUser.getId(), //aUser.getNickname();
       style: TextStyle(fontSize: 25.0, color: Colors.white),
     );
     labelNbFriends = Text("Friends: ${aUser.getNbFriends()}",
