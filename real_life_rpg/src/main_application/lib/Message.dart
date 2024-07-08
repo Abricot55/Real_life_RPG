@@ -1,10 +1,11 @@
+enum MessageState {sending, sent, seen}
+
 class Message {
   DateTime date;
   String text;
   String idSentFrom;
   String idSentTo;
-  bool isSent = false;
-  bool isSeen = false;
+  MessageState state = MessageState.sending;
 
   Message(this.date, this.idSentFrom, this.idSentTo, this.text) {
     //this.date = date.toUtc();
@@ -14,12 +15,8 @@ class Message {
     return this.date.isBefore(other.date);
   }
 
-  void setSentMessage(bool val){
-    this.isSent = val;
-  }
-
-  void setSeeMessage(bool val){
-    this.isSeen = val;
+  void updateState(MessageState val){
+    this.state = val;
   }
 
 }

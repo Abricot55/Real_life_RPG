@@ -360,10 +360,10 @@ class _ChatPageState extends State<ChatPage> {
    */
   Row getWidgetState(Message message) {
     var _text = "Sending...";
-    if (message.isSent) {
+    if (message.state == MessageState.sent) {
       _text = "Sent";
     }
-    if (message.isSeen) {
+    if (message.state == MessageState.seen) {
       _text = "Seen";
     }
     return Row(
@@ -418,7 +418,7 @@ class _ChatPageState extends State<ChatPage> {
       String _text = "";
       if (lastMessage.idSentFrom == me.getId()) {
         sentFrom = "You: ";
-        if (lastMessage.isSent == false) {
+        if (lastMessage.state == MessageState.sending) {
           _text = "Sending...";
         }
       }
