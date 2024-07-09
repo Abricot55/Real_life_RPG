@@ -556,6 +556,62 @@ pub async fn add_friend_function(
     }
 }
 
+pub async fn update_user_function(
+    params: HashMap<String, String>,
+) -> Result<Response<Body>, warp::Rejection> {
+    match params.get("_key") {
+        Some(key) => {
+            match get_document_in_collection(key.clone(), "Users".to_string(), "MainDB".to_string())
+                .await
+            {
+                Ok(document) => match json_to_hashmap(document.as_str().unwrap()) {
+                    Ok(map_value) => {
+                        let mut temp: HashMap<String, String> = HashMap::new();
+                        for (k, v) in map_value {
+                            let k_temp = k.clone();
+                            match params.get(&k) {
+                                Some(_) => temp.insert(k, params[&k_temp].clone()),
+                                None => temp.insert(k, v.to_string()),
+                            };
+                        }
+                        match convert_hash_to_user(temp) {
+                            Ok(user) => {
+                                update_document_in_collection(
+                                    key.clone(),
+                                    DocumentType::User(user),
+                                    "Users".to_string(),
+                                    "MainDB".to_string(),
+                                )
+                                .await;
+                                return Ok(warp::reply::with_status(
+                                    "User updated",
+                                    StatusCode::ACCEPTED,
+                                )
+                                .into_response());
+                            }
+                            Err(e) => {
+                                return Ok(warp::reply::with_status(e, StatusCode::ACCEPTED)
+                                    .into_response())
+                            }
+                        }
+                    }
+                    Err(e) => {
+                        return Ok(warp::reply::with_status(e, StatusCode::ACCEPTED).into_response())
+                    }
+                },
+                Err(e) => {
+                    return Ok(warp::reply::with_status(e, StatusCode::ACCEPTED).into_response())
+                }
+            }
+        }
+        None => {
+            return Ok(
+                warp::reply::with_status("No key provided", StatusCode::ACCEPTED).into_response(),
+            )
+        }
+    }
+}
+
 /**
  * @brief This function convert a status code into a Repsponse<Body>.
  * @param code -> The status code.
