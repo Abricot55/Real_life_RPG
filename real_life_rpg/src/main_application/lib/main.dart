@@ -182,7 +182,7 @@ bool connexionTest(BuildContext context, String pseudo, String password, Flutter
           .then((value) {
         if (value.body != "[]") {
           storage.write(key: "_username", value: pseudo);
-          // TODO SEBASTIEN OU ADAM -> il faut faire dequoi avec ce user la quand on se connecte non?
+          // TODO SEBASTIEN OU ADAM -> il faut faire dequoi avec ce user la quand on se connecte non? nah
           print(loadUser(value.body));
           navigateToNextScreen(context, 2, data: value);
           return true;

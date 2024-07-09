@@ -773,10 +773,17 @@ class _ProfilePageState extends State<ProfilePage> {
 
   Future<void> readUserID() async {
     //trouver le user id
-    //TODO SEBASTIEN, COMME D'HABITUDE
+    //TODO SEBASTIEN, A TESTER
     savedUserID = (await storage.read(key: "_userID"))!; //"testUser";
-    me = User(savedUserID, "", "", "");
+    me = User("", "", "", "");
     memory = Activememory(me);
+    sendRequest("get", path: "users", urlMap: {"key": savedUserID})
+        .then((value) {
+      if (value.body != "[]") {
+        me = loadUser(value.body)!;
+        memory.setMainUser(me);
+      }
+    });
 
     //userTest
     if (savedUserID == "testUser") {

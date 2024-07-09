@@ -12,6 +12,10 @@ class Activememory {
     return _memoryUser;
   }
 
+  void setMainUser(User mainUser){
+    this._memoryUser = mainUser;
+  }
+
   void push(User aUser) {
     if (_stackLength < _stack.length) {
       _stack[_stackLength] = aUser;

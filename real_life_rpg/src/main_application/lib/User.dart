@@ -3,7 +3,7 @@ import 'dart:convert';
 import 'package:camera/camera.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_profile_picture/flutter_profile_picture.dart';
+
 import 'Message.dart';
 import 'main.dart';
 
@@ -30,7 +30,7 @@ class User {
   List<User> _myContacts = [];
 
   User(this._id, this._key, this._firstName, this._nickname) {
-    assert(_id != "");
+    //assert(_id != "");
     _profilePicture = basicPdp;
   }
 
@@ -199,10 +199,16 @@ class User {
         }
       }
       //new user
-      // TODO SEBASTIEN, JAI OTÉ CA PARCE QUE CA MARCHAIT PAS AVEC LE NOUVEAU CONSTRUCTEUR DE USER, SI TU TROUVE UN MOYEN VITE FAIT DE RÉGLER TANT MIEU JAI PAS ENVIE DE REVERSE ENGINEER TON CODE
-      // if (!isFriend) {
-      //   _myContacts.add(User(item.key));
-      //}
+      // TODO SEBASTIEN, À TESTER
+      if (!isFriend) {
+        sendRequest("get", path: "users", urlMap: {"pseudo": item.key})
+            .then((value) {
+          if (value.body != "[]") {
+            User newUser = loadUser(value.body)!;
+            _myContacts.add(newUser);
+          }
+        });
+      }
     }
   }
 

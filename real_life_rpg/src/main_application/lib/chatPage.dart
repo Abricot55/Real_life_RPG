@@ -545,9 +545,14 @@ class _ChatPageState extends State<ChatPage> {
           }
         }
         if (!found) {
-          //TODO SEBASTIEN, MEME CHose ici
-          userTalking = User(userToTalk, "", "", "");
-          me.addContact(userTalking);
+          //TODO SEBASTIEN, A TESTER
+          sendRequest("get", path: "users", urlMap: {"pseudo": userToTalk})
+              .then((value) {
+            if (value.body != "[]") {
+              userTalking = loadUser(value.body)!;
+              me.addContact(userTalking);
+            }
+          });
         }
       }
     }
