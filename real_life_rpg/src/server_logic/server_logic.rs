@@ -555,6 +555,81 @@ pub async fn add_friend_function(
         }
     }
 }
+/**
+ * @brief This function get all the friend of a user if the key or id is provided in the parameter.
+ * @param params -> A hashmap that must contains the key or the id of the user. The Id will be chosen first.
+ * @return A Response<Body> with the friends if friends have been found.
+ */
+pub async fn get_friends_function(
+    params: HashMap<String, String>,
+) -> Result<Response<Body>, warp::Rejection> {
+    match params.get("id") {
+        Some(value) => return sub_function(value.clone()).await,
+        None => match params.get("key") {
+            Some(key) => return sub_function(format!("Users/{}", key)).await,
+            None => {
+                return Ok(warp::reply::with_status(
+                    "No key or id provided",
+                    StatusCode::NOT_ACCEPTABLE,
+                )
+                .into_response())
+            }
+        },
+    };
+
+    async fn sub_function(_id: String) -> Result<Response<Body>, warp::Rejection> {
+        let mut id_map: HashMap<String, Value> = HashMap::new();
+        id_map.insert("_from".to_string(), serde_json::Value::String(_id.clone()));
+        id_map.insert("_to".to_string(), serde_json::Value::String(_id.clone()));
+        let mut friends: Vec<String> = vec![];
+        print!("{}\n",_id.clone());
+        match search_field(id_map, "friend_view".to_string(), "MainDB".to_string()).await {
+            Ok(friend_list) => {
+                print!("{}\n",friend_list.len());
+                for each in friend_list {
+                    let doc = match json_to_hashmap(each.to_string().as_str()) {
+                        Ok(value) => value,
+                        Err(e) => {
+                            return Ok(warp::reply::with_status(e, StatusCode::NOT_ACCEPTABLE)
+                                .into_response())
+                        }
+                    };
+                    if doc["_from"] == _id {
+                        let mut real_key: String = doc["_to"].to_string();
+                        real_key.retain(|c| {
+                            c != 'U' && c != 's' && c != 'e' && c != 'r' && c != 's' && c != '/'
+                        });
+                        match get_document_in_collection(
+                            real_key,
+                            "Users".to_string(),
+                            "MainDB".to_string(),
+                        )
+                        .await
+                        {
+                            Ok(value) => friends.push(value.to_string()),
+                            Err(e) => {
+                                return Ok(warp::reply::with_status(e, StatusCode::NOT_ACCEPTABLE)
+                                    .into_response())
+                            }
+                        };
+                    }
+                }
+            }
+            Err(e) => {
+                return Ok(warp::reply::with_status(e, StatusCode::NOT_ACCEPTABLE).into_response())
+            }
+        }
+        match serde_json::to_string(&friends) {
+            Ok(json) => {
+                print!("{}",json);
+                return Ok(warp::reply::with_status(json, StatusCode::ACCEPTED).into_response())
+            }
+            Err(e) => {
+                return Ok(warp::reply::with_status("Serialisation error", StatusCode::NOT_ACCEPTABLE).into_response())
+            }
+        }
+    }
+}
 
 pub async fn update_user_function(
     params: HashMap<String, String>,

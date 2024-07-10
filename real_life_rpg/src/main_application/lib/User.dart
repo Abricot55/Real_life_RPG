@@ -224,6 +224,19 @@ class User {
     _myMessages[aUser.getId()] = [];
   }
 
+  void loadPhotos() {
+    sendRequest("get", path: "photo", urlMap: {"key": this._key})
+        .then((value) {
+
+          //TODO les photos c'est pas encore finalisé, la sérialisation et désérialisation, so c'est sur que le code en dessous load pas vraiment les photos mais la requete c'est la bonne.
+          _photos = value;
+    });
+  }
+  
+  void loadFriend(){
+    sendRequest()
+  }
+
   /**
    * @brief Remove the contact if no messages has been sent after opening a new conversation with a non-contact
    * @param aUser - The ghost contact
@@ -233,7 +246,8 @@ class User {
   }
 }
 
-User? loadUser(String json) {
+User? loadUser(String json,
+    {photos = false, messages = false, friends = false}) {
   dynamic decodedJson = jsonDecode(json)[0];
   User? user;
   if (decodedJson is Map<String, dynamic>) {
@@ -246,6 +260,9 @@ User? loadUser(String json) {
     } catch (Exception) {
       print("OH NO");
     }
+  }
+  if (user != null && photos){
+    user.loadPhotos();
   }
   return user;
 }

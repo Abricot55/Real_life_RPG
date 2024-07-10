@@ -14,12 +14,7 @@ pub enum DocumentType {
     User(UserType),
     Skill(SkillType),
     Photos(PhotoListType),
-    Uu(RelationUserUserType),
-    Us(RelationUserSkillType),
-}
-
-#[derive(Serialize, Deserialize)]
-pub enum RelationType {
+    Messages(MessageListType),
     Uu(RelationUserUserType),
     Us(RelationUserSkillType),
 }
@@ -58,19 +53,35 @@ pub struct RelationUserSkillType {
     pub title: String,
 }
 #[derive(Serialize, Deserialize)]
-pub struct PhotoListType{
-    pub _key : Option<String>,
-    pub photos : Vec<PhotoType>,
+pub struct PhotoListType {
+    pub _key: Option<String>,
+    pub photos: Vec<PhotoType>,
 }
 
 #[derive(Serialize, Deserialize, Clone)]
-pub struct PhotoType{
-    pub image : String,
-    pub title : String,
-    pub likes : i32,
-    pub comments : Vec<String>,
-    pub shared : i32,
-    pub description : String,
+pub struct PhotoType {
+    pub image: String,
+    pub title: String,
+    pub likes: i32,
+    pub comments: Vec<String>,
+    pub shared: i32,
+    pub description: String,
+}
+
+#[derive(Serialize, Deserialize)]
+pub struct MessageListType {
+    pub _key: Option<String>,
+    pub _from: String,
+    pub _to: String,
+    pub messages: Vec<MessageType>,
+    pub date : String,
+}
+
+#[derive(Serialize, Deserialize, Clone)]
+pub struct MessageType {
+    pub message: String,
+    pub state: i32,
+    pub date: String,
 }
 
 /**
@@ -172,7 +183,7 @@ pub async fn add_document_to_collection(
 ) -> Result<String, String> {
     match convert_doc_json(document) {
         Ok(json_doc) => {
-            print!("{}",json_doc);
+            print!("{}", json_doc);
             let aql = format!("INSERT {} INTO {}", json_doc.to_string(), collection_name);
             let query: AqlQuery = AqlQuery::builder().query(&aql).build();
             match connect_to_db(database_name).await {
@@ -320,7 +331,6 @@ pub async fn search_field(
     }
 }
 
-
 /**
  * @brief This function search the fields and check for the substring. It then shows the 3 most relevant documents.
  * @param fields -> The fields on which the search is based.
@@ -348,16 +358,13 @@ pub async fn relevant_search_field(
             }
             first = false;
 
-            
             match value {
                 Value::String(s) => base_query.push_str(&format!("LIKE(doc.{}, '%{}%') ", key, s)),
                 _ => base_query.push_str(&format!("LIKE(doc.{}, {}) ", key, value)),
             };
         }
 
-        base_query.push_str(
-            "  SORT BM25(doc) DESC LIMIT 3 RETURN doc",
-        );
+        base_query.push_str("  SORT BM25(doc) DESC LIMIT 3 RETURN doc");
 
         let query = AqlQuery::builder().query(&base_query).build();
 
@@ -372,7 +379,6 @@ pub async fn relevant_search_field(
         Err("There is no search field!".to_string())
     }
 }
-
 
 /**
  * @brief module use to link tests to this librairy
