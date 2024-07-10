@@ -150,22 +150,28 @@ class User {
 
   void addMessage(Message message) {
     String idOtherUser = message.isSentFrom.getId();
+    User _otherUser = message.isSentFrom;
     if (idOtherUser == _id) {
       idOtherUser = message.isSentTo.getId();
+      _otherUser = message.isSentTo;
     }
     if (_myMessages.keys.contains(idOtherUser)) {
       _myMessages[idOtherUser] = (_myMessages[idOtherUser]! + [message]);
     } else {
+      /*
       bool trouve = false;
       for (var i = 0; i < _nbFriends && !trouve; i++) {
         if (idOtherUser == _myFriends[i].getId()) {
+          //if a friend - already created
           addContact(_myFriends[i]);
           trouve = true;
         }
       }
-      if (!trouve) {
-        addContact(message.isSentFrom);
-      }
+       */
+      //if (!trouve) {
+      //if not friend
+      addContact(_otherUser);
+      //}
       _myMessages[idOtherUser] = [message];
     }
     //update contact order

@@ -1,10 +1,8 @@
-import 'dart:convert';
 import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:intl/intl.dart';
-import 'package:main_application/utilities.dart';
 
 import 'Message.dart';
 import 'User.dart';
@@ -209,7 +207,7 @@ class _ChatPageState extends State<ChatPage> {
                       size: 35.0,
                     )),
                 Text(
-                  aContact.getId(),
+                  aContact.getNickame(),
                   style: TextStyle(fontSize: 25),
                 ),
                 SizedBox(
@@ -479,7 +477,7 @@ class _ChatPageState extends State<ChatPage> {
                   child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                    Text(aContact.getId()),
+                    Text(aContact.getNickame()),
                     Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
@@ -545,9 +543,9 @@ class _ChatPageState extends State<ChatPage> {
           }
         }
         if (!found) {
-          //TODO SEBASTIEN, A TESTER
-          sendRequest("get", path: "users", urlMap: {"pseudo": userToTalk})
-              .then((value) {
+          sendRequest("get",
+              path: "/users/search",
+              urlMap: {"pseudo": userToTalk}).then((value) {
             if (value.body != "[]") {
               userTalking = loadUser(value.body)!;
               me.addContact(userTalking);
@@ -566,7 +564,7 @@ class _ChatPageState extends State<ChatPage> {
         List<User> search = loadUserMultiple(liste.body);
         print(search);
         for (var i in search) {
-          if (i != me) {
+          if (i.getId() != me.getId()) {
             User aFriend = i;
             users.add(GestureDetector(
               onTap: () {
@@ -583,7 +581,7 @@ class _ChatPageState extends State<ChatPage> {
                   SizedBox(
                     width: 10,
                   ),
-                  Text(i.getId())
+                  Text(i.getNickame())
                 ],
               ),
             ));
@@ -603,8 +601,13 @@ class _ChatPageState extends State<ChatPage> {
   }
 
   Future<void> readUserID() async {
-    // TODO SEBASTIEN, JE SAVAIS PAS TROP COMMENT REGLER DES TRUCS DE STORAGE SO JTE LAISSE FAIRE CA
     savedUserID = (await storage.read(key: "_userID"))!;
-    me = User(savedUserID, "", "", "");
+    me = User("", "", "", "");
+    sendRequest("get", path: "/users/search", urlMap: {"pseudo": savedUserID})
+        .then((value) {
+      if (value.body != "[]") {
+        me = loadUser(value.body)!;
+      }
+    });
   }
 }

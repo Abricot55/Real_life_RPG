@@ -182,8 +182,8 @@ bool connexionTest(BuildContext context, String pseudo, String password, Flutter
           .then((value) {
         if (value.body != "[]") {
           storage.write(key: "_username", value: pseudo);
-          // TODO SEBASTIEN OU ADAM -> il faut faire dequoi avec ce user la quand on se connecte non? nah
-          print(loadUser(value.body));
+          // TODO SEBASTIEN OU ADAM -> on aurait même pas besoin, je write dans le storage l'user par défaut et ça lit et crée un nouvel utilisateur dans le prcchain écran
+          print(value.body);
           navigateToNextScreen(context, 2, data: value);
           return true;
         }
@@ -296,10 +296,10 @@ void setUserTest(User me) {
   adamou.setMyFriends([me, User("Fifiloulou","","","")]);
   me.setMyFriends([
     adamou,
-    User("Sbasien","","",""),
-    User("Jean-Jean","","",""),
-    User("Mike","","",""),
-    User("Marie-Ève","","","")
+    User("","","Sebastien","Sebichou"),
+    User("","","Jean-Jean","Jéjéers"),
+    User("","","Mike","MickeyBoy"),
+    User("","","Marie-Ève","SexyChick95")
   ]);
   me.setActiveSkills(
       {"Cooking": 34.3, "Skateboard": 12.1, "Chapeau melon": 99.90});
