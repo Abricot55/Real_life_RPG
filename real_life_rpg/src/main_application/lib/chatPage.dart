@@ -21,7 +21,7 @@ class _ChatPageState extends State<ChatPage> {
 
   //variables
   bool inConvo = false;
-  User userTalking = User("testUser", "testUser", "testUser", "testUser");
+  User userTalking = User("", "", "", "");
   bool animate = false;
   bool scrollDown = true;
   bool adjustToKeyboardUP = false;
@@ -543,12 +543,17 @@ class _ChatPageState extends State<ChatPage> {
           }
         }
         if (!found) {
+          print(userToTalk);
           sendRequest("get",
               path: "/users/search",
-              urlMap: {"pseudo": userToTalk}).then((value) {
+              urlMap: {"_id": userToTalk}).then((value) {
             if (value.body != "[]") {
               userTalking = loadUser(value.body)!;
               me.addContact(userTalking);
+              var _me = me;
+              setState(() {
+                me = _me;
+              });
             }
           });
         }
