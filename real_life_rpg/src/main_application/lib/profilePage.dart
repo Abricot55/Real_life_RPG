@@ -546,7 +546,7 @@ class _ProfilePageState extends State<ProfilePage> {
     if (myProfile) {
       return "My skills";
     } else {
-      return "${user.getId()}'s skills";
+      return "${user.getNickame()}'s skills";
     }
   }
 
@@ -582,7 +582,7 @@ class _ProfilePageState extends State<ProfilePage> {
                 SizedBox(
                   width: 10,
                 ),
-                Text(i.getId())
+                Text(i.getNickame())
               ],
             ),
           ));
@@ -673,7 +673,7 @@ class _ProfilePageState extends State<ProfilePage> {
    */
   void setUserContainer(User aUser, bool myProfile) {
     labelUserIDController = Text(
-      aUser.getId(), //aUser.getNickname();
+      aUser.getNickame(),
       style: TextStyle(fontSize: 25.0, color: Colors.white),
     );
     labelNbFriends = Text("Friends: ${aUser.getNbFriends()}",
@@ -754,7 +754,7 @@ class _ProfilePageState extends State<ProfilePage> {
                   child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                    Text(aFriend.getId()),
+                    Text(aFriend.getNickame()),
                     Text(
                       "${aFriend.getNbFriends()} friends",
                       style: TextStyle(
@@ -773,11 +773,10 @@ class _ProfilePageState extends State<ProfilePage> {
 
   Future<void> readUserID() async {
     //trouver le user id
-    //TODO SEBASTIEN, A TESTER
     savedUserID = (await storage.read(key: "_userID"))!; //"testUser";
     me = User("", "", "", "");
     memory = Activememory(me);
-    sendRequest("get", path: "users", urlMap: {"key": savedUserID})
+    sendRequest("get", path: "/users/search", urlMap: {"pseudo": savedUserID})
         .then((value) {
       if (value.body != "[]") {
         me = loadUser(value.body)!;
