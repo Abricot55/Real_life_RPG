@@ -74,7 +74,7 @@ pub struct MessageListType {
     pub _from: String,
     pub _to: String,
     pub messages: Vec<MessageType>,
-    pub date : String,
+    pub date: String,
 }
 
 #[derive(Serialize, Deserialize, Clone)]
@@ -377,6 +377,43 @@ pub async fn relevant_search_field(
         }
     } else {
         Err("There is no search field!".to_string())
+    }
+}
+
+/**
+ * @brief This function extract all the relation from a edge document involving the specified id, it could be from or to the id.
+ * @param id_from -> This is the id that need to be checked in the relation.
+ * @param relation_name -> This is the name of the relation(edge document) in which the id needs to be found.
+ * @param database_name -> The name of the database in which the edge document is stored.
+ * @return A result which can contains a vector of document concerning the id or a string explaining why the search didn't worked.
+ */
+pub async fn get_relation_from(
+    id_from: String,
+    relation_name: String,
+    database_name: String,
+) -> Result<Vec<Document<Value>>, String> {
+    let base_query = format!(
+        r#"
+        FOR e IN {}
+            FILTER e._from == '{}' OR e._to == '{}'
+                RETURN e
+        "#,
+        relation_name, id_from, id_from
+    );
+
+    let query = AqlQuery::builder().query(&base_query).build();
+    match connect_to_db(database_name).await {
+        Ok(db) => match db.aql_query::<Document<Value>>(query).await {
+            Ok(documents) => {
+                Ok(documents)
+            }
+            Err(e) => {
+                Err(format!("The query didn't work: {:?}", e))
+            }
+        },
+        Err(e) => {
+            Err(format!("Couldn't connect to db: {:?}", e))
+        }
     }
 }
 
