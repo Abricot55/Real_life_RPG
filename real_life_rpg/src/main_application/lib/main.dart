@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:ui';
 import 'dart:io';
 
+import 'package:audioplayers/audioplayers.dart';
 import 'package:camera/camera.dart';
 import 'package:english_words/english_words.dart';
 import 'package:flutter/material.dart';
@@ -67,6 +68,9 @@ class MyHomePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    //son
+    playLocalAsset();
+
     readStorageValues();
     return Scaffold(
       body: Center(
@@ -122,7 +126,6 @@ class MyHomePage extends StatelessWidget {
                 child: Text("Sign Up")),
             ElevatedButton(
                 onPressed: () {
-                  navigateToNextScreen(context, 4);
                 },
                 child: Text("Picture!")),
             /*This container is the TexField for the server request ***(FOR TEST PURPOSE)****/
@@ -322,4 +325,11 @@ void setUserTest(User me) {
       m1,
     ]
   });
+}
+
+void playLocalAsset() async {
+  AudioPlayer player = new AudioPlayer();
+  //At the next line, DO NOT pass the entire reference such as assets/yes.mp3. This will not work.
+  //Just pass the file name only.
+  await player.play(AssetSource("son.mp3"));
 }
