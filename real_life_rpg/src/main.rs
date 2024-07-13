@@ -9,7 +9,7 @@ use warp::Filter;
 #[tokio::main]
 pub async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
     /*let mut var: HashMap<String, String> = HashMap::new();
-    var.insert("id".to_string(), "Users/1807".to_string());
+    var.insert("id".to_string(), "Users/16350".to_string());
     match get_friends_function(var).await{
         Ok(response) => print!("o"),
         Err(_) => print!("AS")

@@ -4,6 +4,7 @@ import 'dart:async';
 import 'package:crypto/crypto.dart';
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
+import 'package:main_application/User.dart';
 
 /// @brief This function hash a string using SHA256 and return the hashed value.
 /// @param word -> The string that will be hashed.

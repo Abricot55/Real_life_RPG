@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:camera/camera.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:main_application/utilities.dart';
 
 import 'Message.dart';
 import 'main.dart';
@@ -73,7 +74,7 @@ class User {
 
   List<User> getMyFriends() {
     if (_myFriends == []) {
-      //load the list of the user's friend's id
+      loadFriend();
     }
     return _myFriends;
   }
@@ -85,7 +86,7 @@ class User {
 
   int getNbFriends() {
     if (_nbFriends == 0) {
-      //load the number of freinds
+      loadFriend();
     }
     return _nbFriends;
   }
@@ -238,10 +239,27 @@ class User {
           _photos = value;
     });
   }
-  
+
   void loadFriend(){
+    List<User> users = [];
     sendRequest("get", path: "friend", urlMap : {"id" : this._id}).then((value) {
-      print(value.body);
+      String real_body = value.body;
+      List<dynamic> decodejson = jsonDecode(real_body);
+      for (dynamic i in decodejson){
+        if (i is String){
+          i = i.replaceAll("\\\"", "\"");
+          int num = i.length-1;
+          i = "["+i.substring(1,num)+"]";
+          User? user = loadUser(i);
+          print(user);
+          if (user != null){
+            users.add(user);
+          }
+        }
+      }
+      setMyFriends(users);
+      print(getMyFriends()[0]._nickname);
+      print(getMyFriends()[1]._nickname);
     });
   }
 
@@ -281,18 +299,17 @@ User? loadUser(String json,
 List<User> loadUserMultiple(String json) {
   List<dynamic> decodedJson = jsonDecode(json);
   List<User> liste = [];
-  for (dynamic i in decodedJson) {
-    if (i is Map<String, dynamic>) {
+  for (dynamic item in decodedJson) {
+    if (item is Map <String, dynamic>){
       try {
-        var _id = i['_id'] as String;
-        var _key = i['_key'] as String;
-        var pseudo = i['pseudo'] as String;
-        var name = i['name'] as String;
+        var _id = item['_id'] as String;
+        var _key = item['_key'] as String;
+        var pseudo = item['pseudo'] as String;
+        var name = item['name'] as String;
         liste.add(User(_id, _key, name, pseudo));
       } catch (Exception) {
         print("OH NO");
-      }
+      }}
     }
-  }
   return liste;
 }

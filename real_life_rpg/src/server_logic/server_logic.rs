@@ -317,7 +317,7 @@ pub async fn get_user_function(
     match params.remove("key") {
         Some(key) => {
             match get_document_in_collection(key, "Users".to_string(), "MainDB".to_string()).await {
-                Ok(document) => Ok(Response::new(Body::from(document.to_string()))),
+                Ok(document) => {print!("{}",document.to_string());Ok(Response::new(Body::from(document.to_string())))},
                 Err(e) => Ok(warp::reply::with_status(e, StatusCode::NOT_FOUND).into_response()),
             }
         }
@@ -585,7 +585,8 @@ pub async fn get_friends_function(
                 let mut users: Vec<String> = vec![];
                 for i in friend_list {
                     let simple_user = match serde_json::to_string(&i) {
-                        Ok(json) => match json_to_hashmap(&json) {
+                        Ok(json) => {match json_to_hashmap(&json) {
+                            
                             Ok(map_relation) => {
                                 let mut key = "".to_string();
                                 if map_relation["_from"] == _id {
@@ -602,7 +603,9 @@ pub async fn get_friends_function(
                                 )
                                 .await
                                 {
-                                    Ok(value) => value.to_string(),
+                                    Ok(value) => {
+                                        value.to_string()
+                                        }
                                     Err(e) => {
                                         return Ok(warp::reply::with_status(
                                             e,
@@ -616,7 +619,7 @@ pub async fn get_friends_function(
                                 return Ok(warp::reply::with_status(e, StatusCode::NOT_ACCEPTABLE)
                                     .into_response())
                             }
-                        },
+                        }},
                         Err(e) => {
                             return Ok(warp::reply::with_status(
                                 "Could not find the user",
@@ -629,7 +632,6 @@ pub async fn get_friends_function(
                 }
                 match serde_json::to_string(&users) {
                     Ok(final_json) => {
-                        print!("{}", final_json);
                         return Ok(warp::reply::with_status(final_json, StatusCode::ACCEPTED)
                             .into_response());
                     }
@@ -649,7 +651,6 @@ pub async fn get_friends_function(
         }
     }
 }
-
 
 /**RÉCENT MAIS A VÉRIFIER SI CA MARCHE' JE NAI PAS ENCORE TESTÉ */
 pub async fn update_user_function(
