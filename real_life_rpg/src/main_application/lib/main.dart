@@ -69,7 +69,7 @@ class MyHomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     //son
-    playLocalAsset();
+    //playLocalAsset();
 
     readStorageValues();
     return Scaffold(
