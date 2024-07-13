@@ -69,7 +69,7 @@ class MyHomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     //son
-    //playLocalAsset();
+    playLocalAsset();
 
     readStorageValues();
     return Scaffold(
@@ -126,7 +126,6 @@ class MyHomePage extends StatelessWidget {
                 child: Text("Sign Up")),
             ElevatedButton(
                 onPressed: () {
-                  navigateToNextScreen(context, 4);
                 },
                 child: Text("Picture!")),
             /*This container is the TexField for the server request ***(FOR TEST PURPOSE)****/
@@ -332,5 +331,5 @@ void playLocalAsset() async {
   AudioPlayer player = new AudioPlayer();
   //At the next line, DO NOT pass the entire reference such as assets/yes.mp3. This will not work.
   //Just pass the file name only.
-  await player.play(UrlSource("son.mp3"));
+  await player.play(AssetSource("son.mp3"));
 }
