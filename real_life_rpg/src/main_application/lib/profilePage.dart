@@ -273,7 +273,13 @@ class _ProfilePageState extends State<ProfilePage> {
     setUserContainer(aUser, myProfile);
     Row userRow = Row();
     containerAdd = Container();
-    if (!me.getMyFriends().contains(aUser)) {
+    bool alreadyFriend = false;
+    for(var i = 0; i < me.getNbFriends(); i++){
+      if(me.getMyFriends()[i].getId() == aUser.getId()){
+        alreadyFriend = true;
+      }
+    }
+    if (alreadyFriend) {
       containerAdd = Container(
           child: ElevatedButton(
               onPressed: () {

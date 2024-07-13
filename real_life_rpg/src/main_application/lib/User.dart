@@ -250,7 +250,7 @@ class User {
           i = i.replaceAll("\\\"", "\"");
           int num = i.length-1;
           i = "["+i.substring(1,num)+"]";
-          User? user = loadUser(i);
+          User? user = loadUser(i, friends: true);
           print(user);
           if (user != null){
             users.add(user);
@@ -258,8 +258,6 @@ class User {
         }
       }
       setMyFriends(users);
-      print(getMyFriends()[0]._nickname);
-      print(getMyFriends()[1]._nickname);
     });
   }
 
