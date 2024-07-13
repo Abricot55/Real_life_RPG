@@ -70,7 +70,6 @@ pub struct PhotoType {
 
 #[derive(Serialize, Deserialize)]
 pub struct MessageListType {
-    pub _key: Option<String>,
     pub _from: String,
     pub _to: String,
     pub messages: Vec<MessageType>,
@@ -80,10 +79,15 @@ pub struct MessageListType {
 #[derive(Serialize, Deserialize, Clone)]
 pub struct MessageType {
     pub message: String,
-    pub state: i32,
+    pub state: MessageState,
     pub date: String,
+    pub from: String,
 }
 
+#[derive(Serialize, Deserialize, Clone)]
+pub enum MessageState {
+    SENDING,SENT,SEEN
+}
 /**
  * @brief This function etablish connection with the port 8529.
  * @return A result with the connection if it worked and a error if it didn't.
@@ -399,6 +403,45 @@ pub async fn get_relation_from(
                 RETURN e
         "#,
         relation_name, id_from, id_from
+    );
+
+    let query = AqlQuery::builder().query(&base_query).build();
+    match connect_to_db(database_name).await {
+        Ok(db) => match db.aql_query::<Document<Value>>(query).await {
+            Ok(documents) => {
+                Ok(documents)
+            }
+            Err(e) => {
+                Err(format!("The query didn't work: {:?}", e))
+            }
+        },
+        Err(e) => {
+            Err(format!("Couldn't connect to db: {:?}", e))
+        }
+    }
+}
+
+/**
+ * @brief This function extract all the relation from a edge document involving the two specified id.
+ * @param id1 -> This is the id that need to be checked in the relation.
+ * @param id2 -> This is the second id that need to be checked in the realtion.
+ * @param relation_name -> This is the name of the relation(edge document) in which the id needs to be found.
+ * @param database_name -> The name of the database in which the edge document is stored.
+ * @return A result which can contains a vector of document concerning the ids or a string explaining why the search didn't worked.
+ */
+pub async fn get_relation_from_two(
+    id1: String,
+    id2 : String,
+    relation_name: String,
+    database_name: String,
+) -> Result<Vec<Document<Value>>, String> {
+    let base_query = format!(
+        r#"
+        FOR e IN {}
+            FILTER (e._from == '{}' AND e._to == '{}') OR (e._to == '{}' AND e._from == '{}')
+                RETURN e
+        "#,
+        relation_name, id1, id2, id1, id2
     );
 
     let query = AqlQuery::builder().query(&base_query).build();
