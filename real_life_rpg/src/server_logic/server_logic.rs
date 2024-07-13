@@ -653,6 +653,12 @@ pub async fn get_friends_function(
     }
 }
 
+
+/**
+ * @brief This function add a message between to users.
+ * @param params -> This hashmap contains the important informations. It must contain the fields : from, to and message
+ * @return A response body containing a string thaht indicate if the processus worked.
+ */
 pub async fn add_message_function(
     params: HashMap<String, String>,
 ) -> Result<Response<Body>, warp::Rejection> {
@@ -799,6 +805,13 @@ pub async fn add_message_function(
     }
 }
 
+/**
+ * @brief This function retrive the messages concerning one ore two users. 
+ *          If a from field AND a to field are passed in argument, it retrive the messages between thos two, 
+ *          if only a from is specified it retrieve all the message concerning this user. 
+ * @param params -> The Hashmap must contain the from field.
+ * @return A response body with the list of message that are relevant
+ */
 pub async fn get_message_function(
     params: HashMap<String, String>,
 ) -> Result<Response<Body>, warp::Rejection> {

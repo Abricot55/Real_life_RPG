@@ -16,6 +16,15 @@ pub async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
         Ok(response) => print!("o"),
         Err(_) => print!("AS")
     }*/
+    let post_user_route = warp::path("message")
+    .and(warp::post())
+    .and(warp::body::json())
+    .and_then(add_message_function);
+
+    let get_message_route = warp::path("message")
+    .and(warp::get())
+    .and(warp::query::<HashMap<String, String>>())
+    .and_then(get_message_function);
 
     let get_friend_route = warp::path("friend")
         .and(warp::get())
