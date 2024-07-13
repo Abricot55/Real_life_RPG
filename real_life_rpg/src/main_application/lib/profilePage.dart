@@ -779,7 +779,7 @@ class _ProfilePageState extends State<ProfilePage> {
     sendRequest("get", path: "/users/search", urlMap: {"pseudo": savedUserID})
         .then((value) {
       if (value.body != "[]") {
-        me = loadUser(value.body)!;
+        me = loadUser(value.body, friends: true)!;
         memory.setMainUser(me);
       }
     });

@@ -240,7 +240,9 @@ class User {
   }
   
   void loadFriend(){
-    sendRequest()
+    sendRequest("get", path: "friend", urlMap : {"id" : this._id}).then((value) {
+      print(value.body);
+    });
   }
 
   /**
@@ -269,6 +271,9 @@ User? loadUser(String json,
   }
   if (user != null && photos){
     user.loadPhotos();
+  }
+  if (user != null && friends){
+    user.loadFriend();
   }
   return user;
 }
