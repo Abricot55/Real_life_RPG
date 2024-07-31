@@ -270,6 +270,7 @@ class _ProfilePageState extends State<ProfilePage> {
    * @return the widget that displays a user page
    */
   Center getUserPage(User aUser, bool myProfile, bool emptyStack) {
+    aUser.loadFriend();
     setUserContainer(aUser, myProfile);
     Row userRow = Row();
     containerAdd = Container();
@@ -279,7 +280,7 @@ class _ProfilePageState extends State<ProfilePage> {
         alreadyFriend = true;
       }
     }
-    if (alreadyFriend) {
+    if (!alreadyFriend) {
       containerAdd = Container(
           child: ElevatedButton(
               onPressed: () {

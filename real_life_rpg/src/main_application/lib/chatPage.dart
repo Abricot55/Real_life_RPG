@@ -513,7 +513,13 @@ class _ChatPageState extends State<ChatPage> {
       me = _me;
     });
 
-    //TODO ADAM - méthode envoyer avec .then qui update le status "sent" du message
+    sendRequest("ADD", path: "message", urlMap: {"from": message.isSentFrom.getId(), "to": message.isSentTo.getId(), "message": message.text}).then((value) {
+      message.state = MessageState.sent;
+      var _me = me;
+      setState(() {
+        me = _me;
+      });
+    });
   }
 
   /**
