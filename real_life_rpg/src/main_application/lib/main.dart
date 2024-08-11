@@ -235,6 +235,7 @@ Future<dynamic> sendRequest(String function,
     var body = response.body;
     print(body);
   } else {
+    print(response.body);
     print(response.statusCode);
   }
   return response;
