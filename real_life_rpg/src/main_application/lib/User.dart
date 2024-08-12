@@ -9,7 +9,6 @@ import 'Message.dart';
 import 'main.dart';
 
 class User {
-  //TODO ADAM -  tout les load et upload
   final String _key;
   final String _id;
   String _nickname = "";

@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:main_application/Publication.dart';
 import 'package:main_application/activeMemory.dart';
 import 'package:main_application/picturePage.dart';
 import 'package:percent_indicator/linear_percent_indicator.dart';
@@ -34,6 +35,9 @@ class _ProfilePageState extends State<ProfilePage> {
   var _searchMode = false;
   TextEditingController searchController = TextEditingController();
   List<Widget> _itemsRecherche = [];
+  List<Publication> publicationsOnDisplay = [];
+  TextEditingController quickPublicationController = TextEditingController();
+  Column widgetPublications = Column();
 
   //containers profilepage
   var labelUserIDController = Text("", style: TextStyle(fontSize: 25.0));
@@ -140,6 +144,7 @@ class _ProfilePageState extends State<ProfilePage> {
    */
   Column getHomePage(bool _sM) {
     if (_sM == false) {
+      widgetPublications = getPublicationsToDisplay();
       return Column(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
@@ -192,7 +197,42 @@ class _ProfilePageState extends State<ProfilePage> {
                                 ))
                           ])
                         ]),
-                    Divider()
+                    Divider(),
+                    //Quick publication
+                    Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Expanded(
+                            child: TextField(
+                              controller: quickPublicationController,
+                              decoration: InputDecoration(
+                                border: InputBorder.none,
+                                contentPadding: EdgeInsets.all(10.0),
+                                hintText: "What's new?",
+                              ),
+                            ),
+                          ),
+                          ElevatedButton(
+                              onPressed: () {
+                                if (quickPublicationController.text != "") {
+                                  Publication publication =
+                                  Publication(PublicationType.text, me);
+                                  publication.setMessage(
+                                      quickPublicationController.text);
+                                  quickPublicationController.text = "";
+                                  publicationsOnDisplay.add(publication);
+                                  var _memory = memory;
+                                  setState(() {
+                                    memory = _memory;
+                                    _searchMode = false;
+                                    containerGeneral = getHomePage(_searchMode);
+                                  });
+                                }
+                              },
+                              child: Text("Post"))
+                        ]),
+                    Divider(),
+                    widgetPublications
                   ]))
             ])
           ]);
@@ -275,8 +315,8 @@ class _ProfilePageState extends State<ProfilePage> {
     Row userRow = Row();
     containerAdd = Container();
     bool alreadyFriend = false;
-    for(var i = 0; i < me.getNbFriends(); i++){
-      if(me.getMyFriends()[i].getId() == aUser.getId()){
+    for (var i = 0; i < me.getNbFriends(); i++) {
+      if (me.getMyFriends()[i].getId() == aUser.getId()) {
         alreadyFriend = true;
       }
     }
@@ -797,5 +837,19 @@ class _ProfilePageState extends State<ProfilePage> {
 
   Future<void> writeStorage(_key, _value) async {
     storage.write(key: _key, value: _value);
+  }
+
+  /**
+   * @brief Function which returns a list of publications to display on the home page - server side
+   */
+  Column getPublicationsToDisplay() {
+    //publicationsOnDisplay = requête server;
+    List<Column> widgetsPublications = [];
+    for (var i = 0; i < publicationsOnDisplay.length; i++) {
+      widgetsPublications.add(publicationsOnDisplay[i].getPubWidget());
+    }
+    return Column(
+      children: widgetsPublications,
+    );
   }
 }
