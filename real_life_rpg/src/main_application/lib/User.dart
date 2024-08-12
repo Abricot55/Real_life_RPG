@@ -261,6 +261,11 @@ class User {
     });
   }
 
+  void loadMessages(){
+    Map<String, List<Message>> myMessages= {};
+    setMyMessages(myMessages);
+  }
+
   /**
    * @brief Remove the contact if no messages has been sent after opening a new conversation with a non-contact
    * @param aUser - The ghost contact
@@ -290,6 +295,9 @@ User? loadUser(String json,
   }
   if (user != null && friends){
     user.loadFriend();
+  }
+  if (user != null && messages){
+    user.loadMessages();
   }
   return user;
 }

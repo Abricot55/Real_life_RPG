@@ -20,8 +20,8 @@ class _ProfilePageState extends State<ProfilePage> {
 
   //varaibles
   var savedUserID = "";
-  late User me;
-  late Activememory memory;
+  User me = User("", "", "", "");
+  Activememory memory = Activememory(User("", "", "", ""));
   var _selectedIndex = 0;
 
   //containers
@@ -781,8 +781,6 @@ class _ProfilePageState extends State<ProfilePage> {
   Future<void> readUserID() async {
     //trouver le user id
     savedUserID = (await storage.read(key: "_userID"))!; //"testUser";
-    me = User("", "", "", "");
-    memory = Activememory(me);
     sendRequest("get", path: "/users/search", urlMap: {"pseudo": savedUserID})
         .then((value) {
       if (value.body != "[]") {
