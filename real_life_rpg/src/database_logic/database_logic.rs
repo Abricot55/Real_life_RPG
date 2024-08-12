@@ -5,7 +5,6 @@ use arangors::{
     Database,
 };
 use arangors::{AqlQuery, Document};
-use image::DynamicImage;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 
@@ -269,7 +268,7 @@ pub async fn update_document_in_collection(
     database_name: String,
 ) {
     delete_document_in_collection(key, collection_name.clone(), database_name.clone()).await;
-    add_document_to_collection(new_document, collection_name, database_name).await;
+    let _ = add_document_to_collection(new_document, collection_name, database_name).await;
 }
 
 /**
