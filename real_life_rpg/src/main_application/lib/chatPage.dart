@@ -515,9 +515,7 @@ class _ChatPageState extends State<ChatPage> {
     });
     var jsonThing = jsonEncode(<String, String>{"from": message.isSentFrom.getId(), "to": message.isSentTo.getId(), "message": message.text, "date": message.date.toString()});
     sendRequest("ADD", path: "message", jsonBody: jsonThing).then((value) {
-      print(value.toString());
-      //message.state = MessageState.sent;
-      print("coucou");
+      message.state = MessageState.sent;
       var _me = me;
       setState(() {
         me = _me;
