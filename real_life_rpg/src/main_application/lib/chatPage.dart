@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
@@ -512,9 +513,11 @@ class _ChatPageState extends State<ChatPage> {
     setState(() {
       me = _me;
     });
-
-    sendRequest("ADD", path: "message", urlMap: {"from": message.isSentFrom.getId(), "to": message.isSentTo.getId(), "message": message.text, "date" : message.date.toString()}).then((value) {
-      message.state = MessageState.sent;
+    var jsonThing = jsonEncode(<String, String>{"from": message.isSentFrom.getId(), "to": message.isSentTo.getId(), "message": message.text, "date": message.date.toString()});
+    sendRequest("ADD", path: "message", jsonBody: jsonThing).then((value) {
+      print(value.toString());
+      //message.state = MessageState.sent;
+      print("coucou");
       var _me = me;
       setState(() {
         me = _me;
