@@ -239,7 +239,7 @@ class User {
     });
   }
 
-  void loadFriend(){
+  Future<void> loadFriend() async {
     List<User> users = [];
     sendRequest("get", path: "friend", urlMap : {"id" : this._id}).then((value) {
       String real_body = value.body;

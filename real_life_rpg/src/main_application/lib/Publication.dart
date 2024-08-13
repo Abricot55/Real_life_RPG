@@ -8,7 +8,9 @@ class Publication {
   final PublicationType type;
   User user;
   List<String> likes = [];
+  DateTime date;
   //List<Comments> comments = []; faire un objet commentaire qui peut se faire afficher et interragir avec, avoir des likes et reply
+
 
   //message
   String message = "";
@@ -21,7 +23,7 @@ class Publication {
   String skill = "";
   int level = 0;
 
-  Publication(this.type, this.user) {}
+  Publication(this.type, this.user, this.date) {}
 
   void setMessage(String message) {
     this.message = message;

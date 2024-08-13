@@ -216,7 +216,7 @@ class _ProfilePageState extends State<ProfilePage> {
                               onPressed: () {
                                 if (quickPublicationController.text != "") {
                                   Publication publication =
-                                  Publication(PublicationType.text, me);
+                                  Publication(PublicationType.text, me, DateTime.now());
                                   publication.setMessage(
                                       quickPublicationController.text);
                                   quickPublicationController.text = "";
@@ -311,6 +311,7 @@ class _ProfilePageState extends State<ProfilePage> {
    */
   Center getUserPage(User aUser, bool myProfile, bool emptyStack) {
     aUser.loadFriend();
+
     setUserContainer(aUser, myProfile);
     Row userRow = Row();
     containerAdd = Container();
