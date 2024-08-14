@@ -90,7 +90,7 @@ pub async fn add_message_function(
                 {
                     Ok(v) => {
                         return Ok(
-                            warp::reply::with_status(v, StatusCode::NOT_ACCEPTABLE).into_response()
+                            warp::reply::with_status(v, StatusCode::ACCEPTED).into_response()
                         )
                     }
                     Err(e) => {
