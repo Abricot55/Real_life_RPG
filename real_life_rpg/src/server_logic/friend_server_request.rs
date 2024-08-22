@@ -5,6 +5,7 @@ use hyper::{Body, Response};
 use std::collections::HashMap;
 use warp::reply::Reply;
 use warp::Filter;
+use super::structs::*;
 
 pub fn friend_routes() -> impl Filter<Extract = impl warp::Reply, Error = warp::Rejection> + Clone {
     let get_friend_route = warp::query::<HashMap<String, String>>().and_then(get_friends_function);

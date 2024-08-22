@@ -6,6 +6,7 @@ use hyper::{Body, Response};
 use std::collections::HashMap;
 use warp::reply::Reply;
 use warp::Filter;
+use super::structs::*;
 
 pub fn message_routes() -> impl Filter<Extract = impl warp::Reply, Error = warp::Rejection> + Clone
 {

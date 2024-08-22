@@ -8,85 +8,9 @@ use arangors::{AqlQuery, Document};
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 
-#[derive(Serialize, Deserialize)]
-pub enum DocumentType {
-    User(UserType),
-    Skill(SkillType),
-    Photos(PhotoListType),
-    Messages(MessageListType),
-    Uu(RelationUserUserType),
-    Us(RelationUserSkillType),
-}
+use crate::server_logic::structs::DocumentType;
 
-#[derive(Serialize, Deserialize)]
-pub struct UserType {
-    pub name: String,
-    pub pseudo: String,
-    pub email: String,
-    pub birth_date: String,
-    pub level: i32,
-    pub password: String,
-}
-#[derive(Serialize, Deserialize)]
-pub struct SkillType {
-    pub _key: String,
-    pub name: String,
-}
 
-#[derive(Serialize, Deserialize)]
-pub struct RelationUserUserType {
-    pub _from: String,
-    pub _to: String,
-    pub force: i32,
-    pub time: i32,
-    pub relation_type: String,
-}
-
-#[derive(Serialize, Deserialize)]
-pub struct RelationUserSkillType {
-    pub _key: String,
-    pub from: String,
-    pub to: String,
-    pub level: i32,
-    pub challenge_completed: i32,
-    pub title: String,
-}
-#[derive(Serialize, Deserialize)]
-pub struct PhotoListType {
-    pub _key: Option<String>,
-    pub photos: Vec<PhotoType>,
-}
-
-#[derive(Serialize, Deserialize, Clone)]
-pub struct PhotoType {
-    pub image: String,
-    pub title: String,
-    pub likes: i32,
-    pub comments: Vec<String>,
-    pub shared: i32,
-    pub description: String,
-}
-
-#[derive(Serialize, Deserialize)]
-pub struct MessageListType {
-    pub _from: String,
-    pub _to: String,
-    pub messages: Vec<MessageType>,
-    pub date: String,
-}
-
-#[derive(Serialize, Deserialize, Clone)]
-pub struct MessageType {
-    pub message: String,
-    pub state: MessageState,
-    pub date: String,
-    pub from: String,
-}
-
-#[derive(Serialize, Deserialize, Clone)]
-pub enum MessageState {
-    SENDING,SENT,SEEN
-}
 /**
  * @brief This function etablish connection with the port 8529.
  * @return A result with the connection if it worked and a error if it didn't.

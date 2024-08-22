@@ -9,6 +9,8 @@ use tokio::time::sleep;
 use warp::reply::Reply;
 use warp::Filter;
 
+use super::structs::*;
+
 /**
  * @brief This function return a filter with all the different routes (request that concern the users)
  */
@@ -81,6 +83,21 @@ fn convert_hash_to_user(params: HashMap<String, String>) -> Result<UserType, Str
         Some(value) => value.clone(),
         None => return Err("Aucun mot de passe fourni".to_string()),
     };
+    let title = match params.get("title") {
+        Some(value) => value.clone(),
+        None => "".to_string(),
+    };
+
+    let title_list = match params.get("title_list"){
+        Some(value)=> {
+            let split_strings: Vec<&str> = value[1..value.len() - 1].split(',').collect();
+            split_strings
+                .iter()
+                .map(|s| s.trim_matches('"').to_string())
+                .collect()
+        },
+        None => Vec::new()
+    };
     return Ok(UserType {
         name,
         pseudo,
@@ -88,6 +105,8 @@ fn convert_hash_to_user(params: HashMap<String, String>) -> Result<UserType, Str
         birth_date: birth,
         level,
         password,
+        title,
+        title_list
     });
 }
 
@@ -135,7 +154,8 @@ async fn add_user_function(
                                                 weird_json_normal_str(key.to_string());
                                             let temp_photo: PhotoListType = PhotoListType {
                                                 _key: Some(real_key),
-                                                photos: vec![],
+                                                wall: vec![],
+                                                storie: vec![],
                                             };
                                             match add_document_to_collection(
                                                 DocumentType::Photos(temp_photo),
