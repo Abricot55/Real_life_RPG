@@ -9,24 +9,25 @@ use crate::server_logic::message_server_request::*;
 use crate::server_logic::photo_server_request::*;
 use crate::server_logic::user_server_request::*;
 
+use crate::server_logic::structs::SkillType;
 use database_logic::database_logic::add_document_to_collection;
 use hyper::body::HttpBody;
-use crate::server_logic::structs::SkillType;
 use warp::Filter;
 
 #[tokio::main]
 pub async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
     /*let mut var: HashMap<String, String> = HashMap::new();
     var.insert("key".to_string(), "16350".to_string());
-    var.insert("image".to_string(), "pretty cool photo".to_string());
-    match get_everything(var).await{
+    var.insert("image".to_string(), "[4]".to_string());
+    var.insert("photo_id".to_string(),"1".to_string());
+    match get_storie(var).await{
         Ok(res) => print!("os"),
         Err(_) => print!("AS")
     }*/
     /*let skill : SkillType = SkillType { name: "Chapeau Melon".to_string(), challenges: Vec::new() };
 
-    add_document_to_collection(database_logic::database_logic::DocumentType::Skill(skill), "Skills".to_string(), "MainDB".to_string()).await.unwrap();
-*/
+        add_document_to_collection(database_logic::database_logic::DocumentType::Skill(skill), "Skills".to_string(), "MainDB".to_string()).await.unwrap();
+    */
     let routes = friend_routes()
         .or(photo_routes())
         .or(user_routes())

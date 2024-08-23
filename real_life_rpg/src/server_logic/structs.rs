@@ -1,7 +1,5 @@
 use std::collections::HashMap;
-
 use serde::{Deserialize, Serialize};
-use serde_json::Map;
 
 #[derive(Serialize, Deserialize)]
 pub enum DocumentType {
@@ -53,12 +51,14 @@ pub struct PhotoListType {
 
 #[derive(Serialize, Deserialize, Clone)]
 pub struct PhotoType {
-    pub image: String,
+    pub photo_id : i32,
+    pub image: Vec<String>,
     pub title: String,
     pub likes: i32,
     pub comments: Vec<String>,
     pub shared: i32,
     pub description: String,
+    pub date: String
 }
 
 #[derive(Serialize, Deserialize)]

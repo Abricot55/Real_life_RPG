@@ -88,15 +88,15 @@ fn convert_hash_to_user(params: HashMap<String, String>) -> Result<UserType, Str
         None => "".to_string(),
     };
 
-    let title_list = match params.get("title_list"){
-        Some(value)=> {
+    let title_list = match params.get("title_list") {
+        Some(value) => {
             let split_strings: Vec<&str> = value[1..value.len() - 1].split(',').collect();
             split_strings
                 .iter()
                 .map(|s| s.trim_matches('"').to_string())
                 .collect()
-        },
-        None => Vec::new()
+        }
+        None => Vec::new(),
     };
     return Ok(UserType {
         name,
@@ -106,7 +106,7 @@ fn convert_hash_to_user(params: HashMap<String, String>) -> Result<UserType, Str
         level,
         password,
         title,
-        title_list
+        title_list,
     });
 }
 
@@ -317,18 +317,29 @@ async fn update_user_function(
                         }
                         match convert_hash_to_user(temp) {
                             Ok(user) => {
-                                update_document_in_collection(
+                                match update_document_in_collection(
                                     key.clone(),
                                     DocumentType::User(user),
                                     "Users".to_string(),
                                     "MainDB".to_string(),
                                 )
-                                .await;
-                                return Ok(warp::reply::with_status(
-                                    "User updated",
-                                    StatusCode::ACCEPTED,
-                                )
-                                .into_response());
+                                .await
+                                {
+                                    Ok(_) => {
+                                        return Ok(warp::reply::with_status(
+                                            "User updated",
+                                            StatusCode::ACCEPTED,
+                                        )
+                                        .into_response())
+                                    }
+                                    Err(e) => {
+                                        return Ok(warp::reply::with_status(
+                                            e,
+                                            StatusCode::NOT_ACCEPTABLE,
+                                        )
+                                        .into_response())
+                                    }
+                                }
                             }
                             Err(e) => {
                                 return Ok(warp::reply::with_status(e, StatusCode::ACCEPTED)

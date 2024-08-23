@@ -5,7 +5,6 @@ use arangors::{
     Database,
 };
 use arangors::{AqlQuery, Document};
-use serde::{Deserialize, Serialize};
 use serde_json::Value;
 
 use crate::server_logic::structs::DocumentType;
@@ -110,7 +109,6 @@ pub async fn add_document_to_collection(
 ) -> Result<String, String> {
     match convert_doc_json(document) {
         Ok(json_doc) => {
-            print!("{}", json_doc);
             let aql = format!("INSERT {} INTO {}", json_doc.to_string(), collection_name);
             let query: AqlQuery = AqlQuery::builder().query(&aql).build();
             match connect_to_db(database_name).await {
@@ -190,9 +188,12 @@ pub async fn update_document_in_collection(
     new_document: DocumentType,
     collection_name: String,
     database_name: String,
-) {
+) -> Result<String,String>{
     delete_document_in_collection(key, collection_name.clone(), database_name.clone()).await;
-    let _ = add_document_to_collection(new_document, collection_name, database_name).await;
+    match add_document_to_collection(new_document, collection_name, database_name).await{
+        Ok(v) => return Ok(v),
+        Err(e) => return Err(e),
+    }
 }
 
 /**

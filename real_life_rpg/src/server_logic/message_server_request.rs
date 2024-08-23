@@ -144,17 +144,24 @@ pub async fn add_message_function(
                                 .into_response())
                             }
                         };
+                        match
                         update_document_in_collection(
                             key,
                             DocumentType::Messages(new),
                             "Messages".to_string(),
                             "MainDB".to_string(),
                         )
-                        .await;
-                        return Ok(
-                            warp::reply::with_status("message added", StatusCode::ACCEPTED)
-                                .into_response(),
-                        );
+                        .await{
+                            Ok(_) => return Ok(
+                                warp::reply::with_status("message added", StatusCode::ACCEPTED)
+                                    .into_response(),
+                            ),
+                            Err(e) => return Ok(
+                                warp::reply::with_status(e, StatusCode::NOT_ACCEPTABLE)
+                                    .into_response(),
+                            ),
+                        }
+                        
                     }
                     Err(e) => {
                         return Ok(
