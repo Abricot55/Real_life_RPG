@@ -38,9 +38,6 @@ class User {
   }
 
   String getNickame() {
-    if (_nickname == "") {
-      //load the name
-    }
     return _nickname;
   }
 
@@ -49,9 +46,6 @@ class User {
   }
 
   String getFirstName() {
-    if (_firstName == "") {
-      //load the name
-    }
     return _firstName;
   }
 
@@ -60,9 +54,6 @@ class User {
   }
 
   String getSurname() {
-    if (_surname == "") {
-      //load the name
-    }
     return _surname;
   }
 
@@ -92,15 +83,11 @@ class User {
   void addFriend(User aFriend) {
     _nbFriends += 1;
     _myFriends.add(aFriend);
-
-    //upload the new friend!!
   }
 
   void removeFriend(User aFriend) {
     _nbFriends -= 1;
     _myFriends.remove(aFriend);
-
-    //upload the new friend list!!
   }
 
   void setNbFriends(int nbFriends) {
@@ -108,9 +95,6 @@ class User {
   }
 
   String getProfileDescription() {
-    if (_profileDescription == "") {
-      //load the description
-    }
     return _profileDescription;
   }
 
@@ -119,9 +103,6 @@ class User {
   }
 
   Map<String, double> getActiveSkills() {
-    if (_activeSkills == {}) {
-      //load active skills
-    }
     return _activeSkills;
   }
 
@@ -130,9 +111,6 @@ class User {
   }
 
   NetworkImage getProfilePicture() {
-    if (_profilePicture == basicPdp) {
-      //load profile picture
-    }
     return _profilePicture;
   }
 
@@ -142,7 +120,7 @@ class User {
 
   Map<String, List<Message>> getMyMessages() {
     if (_myMessages == {}) {
-      //load messages
+      loadMessages();
     }
     return _myMessages;
   }
@@ -157,20 +135,7 @@ class User {
     if (_myMessages.keys.contains(idOtherUser)) {
       _myMessages[idOtherUser] = (_myMessages[idOtherUser]! + [message]);
     } else {
-      /*
-      bool trouve = false;
-      for (var i = 0; i < _nbFriends && !trouve; i++) {
-        if (idOtherUser == _myFriends[i].getId()) {
-          //if a friend - already created
-          addContact(_myFriends[i]);
-          trouve = true;
-        }
-      }
-       */
-      //if (!trouve) {
-      //if not friend
       addContact(_otherUser);
-      //}
       _myMessages[idOtherUser] = [message];
     }
     //update contact order
@@ -186,8 +151,6 @@ class User {
       _myContacts[i] = _myContacts[i - 1];
     }
     _myContacts[0] = otherUser;
-
-    //updload myContacts and myMessages
   }
 
   void setMyMessages(Map<String, List<Message>> myMessages) {
@@ -204,9 +167,8 @@ class User {
         }
       }
       //new user
-      // TODO SEBASTIEN, À TESTER
       if (!isFriend) {
-        sendRequest("get", path: "/users/search", urlMap: {"id": item.key})
+        sendRequest("get", path: "/users/search", urlMap: {"_id": item.key})
             .then((value) {
           if (value.body != "[]") {
             User newUser = loadUser(value.body)!;
@@ -215,6 +177,7 @@ class User {
         });
       }
     }
+    //sort contacts
   }
 
   List<User> getMyContacts() {
@@ -265,30 +228,36 @@ class User {
       for (dynamic item in json) {
         if (item is Map<String, dynamic>) {
           try {
-            var _to = item['_to'] as String;
+            var _other = item['_to'] as String;
+            if (_other == this.getId()){
+              _other = item['_from'] as String;
+            }
             List<Message> listMessages = [];
             for (dynamic message in item['messages']) {
               var _date = message['date'] as String;
               var _text = message['message'] as String;
               var _state = message['state'] as String;
               var _from = message['from'] as String;
-              //var _to = message['to'] as String;
+              var _to = this.getId();
+              if (_from == this.getId());{
+                _to = _other;
+              }
               User userFrom = User(_from, "", "", "");
-              //User userTo = User(_to, "", "", "");
-              sendRequest("get", path: "/users/search", urlMap: {"id": _from})
+              User userTo = User(_to, "", "", "");
+              sendRequest("get", path: "/users/search", urlMap: {"_id": _from})
                   .then((value) {
                 if (value.body != "[]") {
                   userFrom = loadUser(value.body)!;
                 }
               });
-              sendRequest("get", path: "/users/search", urlMap: {"id": _to})
+              sendRequest("get", path: "/users/search", urlMap: {"_id": _to})
                   .then((value) {
                 if (value.body != "[]") {
-                  //userTo = loadUser(value.body)!;
+                  userTo = loadUser(value.body)!;
                 }
               });
               Message _message =
-                  Message(DateTime.parse(_date), userFrom, this, _text);
+                  Message(DateTime.parse(_date), userFrom, userTo, _text);
               switch (_state) {
                 case 'SENT':
                   _message.updateState(MessageState.sent);
@@ -302,7 +271,7 @@ class User {
               }
               listMessages.add(_message);
             }
-            myMessages[_to] = listMessages;
+            myMessages[_other] = listMessages;
           } catch (Exception) {
             print("Oh no");
           }

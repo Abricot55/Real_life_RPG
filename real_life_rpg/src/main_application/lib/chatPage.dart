@@ -310,7 +310,7 @@ class _ChatPageState extends State<ChatPage> {
       var _color = Theme.of(context).primaryColor;
       Container pdp = Container();
       double _maxWidth = MediaQuery.of(context).size.width * 0.8;
-      if (messages![i].isSentFrom != me) {
+      if (messages![i].isSentFrom.getId() != me.getId()) {
         _maxWidth = (MediaQuery.of(context).size.width * 0.8) - 30;
         alignment = MainAxisAlignment.start;
         _color = Colors.black54;
