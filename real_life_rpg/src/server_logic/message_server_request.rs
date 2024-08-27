@@ -1,3 +1,4 @@
+use super::structs::*;
 use crate::database_logic::database_logic::*;
 use crate::util::json_to_hashmap;
 use chrono::Local;
@@ -6,7 +7,6 @@ use hyper::{Body, Response};
 use std::collections::HashMap;
 use warp::reply::Reply;
 use warp::Filter;
-use super::structs::*;
 
 pub fn message_routes() -> impl Filter<Extract = impl warp::Reply, Error = warp::Rejection> + Clone
 {
@@ -63,7 +63,12 @@ pub async fn add_message_function(
 
     let to: String = match params.get("to") {
         Some(value) => value.clone(),
-        None => return Ok(warp::reply::with_status("No to id specified", StatusCode::NOT_ACCEPTABLE).into_response()),
+        None => {
+            return Ok(
+                warp::reply::with_status("No to id specified", StatusCode::NOT_ACCEPTABLE)
+                    .into_response(),
+            )
+        }
     };
 
     match get_relation_from_two(
@@ -90,9 +95,7 @@ pub async fn add_message_function(
                 .await
                 {
                     Ok(v) => {
-                        return Ok(
-                            warp::reply::with_status(v, StatusCode::ACCEPTED).into_response()
-                        )
+                        return Ok(warp::reply::with_status(v, StatusCode::ACCEPTED).into_response())
                     }
                     Err(e) => {
                         return Ok(
@@ -144,24 +147,26 @@ pub async fn add_message_function(
                                 .into_response())
                             }
                         };
-                        match
-                        update_document_in_collection(
+                        match update_document_in_collection(
                             key,
                             DocumentType::Messages(new),
                             "Messages".to_string(),
                             "MainDB".to_string(),
                         )
-                        .await{
-                            Ok(_) => return Ok(
-                                warp::reply::with_status("message added", StatusCode::ACCEPTED)
-                                    .into_response(),
-                            ),
-                            Err(e) => return Ok(
-                                warp::reply::with_status(e, StatusCode::NOT_ACCEPTABLE)
-                                    .into_response(),
-                            ),
+                        .await
+                        {
+                            Ok(_) => {
+                                return Ok(warp::reply::with_status(
+                                    "message added",
+                                    StatusCode::ACCEPTED,
+                                )
+                                .into_response())
+                            }
+                            Err(e) => {
+                                return Ok(warp::reply::with_status(e, StatusCode::NOT_ACCEPTABLE)
+                                    .into_response())
+                            }
                         }
-                        
                     }
                     Err(e) => {
                         return Ok(

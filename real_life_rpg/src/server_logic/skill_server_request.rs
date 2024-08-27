@@ -13,4 +13,13 @@ update description
 add share
 add like
 sub like
+
+
+get message individuel
+modifier message individuel
+ajouter reaction et reponse dans objet message
+supprimer messages complet
+supprimer message specifique
+
+
 */
