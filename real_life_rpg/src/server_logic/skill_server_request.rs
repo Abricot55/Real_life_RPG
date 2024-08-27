@@ -4,7 +4,6 @@ create_new_skill;
 create_new_challenge;
 submit_a_photo;
 
-
 add comment
 update comment
 delete comment
@@ -21,5 +20,5 @@ ajouter reaction et reponse dans objet message
 supprimer messages complet
 supprimer message specifique
 
-
+supprimer amis
 */
