@@ -1,90 +1,41 @@
 mod database_logic;
 mod server_logic;
 mod util;
-use crate::server_logic::server_logic::*;
-use serde_json::Value;
+
 use std::collections::HashMap;
+
+use crate::server_logic::friend_server_request::*;
+use crate::server_logic::message_server_request::*;
+use crate::server_logic::photo_server_request::*;
+use crate::server_logic::user_server_request::*;
+
+use crate::server_logic::structs::SkillType;
+use database_logic::database_logic::add_document_to_collection;
+use hyper::body::HttpBody;
 use warp::Filter;
 
 #[tokio::main]
 pub async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
     /*let mut var: HashMap<String, String> = HashMap::new();
-    var.insert("to".to_string(), "Users/16350".to_string());
-    var.insert("from".to_string(), "Users/16381".to_string());
-    var.insert("message".to_string(), "allo".to_string());
-    match add_message_function(var).await{
-        Ok(response) => print!("o"),
+    var.insert("key".to_string(), "16350".to_string());
+    var.insert("image".to_string(), "[4]".to_string());
+    var.insert("photo_id".to_string(),"1".to_string());
+    match get_storie(var).await{
+        Ok(res) => print!("os"),
         Err(_) => print!("AS")
     }*/
-    let post_user_route = warp::path("message")
-    .and(warp::post())
-    .and(warp::body::json())
-    .and_then(add_message_function);
+    /*let skill : SkillType = SkillType { name: "Chapeau Melon".to_string(), challenges: Vec::new() };
 
-    let get_message_route = warp::path("message")
-    .and(warp::get())
-    .and(warp::query::<HashMap<String, String>>())
-    .and_then(get_message_function);
+        add_document_to_collection(database_logic::database_logic::DocumentType::Skill(skill), "Skills".to_string(), "MainDB".to_string()).await.unwrap();
+    */
+    let routes = friend_routes()
+        .or(photo_routes())
+        .or(user_routes())
+        .or(message_routes());
 
-    let get_friend_route = warp::path("friend")
-        .and(warp::get())
-        .and(warp::query::<HashMap<String, String>>())
-        .and_then(get_friends_function);
-    
-    let get_photo_route = warp::path("photo")
-        .and(warp::get())
-        .and(warp::query::<HashMap<String, String>>())
-        .and_then(get_photo_list);
+    warp::serve(routes.clone())
+        .run(([127, 0, 0, 1], 3000))
+        .await;
 
-    let save_photo_route = warp::path("save")
-        .and(warp::path("photo"))
-        .and(warp::put())
-        .and(warp::body::json())
-        .and_then(add_photo_user);
-
-    let relevant_search_user_route = warp::path("users")
-        .and(warp::path("relevant"))
-        .and(warp::get())
-        .and(warp::query::<HashMap<String, Value>>())
-        .and_then(relevant_search_user_function);
-
-    let search_user_route = warp::path("users")
-        .and(warp::path("search"))
-        .and(warp::get())
-        .and(warp::query::<HashMap<String, Value>>())
-        .and_then(search_user_function);
-
-    let get_user_route = warp::path("users")
-        .and(warp::path::end())
-        .and(warp::get())
-        .and(warp::query::<HashMap<String, String>>())
-        .and_then(get_user_function);
-
-    let post_user_route = warp::path("users")
-        .and(warp::post())
-        .and(warp::body::json())
-        .and_then(add_user_function);
-
-    let post_friend_route = warp::path("friend")
-        .and(warp::post())
-        .and(warp::body::json())
-        .and_then(add_friend_function);
-
-    let update_user_route = warp::path("users")
-        .and(warp::path("update"))
-        .and(warp::put())
-        .and(warp::body::json())
-        .and_then(update_user_function);
-
-    let routes = relevant_search_user_route
-        .or(get_friend_route)
-        .or(get_photo_route)
-        .or(update_user_route)
-        .or(search_user_route)
-        .or(get_user_route)
-        .or(post_user_route)
-        .or(save_photo_route)
-        .or(post_friend_route);
-    warp::serve(routes).run(([127, 0, 0, 1], 3000)).await;
     Ok(())
 }

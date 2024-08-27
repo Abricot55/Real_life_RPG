@@ -3,13 +3,11 @@ import 'dart:convert';
 import 'package:camera/camera.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:main_application/utilities.dart';
 
 import 'Message.dart';
 import 'main.dart';
 
 class User {
-  //TODO ADAM -  tout les load et upload
   final String _key;
   final String _id;
   String _nickname = "";
@@ -208,7 +206,7 @@ class User {
       //new user
       // TODO SEBASTIEN, À TESTER
       if (!isFriend) {
-        sendRequest("get", path: "users", urlMap: {"pseudo": item.key})
+        sendRequest("get", path: "/users/search", urlMap: {"id": item.key})
             .then((value) {
           if (value.body != "[]") {
             User newUser = loadUser(value.body)!;
@@ -232,32 +230,85 @@ class User {
   }
 
   void loadPhotos() {
-    sendRequest("get", path: "photo", urlMap: {"key": this._key})
-        .then((value) {
-
-          //TODO les photos c'est pas encore finalisé, la sérialisation et désérialisation, so c'est sur que le code en dessous load pas vraiment les photos mais la requete c'est la bonne.
-          _photos = value;
+    sendRequest("get", path: "photo", urlMap: {"key": this._key}).then((value) {
+      //TODO les photos c'est pas encore finalisé, la sérialisation et désérialisation, so c'est sur que le code en dessous load pas vraiment les photos mais la requete c'est la bonne.
+      _photos = value;
     });
   }
 
-  void loadFriend(){
+  Future<void> loadFriend() async {
     List<User> users = [];
-    sendRequest("get", path: "friend", urlMap : {"id" : this._id}).then((value) {
+    sendRequest("get", path: "friend", urlMap: {"id": this._id}).then((value) {
       String real_body = value.body;
       List<dynamic> decodejson = jsonDecode(real_body);
-      for (dynamic i in decodejson){
-        if (i is String){
+      for (dynamic i in decodejson) {
+        if (i is String) {
           i = i.replaceAll("\\\"", "\"");
-          int num = i.length-1;
-          i = "["+i.substring(1,num)+"]";
+          int num = i.length - 1;
+          i = "[" + i.substring(1, num) + "]";
           User? user = loadUser(i, friends: false);
           print(user);
-          if (user != null){
+          if (user != null) {
             users.add(user);
           }
         }
       }
       setMyFriends(users);
+    });
+  }
+
+  void loadMessages() {
+    sendRequest("get", path: "message", urlMap: {"from": this.getId()})
+        .then((value) {
+      Map<String, List<Message>> myMessages = {};
+      dynamic json = jsonDecode(value.body);
+      for (dynamic item in json) {
+        if (item is Map<String, dynamic>) {
+          try {
+            var _to = item['_to'] as String;
+            List<Message> listMessages = [];
+            for (dynamic message in item['messages']) {
+              var _date = message['date'] as String;
+              var _text = message['message'] as String;
+              var _state = message['state'] as String;
+              var _from = message['from'] as String;
+              //var _to = message['to'] as String;
+              User userFrom = User(_from, "", "", "");
+              //User userTo = User(_to, "", "", "");
+              sendRequest("get", path: "/users/search", urlMap: {"id": _from})
+                  .then((value) {
+                if (value.body != "[]") {
+                  userFrom = loadUser(value.body)!;
+                }
+              });
+              sendRequest("get", path: "/users/search", urlMap: {"id": _to})
+                  .then((value) {
+                if (value.body != "[]") {
+                  //userTo = loadUser(value.body)!;
+                }
+              });
+              Message _message =
+                  Message(DateTime.parse(_date), userFrom, this, _text);
+              switch (_state) {
+                case 'SENT':
+                  _message.updateState(MessageState.sent);
+                  break;
+                case 'SENDING':
+                  _message.updateState(MessageState.sending);
+                  break;
+                case 'SEEN':
+                  _message.updateState(MessageState.seen);
+                  break;
+              }
+              listMessages.add(_message);
+            }
+            myMessages[_to] = listMessages;
+          } catch (Exception) {
+            print("Oh no");
+          }
+        }
+      }
+      setMyMessages(myMessages);
     });
   }
 
@@ -285,11 +336,14 @@ User? loadUser(String json,
       print("OH NO");
     }
   }
-  if (user != null && photos){
+  if (user != null && photos) {
     user.loadPhotos();
   }
-  if (user != null && friends){
+  if (user != null && friends) {
     user.loadFriend();
+  }
+  if (user != null && messages) {
+    user.loadMessages();
   }
   return user;
 }
@@ -298,7 +352,7 @@ List<User> loadUserMultiple(String json) {
   List<dynamic> decodedJson = jsonDecode(json);
   List<User> liste = [];
   for (dynamic item in decodedJson) {
-    if (item is Map <String, dynamic>){
+    if (item is Map<String, dynamic>) {
       try {
         var _id = item['_id'] as String;
         var _key = item['_key'] as String;
@@ -307,7 +361,8 @@ List<User> loadUserMultiple(String json) {
         liste.add(User(_id, _key, name, pseudo));
       } catch (Exception) {
         print("OH NO");
-      }}
+      }
     }
+  }
   return liste;
 }

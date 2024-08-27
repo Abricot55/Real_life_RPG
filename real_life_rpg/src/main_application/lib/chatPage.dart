@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
@@ -512,8 +513,9 @@ class _ChatPageState extends State<ChatPage> {
     setState(() {
       me = _me;
     });
-
-    sendRequest("ADD", path: "message", urlMap: {"from": message.isSentFrom.getId(), "to": message.isSentTo.getId(), "message": message.text}).then((value) {
+    
+    var jsonThing = jsonEncode(<String, String>{"from": message.isSentFrom.getId(), "to": message.isSentTo.getId(), "message": message.text});
+    sendRequest("ADD", path: "message", jsonBody: jsonThing).then((value)  {
       message.state = MessageState.sent;
       var _me = me;
       setState(() {
@@ -617,7 +619,7 @@ class _ChatPageState extends State<ChatPage> {
     sendRequest("get", path: "/users/search", urlMap: {"pseudo": savedUserID})
         .then((value) {
       if (value.body != "[]") {
-        me = loadUser(value.body)!;
+        me = loadUser(value.body, messages: true)!;
       }
     });
   }
