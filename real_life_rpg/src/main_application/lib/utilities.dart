@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:async';
-
+import 'dart:io';
+import 'dart:typed_data';
 import 'package:crypto/crypto.dart';
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
@@ -13,7 +14,7 @@ String hash_string(String word) {
   return sha256.convert(utf8.encode(word)).toString();
 }
 
-/// @brief Given a json which is a list of users (sent in a response body by the server), this function retrive all pseudo in this list.
+/// @brief Given a json which is a list of users (sent in a response body by the server), this function retrieve all pseudo in this list.
 /// @param json -> The json string that is the list.
 /// @return A list of pseudonyms.
 List<String> listUserJsonRetrievePseudo(String json) {
@@ -42,4 +43,14 @@ Future<CameraDescription?> findCamera({int camNumber = 0}) async {
   } catch (e) {
     return null;
   }
+}
+
+Future<String> encodeImageToBase64(String imagePath) async {
+  File imageFile = File(imagePath);
+  Uint8List imageBytes = await imageFile.readAsBytes();
+  return base64.encode(imageBytes);
+}
+
+Uint8List decodeImageBase64(String base64Image) {
+  return base64.decode(base64Image);
 }

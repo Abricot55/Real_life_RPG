@@ -513,6 +513,7 @@ class _ChatPageState extends State<ChatPage> {
     setState(() {
       me = _me;
     });
+    
     var jsonThing = jsonEncode(<String, String>{"from": message.isSentFrom.getId(), "to": message.isSentTo.getId(), "message": message.text});
     sendRequest("ADD", path: "message", jsonBody: jsonThing).then((value)  {
       message.state = MessageState.sent;
@@ -618,7 +619,7 @@ class _ChatPageState extends State<ChatPage> {
     sendRequest("get", path: "/users/search", urlMap: {"pseudo": savedUserID})
         .then((value) {
       if (value.body != "[]") {
-        me = loadUser(value.body)!;
+        me = loadUser(value.body, messages: true)!;
       }
     });
   }
