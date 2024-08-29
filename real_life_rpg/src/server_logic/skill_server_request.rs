@@ -5,8 +5,6 @@ create_new_challenge;
 submit_a_photo;
 
 
-update title
-update description
 add share
 add like
 sub like

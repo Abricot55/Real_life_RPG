@@ -1,9 +1,10 @@
 use crate::database_logic::database_logic::*;
 use crate::util::json_to_hashmap;
 use chrono::{DateTime, Duration, Utc};
-use comment_photo::{add_comment, delete_comment};
+use comment_photo::comment_routes;
 use hyper::StatusCode;
 use hyper::{Body, Response};
+use other_photo_things::other_photo_routes;
 use serde_json::Map;
 use serde_json::Value;
 use std::collections::HashMap;
@@ -11,6 +12,7 @@ use warp::reply::Reply;
 use warp::Filter;
 
 mod comment_photo;
+mod other_photo_things;
 
 use super::structs::{DocumentType, MessageType, PhotoListType, PhotoType};
 
@@ -64,7 +66,7 @@ pub fn photo_routes() -> impl Filter<Extract = impl warp::Reply, Error = warp::R
 
     let delete = warp::delete().and(delete_photo_route);
 
-    warp::path("photo").and(post.or(get).or(delete).or(put))
+    warp::path("photo").and(post.or(get).or(delete).or(put).or(comment_routes()).or(other_photo_routes()))
 }
 
 /**
@@ -157,7 +159,7 @@ async fn add_storie_photo(
  * @param params -> A map with all the informations needed. Must contains the key, wall and storie fields.
  * @return A response containing a message indicating if the operation was successfull.
  */
-pub async fn add_both_photo(
+async fn add_both_photo(
     params: HashMap<String, String>,
 ) -> Result<Response<Body>, warp::Rejection> {
     return add_photo_user(params, true, true).await;
@@ -268,7 +270,7 @@ async fn add_photo_user(
  * @param params -> A map that must contain the key field which represent the document.
  * @return A Response with the list of photos in it body.
  */
-pub async fn get_wall(params: HashMap<String, String>) -> Result<Response<Body>, warp::Rejection> {
+async fn get_wall(params: HashMap<String, String>) -> Result<Response<Body>, warp::Rejection> {
     get_photo_list(params, true, false).await
 }
 
@@ -277,7 +279,7 @@ pub async fn get_wall(params: HashMap<String, String>) -> Result<Response<Body>,
  * @param params -> A map that must contain the key field which represent the document.
  * @return A Response with the list of photos in it body.
  */
-pub async fn get_storie(
+async fn get_storie(
     params: HashMap<String, String>,
 ) -> Result<Response<Body>, warp::Rejection> {
     get_photo_list(params, false, true).await
@@ -538,7 +540,7 @@ async fn update_photo(params: HashMap<String, String>) -> Result<Response<Body>,
 /**
  * @brief This function update a photo with the new informations passed in the parameter.
  * @param key -> They key of the document in which the photo is.
- * @param photo -> the new photo that need to be put in the document. 
+ * @param photo -> the new photo that need to be put in the document.
  * @return A response body with the informations in it
  */
 async fn update_photo_posseded(
@@ -793,6 +795,4 @@ fn get_two_type_from_photolisttype_doc(doc: Value) -> Result<Vec<Vec<PhotoType>>
     return get_two_type_from_photolisttype_json(photolist);
 }
 
-pub async fn hehe(params: HashMap<String, String>) -> Result<Response<Body>, warp::Rejection> {
-    delete_comment(params).await
-}
+
