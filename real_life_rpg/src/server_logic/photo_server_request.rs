@@ -1,7 +1,7 @@
 use crate::database_logic::database_logic::*;
 use crate::util::json_to_hashmap;
 use chrono::{DateTime, Duration, Utc};
-use comment_photo::add_comment;
+use comment_photo::{add_comment, delete_comment};
 use hyper::StatusCode;
 use hyper::{Body, Response};
 use serde_json::Map;
@@ -54,6 +54,7 @@ pub fn photo_routes() -> impl Filter<Extract = impl warp::Reply, Error = warp::R
         .and(save_wall_route)
         .or(save_both_route)
         .or(save_storie_route);
+
     let get = warp::get()
         .and(get_photo_route)
         .or(get_storie_route)
@@ -793,5 +794,5 @@ fn get_two_type_from_photolisttype_doc(doc: Value) -> Result<Vec<Vec<PhotoType>>
 }
 
 pub async fn hehe(params: HashMap<String, String>) -> Result<Response<Body>, warp::Rejection> {
-    add_comment(params).await
+    delete_comment(params).await
 }

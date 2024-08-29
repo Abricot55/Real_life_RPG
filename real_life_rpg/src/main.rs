@@ -20,8 +20,8 @@ pub async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
     var.insert("key".to_string(), "16350".to_string());
     var.insert("message".to_string(), "Nice!".to_string());
     var.insert("date".to_string(),"2022".to_string());
-    var.insert("from".to_string(), "Seb DUb".to_string());
-    var.insert("message_id".to_string(), "21".to_string());
+    var.insert("from".to_string(), "Mr Worldwide".to_string());
+    var.insert("message_id".to_string(), "1".to_string());
     var.insert("photo_id".to_string(),"1".to_string());
     match hehe(var).await{
         Ok(res) => print!("os"),

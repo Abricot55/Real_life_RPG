@@ -4,9 +4,7 @@ create_new_skill;
 create_new_challenge;
 submit_a_photo;
 
-add comment
-update comment
-delete comment
+
 update title
 update description
 add share
