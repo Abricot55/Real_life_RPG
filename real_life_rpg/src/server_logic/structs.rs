@@ -55,7 +55,7 @@ pub struct PhotoType {
     pub image: Vec<String>,
     pub title: String,
     pub likes: i32,
-    pub comments: Vec<String>,
+    pub comments: Vec<MessageType>,
     pub shared: i32,
     pub description: String,
     pub date: String
@@ -75,6 +75,7 @@ pub struct MessageType {
     pub state: MessageState,
     pub date: String,
     pub from: String,
+    pub message_id: i32,
 }
 
 #[derive(Serialize, Deserialize, Clone)]

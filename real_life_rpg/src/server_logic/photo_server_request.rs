@@ -1,15 +1,20 @@
 use crate::database_logic::database_logic::*;
 use crate::util::json_to_hashmap;
 use chrono::{DateTime, Duration, Utc};
+use comment_photo::comment_routes;
 use hyper::StatusCode;
 use hyper::{Body, Response};
+use other_photo_things::other_photo_routes;
 use serde_json::Map;
 use serde_json::Value;
 use std::collections::HashMap;
 use warp::reply::Reply;
 use warp::Filter;
 
-use super::structs::{DocumentType, PhotoListType, PhotoType};
+mod comment_photo;
+mod other_photo_things;
+
+use super::structs::{DocumentType, MessageType, PhotoListType, PhotoType};
 
 pub fn photo_routes() -> impl Filter<Extract = impl warp::Reply, Error = warp::Rejection> + Clone {
     let delete_photo_route = warp::path::end()
@@ -51,6 +56,7 @@ pub fn photo_routes() -> impl Filter<Extract = impl warp::Reply, Error = warp::R
         .and(save_wall_route)
         .or(save_both_route)
         .or(save_storie_route);
+
     let get = warp::get()
         .and(get_photo_route)
         .or(get_storie_route)
@@ -60,7 +66,7 @@ pub fn photo_routes() -> impl Filter<Extract = impl warp::Reply, Error = warp::R
 
     let delete = warp::delete().and(delete_photo_route);
 
-    warp::path("photo").and(post.or(get).or(delete).or(put))
+    warp::path("photo").and(post.or(get).or(delete).or(put).or(comment_routes()).or(other_photo_routes()))
 }
 
 /**
@@ -89,14 +95,14 @@ fn convert_hash_photo(params: HashMap<String, String>) -> Result<PhotoType, Stri
             .map_err(|_| "The number of like need to be a number")?,
         None => 0,
     };
-    let comments: Vec<String> = match params.get("comments") {
-        Some(value) => {
-            let split_strings: Vec<&str> = value[1..value.len() - 1].split(',').collect();
-            split_strings
-                .iter()
-                .map(|s| s.trim_matches('"').to_string())
-                .collect()
-        }
+    let comments: Vec<MessageType> = match params.get("comments") {
+        Some(value) => match serde_json::to_value(value) {
+            Ok(real_value) => match serde_json::from_value::<Vec<MessageType>>(real_value) {
+                Ok(messages) => messages,
+                Err(_) => return Err("Problem encountered when parsing comments".to_string()),
+            },
+            Err(_) => return Err("Problem while parsing comments".to_string()),
+        },
         None => [].to_vec(),
     };
     let shared: i32 = match params.get("shared") {
@@ -153,7 +159,7 @@ async fn add_storie_photo(
  * @param params -> A map with all the informations needed. Must contains the key, wall and storie fields.
  * @return A response containing a message indicating if the operation was successfull.
  */
-pub async fn add_both_photo(
+async fn add_both_photo(
     params: HashMap<String, String>,
 ) -> Result<Response<Body>, warp::Rejection> {
     return add_photo_user(params, true, true).await;
@@ -264,7 +270,7 @@ async fn add_photo_user(
  * @param params -> A map that must contain the key field which represent the document.
  * @return A Response with the list of photos in it body.
  */
-pub async fn get_wall(params: HashMap<String, String>) -> Result<Response<Body>, warp::Rejection> {
+async fn get_wall(params: HashMap<String, String>) -> Result<Response<Body>, warp::Rejection> {
     get_photo_list(params, true, false).await
 }
 
@@ -273,7 +279,7 @@ pub async fn get_wall(params: HashMap<String, String>) -> Result<Response<Body>,
  * @param params -> A map that must contain the key field which represent the document.
  * @return A Response with the list of photos in it body.
  */
-pub async fn get_storie(
+async fn get_storie(
     params: HashMap<String, String>,
 ) -> Result<Response<Body>, warp::Rejection> {
     get_photo_list(params, false, true).await
@@ -414,7 +420,7 @@ async fn delete_old_stories(
     for each in stories.as_slice() {
         match DateTime::parse_from_rfc3339(each.date.as_str()) {
             Ok(date) => {
-                if Utc::now() - date.to_utc() > Duration::seconds(400) {
+                if Utc::now() - date.to_utc() > Duration::hours(24) {
                     n += 1;
                 } else {
                     break;
@@ -508,28 +514,19 @@ async fn update_photo(params: HashMap<String, String>) -> Result<Response<Body>,
                             }
                         }
                         Err(e) => {
-                            return Ok(warp::reply::with_status(
-                                e,
-                                StatusCode::NOT_ACCEPTABLE,
-                            )
-                            .into_response())
+                            return Ok(warp::reply::with_status(e, StatusCode::NOT_ACCEPTABLE)
+                                .into_response())
                         }
                     },
                     Err(e) => {
-                        return Ok(warp::reply::with_status(
-                            e,
-                            StatusCode::NOT_ACCEPTABLE,
+                        return Ok(
+                            warp::reply::with_status(e, StatusCode::NOT_ACCEPTABLE).into_response()
                         )
-                        .into_response())
                     }
                 }
             }
             Err(e) => {
-                return Ok(warp::reply::with_status(
-                    e,
-                    StatusCode::NOT_ACCEPTABLE,
-                )
-                .into_response())
+                return Ok(warp::reply::with_status(e, StatusCode::NOT_ACCEPTABLE).into_response())
             }
         },
         None => {
@@ -540,7 +537,65 @@ async fn update_photo(params: HashMap<String, String>) -> Result<Response<Body>,
         }
     }
 }
-
+/**
+ * @brief This function update a photo with the new informations passed in the parameter.
+ * @param key -> They key of the document in which the photo is.
+ * @param photo -> the new photo that need to be put in the document.
+ * @return A response body with the informations in it
+ */
+async fn update_photo_posseded(
+    key: String,
+    photo: PhotoType,
+) -> Result<Response<Body>, warp::Rejection> {
+    match get_document_in_collection(key.clone(), "Photos".to_string(), "MainDB".to_string()).await
+    {
+        Ok(doc) => match get_two_type_from_photolisttype_doc(doc) {
+            Ok(lists) => {
+                let mut temp_wall = lists[0].clone();
+                let mut temp_storie = lists[1].clone();
+                if photo.photo_id % 2 == 0 {
+                    let place: i32 = photo.photo_id;
+                    temp_storie[(place / 2) as usize] = photo;
+                } else {
+                    let place: i32 = photo.photo_id;
+                    temp_wall[((place - 1) / 2) as usize] = photo;
+                }
+                delete_document_in_collection(
+                    key.clone(),
+                    "Photos".to_string(),
+                    "MainDB".to_string(),
+                )
+                .await;
+                let doc = DocumentType::Photos(PhotoListType {
+                    _key: Some(key.clone()),
+                    wall: temp_wall.to_vec(),
+                    storie: temp_storie.clone(),
+                });
+                match add_document_to_collection(doc, "Photos".to_string(), "MainDB".to_string())
+                    .await
+                {
+                    Ok(_) => {
+                        return Ok(
+                            warp::reply::with_status("worked fine", StatusCode::ACCEPTED)
+                                .into_response(),
+                        )
+                    }
+                    Err(e) => {
+                        return Ok(
+                            warp::reply::with_status(e, StatusCode::NOT_ACCEPTABLE).into_response()
+                        )
+                    }
+                }
+            }
+            Err(e) => {
+                return Ok(warp::reply::with_status(e, StatusCode::NOT_ACCEPTABLE).into_response())
+            }
+        },
+        Err(e) => {
+            return Ok(warp::reply::with_status(e, StatusCode::NOT_ACCEPTABLE).into_response())
+        }
+    }
+}
 /**
  * @brief This function completely change the storie list and the wall list of a user. It can change only one or the two, depending of the parameters.
  * @param key -> The key that represent the document.
@@ -571,6 +626,67 @@ async fn update_photolisttype(
         storie: real_storie,
     });
     update_document_in_collection(key, doc, "Photos".to_string(), "MainDB".to_string()).await
+}
+/**
+ * @brief This struct can make the transfert of single photos without losing the information in which document they are.
+ */
+struct PhotoInfo {
+    key: String,
+    photo: PhotoType,
+}
+/**
+ * @brief This function get a specific photo. It returns it inside a photoInfo struct.
+ * @param key -> The key of the document in which the photo is.
+ * @param photo_id -> The id of the photo which need to be found.
+ * @return A result with the photoInfo in it or a string if it dodn't worked.
+ */
+async fn get_specific_photo(key: String, photo_id: i32) -> Result<PhotoInfo, String> {
+    let photolist =
+        match get_document_in_collection(key.clone(), "Photos".to_string(), "MainDB".to_string())
+            .await
+        {
+            Ok(document) => match get_two_type_from_photolisttype_doc(document) {
+                Ok(photolist_real) => photolist_real,
+                Err(_) => return Err("Photolist problem while parsing".to_string()),
+            },
+            Err(_) => return Err("No document with specified key".to_string()),
+        };
+    let photo: PhotoType;
+    if photo_id % 2 == 0 {
+        let place: i32 = photo_id / 2;
+        photo = match photolist[1].get(place as usize) {
+            Some(value) => value.clone(),
+            None => return Err("Cannot access photo with specified id".to_string()),
+        };
+    } else {
+        let place: i32 = (photo_id - 1) / 2;
+        photo = match photolist[0].get(place as usize) {
+            Some(value) => value.clone(),
+            None => return Err("Cannot access photo with specified id".to_string()),
+        };
+    }
+    return Ok(PhotoInfo { key, photo });
+}
+
+/**
+ * @brief This function take a hashmap and get from it a single photo. The photo is put in a photoInfo struct so the key of the document is accessible to the function that called this one.
+ * @param params -> A hashmaps that must contain the key and the photo_id of the concerned photo.
+ * @return A result with the photoInfo in it or a string if it dodn't worked.
+ */
+async fn get_specific_photo_only_hashmap(
+    params: HashMap<String, String>,
+) -> Result<PhotoInfo, String> {
+    let key = match params.get("key") {
+        Some(value) => value.clone(),
+        None => return Err("No Key provided".to_string()),
+    };
+    let photo_id = match params.get("photo_id") {
+        Some(value) => value
+            .parse::<i32>()
+            .map_err(|_| "The number of the photo_id need to be a number")?,
+        None => return Err("No Photo_id provided".to_string()),
+    };
+    get_specific_photo(key, photo_id).await
 }
 
 /**
@@ -678,3 +794,5 @@ fn get_two_type_from_photolisttype_doc(doc: Value) -> Result<Vec<Vec<PhotoType>>
     };
     return get_two_type_from_photolisttype_json(photolist);
 }
+
+

@@ -20,7 +20,7 @@ pub fn message_routes() -> impl Filter<Extract = impl warp::Reply, Error = warp:
     warp::path("message").and(get.or(post))
 }
 
-fn hash_to_message(params: HashMap<String, String>) -> Result<MessageType, String> {
+pub fn hash_to_message(params: HashMap<String, String>) -> Result<MessageType, String> {
     let from: String = match params.get("from") {
         Some(value) => value.clone(),
         None => return Err("No from id specified".to_string()),
@@ -34,12 +34,18 @@ fn hash_to_message(params: HashMap<String, String>) -> Result<MessageType, Strin
         Some(value) => value.clone(),
         None => Local::now().format("%Y-%m-%d %H:%M:%S").to_string(),
     };
-
+    let message_id: i32 = match params.get("message_id") {
+        Some(value) => value
+            .parse::<i32>()
+            .map_err(|_| "The number of the id need to be a number")?,
+        None => return Err("The message needs an id".to_string()),
+    };
     let message_obj: MessageType = MessageType {
         message,
         state: MessageState::SENT,
         date: date.clone(),
         from: from.clone(),
+        message_id,
     };
 
     return Ok(message_obj);

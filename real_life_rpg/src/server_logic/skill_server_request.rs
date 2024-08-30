@@ -5,11 +5,6 @@ create_new_challenge;
 submit_a_photo;
 
 
-add comment
-update comment
-delete comment
-update title
-update description
 add share
 add like
 sub like
@@ -21,5 +16,5 @@ ajouter reaction et reponse dans objet message
 supprimer messages complet
 supprimer message specifique
 
-
+supprimer amis
 */
